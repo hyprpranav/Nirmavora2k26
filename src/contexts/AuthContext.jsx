@@ -3,6 +3,9 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../config/firebase';
@@ -56,9 +59,38 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
-  /* Google Sign-In */
+  /* Google Sign-In – instant, no OTP needed (Google already verified email) */
   async function signInWithGoogle() {
     const result = await signInWithPopup(auth, googleProvider);
+    const firebaseUser = result.user;
+    // Ensure profile has otpVerified: true for Google users
+    await setDoc(doc(db, 'users', firebaseUser.uid), { otpVerified: true }, { merge: true });
+    setOtpVerified(true);
+    return firebaseUser;
+  }
+
+  /* Email Sign-Up – creates Firebase user + Firestore profile */
+  async function signUpWithEmail(name, email, password) {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(result.user, { displayName: name });
+    const newProfile = {
+      uid: result.user.uid,
+      email,
+      displayName: name,
+      photoURL: null,
+      role: ROLES.PARTICIPANT,
+      otpVerified: true, // OTP was verified before calling this
+      createdAt: new Date().toISOString(),
+    };
+    await setDoc(doc(db, 'users', result.user.uid), newProfile);
+    setProfile(newProfile);
+    setOtpVerified(true);
+    return result.user;
+  }
+
+  /* Email Sign-In */
+  async function signInWithEmail(email, password) {
+    const result = await signInWithEmailAndPassword(auth, email, password);
     return result.user;
   }
 
@@ -87,6 +119,8 @@ export function AuthProvider({ children }) {
     loading,
     otpVerified,
     signInWithGoogle,
+    signUpWithEmail,
+    signInWithEmail,
     signOut,
     markOtpVerified,
     updateRole,

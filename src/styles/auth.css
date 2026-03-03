@@ -12,7 +12,7 @@
 
 .auth-container {
   background: var(--dark-gray);
-  padding: 48px 40px;
+  padding: 40px 36px;
   border-radius: var(--radius-lg);
   max-width: 460px;
   width: 100%;
@@ -20,22 +20,75 @@
   box-shadow: var(--shadow-lg);
 }
 
-.auth-container h2 {
-  font-size: 1.5rem;
-  margin-bottom: 8px;
+/* Logo */
+.auth-logo {
+  margin-bottom: 24px;
+}
+.auth-logo-text {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-family: var(--font-secondary);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+}
+.auth-logo-year {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--accent);
+  letter-spacing: 4px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Tabs */
+.auth-tabs {
+  display: flex;
+  background: var(--dark-base);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin-bottom: 20px;
+  gap: 4px;
+}
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 2px);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-gray);
+  transition: var(--transition-fast);
+}
+.auth-tab.active {
+  background: var(--primary);
+  color: #fff;
+}
+.auth-tab:not(.active):hover {
+  color: var(--soft-white);
 }
 
 .auth-subtitle {
   color: var(--text-gray) !important;
-  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
 }
 
+/* Google button */
 .btn-google {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  padding: 14px 32px;
-  font-size: 1rem;
+  padding: 12px 32px;
+  width: 100%;
+  font-size: 0.95rem;
   font-weight: 600;
   background: var(--soft-white);
   color: var(--dark-base);
@@ -54,30 +107,106 @@
   cursor: not-allowed;
 }
 .btn-google i {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   color: #4285F4;
+}
+
+/* Divider */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--text-gray);
+  font-size: 0.8rem;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--medium-gray);
+}
+
+/* Form inner */
+.auth-form-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+.auth-form-inner .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.auth-form-inner label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-gray);
+}
+.auth-form-inner input {
+  padding: 11px 14px;
+  border: 1.5px solid var(--medium-gray);
+  border-radius: var(--radius-sm);
+  background: var(--dark-base);
+  color: var(--soft-white);
+  font-size: 0.95rem;
+  font-family: var(--font-primary);
+  outline: none;
+  transition: var(--transition-fast);
+}
+.auth-form-inner input:focus {
+  border-color: var(--primary);
+}
+.w-full { width: 100%; }
+
+/* Switch link */
+.auth-switch {
+  margin-top: 16px;
+  font-size: 0.875rem;
+  color: var(--text-gray) !important;
+}
+
+/* Link style button */
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: inherit;
+  font-family: var(--font-primary);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.btn-link:disabled {
+  color: var(--text-gray);
+  cursor: default;
+  text-decoration: none;
 }
 
 .auth-error {
   color: var(--danger) !important;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.success-text {
+  color: #4CAF50 !important;
   font-size: 0.9rem;
-  margin-top: 12px;
 }
 
 /* OTP */
-.otp-form {
+.otp-input-row {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
+  justify-content: center;
 }
-
 .otp-input-row input {
-  width: 220px;
+  width: 200px;
   padding: 14px;
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   text-align: center;
-  letter-spacing: 8px;
+  letter-spacing: 10px;
   font-weight: 700;
   border: 2px solid var(--medium-gray);
   border-radius: var(--radius-sm);
@@ -91,8 +220,9 @@
   border-color: var(--accent);
 }
 
-.otp-info {
-  font-size: 0.85rem;
-  color: var(--text-gray) !important;
+/* Email form wrapper */
+.auth-email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
-.otp-info i { color: var(--accent); margin-right: 4px; }
