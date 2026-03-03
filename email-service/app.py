@@ -10,9 +10,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# CORS – allow your Vercel frontend
-origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
-CORS(app, origins=[o.strip() for o in origins])
+# CORS – open to all origins; endpoints are protected by X-API-Secret header
+CORS(app)
 
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")

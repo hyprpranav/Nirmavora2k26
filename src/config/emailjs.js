@@ -1,25 +1,43 @@
 /**
  * Email Service – calls Python SMTP microservice on Render
- * Replaces EmailJS with instant Gmail SMTP delivery.
+ * Includes wake-up ping for Render free tier cold starts + retry logic.
  */
 
 const EMAIL_API = import.meta.env.VITE_EMAIL_API_URL || 'http://localhost:5000';
-const API_SECRET = 'nirmavora_2026_secret_key'; // Must match email-service .env
+const API_SECRET = 'nirmavora_2026_secret_key';
 
-async function post(endpoint, body) {
-  const res = await fetch(`${EMAIL_API}${endpoint}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Secret': API_SECRET,
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Email API error ${res.status}`);
+/** Ping the service to wake it up from Render free-tier sleep */
+export async function wakeUpEmailService() {
+  try {
+    await fetch(`${EMAIL_API}/health`, { method: 'GET', signal: AbortSignal.timeout(60000) });
+  } catch {
+    // ignore – just waking up
   }
-  return res.json();
+}
+
+async function post(endpoint, body, retries = 2) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`${EMAIL_API}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Secret': API_SECRET,
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(60000), // 60s timeout for cold start
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Email API error ${res.status}`);
+      }
+      return res.json();
+    } catch (err) {
+      if (attempt === retries) throw err;
+      // Wait 3s before retry
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+  }
 }
 
 export async function sendOTP(email, otp, name) {

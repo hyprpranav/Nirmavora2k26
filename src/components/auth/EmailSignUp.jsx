@@ -146,7 +146,7 @@ export default function EmailSignUp() {
           </div>
           {error && <p className="auth-error">{error}</p>}
           <button className="btn btn-primary w-full" disabled={busy} type="submit">
-            {busy ? 'Sending OTP…' : 'Send Verification OTP'}
+            {busy ? 'Sending OTP… (may take 30s on first try)' : 'Send Verification OTP'}
           </button>
         </form>
       )}
