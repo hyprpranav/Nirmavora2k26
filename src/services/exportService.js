@@ -85,3 +85,6 @@ export function exportTeamIdCSV(teams) {
     .map((t) => ({ TeamID: t.teamId, TeamName: t.teamName }));
   downloadCSV('nirmavora_teamids.csv', Papa.unparse(rows));
 }
+
+/* ─── Alias for Organiser Dashboard ─── */
+export const exportTeamsCSV = exportMasterLogCSV;
