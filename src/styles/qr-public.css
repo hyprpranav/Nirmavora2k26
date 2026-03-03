@@ -1,0 +1,55 @@
+/* ═══════════════════════════════
+   QR Public Page
+   ═══════════════════════════════ */
+
+.qr-public {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 60px;
+}
+
+.qr-public-card {
+  background: var(--dark-gray);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+}
+
+.qr-header {
+  background: var(--gradient-primary);
+  padding: 24px;
+  text-align: center;
+}
+.qr-header h2 { margin-bottom: 6px; font-size: 1.3rem; }
+.qr-event-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 14px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.qr-body {
+  padding: 28px;
+}
+.qr-body h3 { font-size: 1.5rem; margin-bottom: 4px; }
+.qr-team-id {
+  color: var(--accent) !important;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.qr-members {
+  margin-top: 20px;
+  background: var(--dark-base);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+}
+.qr-members h4 { color: var(--accent); margin-bottom: 8px; }
+.qr-members ol { padding-left: 20px; }
+.qr-members li { margin-bottom: 4px; color: var(--text-gray); }

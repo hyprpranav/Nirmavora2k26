@@ -1,0 +1,108 @@
+import {
+  collection,
+  doc,
+  addDoc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  setDoc,
+} from 'firebase/firestore';
+import { db } from '../config/firebase';
+import { TEAM_STATUS, PAYMENT_STATUS } from '../config/constants';
+
+const TEAMS = 'teams';
+const SETTINGS = 'settings';
+const FEEDBACK = 'feedback';
+
+/* ─── Registration ─── */
+export async function registerTeam(data) {
+  const teamData = {
+    ...data,
+    status: TEAM_STATUS.PENDING,
+    paymentStatus: PAYMENT_STATUS.NOT_PAID,
+    teamId: null,
+    attendance: false,
+    createdAt: new Date().toISOString(),
+    memberCount: countMembers(data),
+  };
+  const ref = await addDoc(collection(db, TEAMS), teamData);
+  return ref.id;
+}
+
+function countMembers(data) {
+  let count = 1; // leader
+  if (data.member1Name) count++;
+  if (data.member2Name) count++;
+  if (data.member3Name) count++;
+  return count;
+}
+
+/* ─── Queries ─── */
+export async function getTeamsByUser(userId) {
+  const q = query(collection(db, TEAMS), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function getAllTeams() {
+  const q = query(collection(db, TEAMS), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function getTeamById(docId) {
+  const snap = await getDoc(doc(db, TEAMS, docId));
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+
+export async function getTeamByTeamId(teamId) {
+  const q = query(collection(db, TEAMS), where('teamId', '==', teamId));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { id: d.id, ...d.data() };
+}
+
+/* ─── Status Updates ─── */
+export async function updateTeamStatus(docId, status, teamId = null) {
+  const update = { status };
+  if (teamId) update.teamId = teamId;
+  await updateDoc(doc(db, TEAMS, docId), update);
+}
+
+export async function updateTeamDetails(docId, partial) {
+  await updateDoc(doc(db, TEAMS, docId), partial);
+}
+
+/* ─── Attendance ─── */
+export async function markAttendance(docId, present) {
+  await updateDoc(doc(db, TEAMS, docId), {
+    attendance: present,
+    attendanceAt: present ? new Date().toISOString() : null,
+  });
+}
+
+/* ─── Settings ─── */
+export async function getSettings() {
+  const snap = await getDoc(doc(db, SETTINGS, 'global'));
+  if (snap.exists()) return snap.data();
+  const defaults = { registrationOpen: true, feedbackEnabled: false, attendanceEnabled: false };
+  await setDoc(doc(db, SETTINGS, 'global'), defaults);
+  return defaults;
+}
+
+export async function updateSettings(partial) {
+  await setDoc(doc(db, SETTINGS, 'global'), partial, { merge: true });
+}
+
+/* ─── Feedback ─── */
+export async function submitFeedback(userId, data) {
+  await addDoc(collection(db, FEEDBACK), {
+    userId,
+    ...data,
+    createdAt: new Date().toISOString(),
+  });
+}

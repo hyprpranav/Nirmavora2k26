@@ -1,0 +1,45 @@
+/* ═══════════════════════════════════
+   NIRMAVORA FEST 2026 – CSS Variables
+   ═══════════════════════════════════ */
+
+:root {
+  /* Color Palette */
+  --primary: #B11226;
+  --secondary: #F05A28;
+  --accent: #F5B301;
+  --dark-base: #121212;
+  --dark-gray: #1E1E1E;
+  --medium-gray: #2A2A2A;
+  --light-gray: #E0E0E0;
+  --text-gray: #CCCCCC;
+  --soft-white: #FAFAFA;
+  --success: #4CAF50;
+  --warning: #FF9800;
+  --danger: #f44336;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+  --gradient-dark: linear-gradient(180deg, var(--dark-base) 0%, var(--dark-gray) 100%);
+
+  /* Typography */
+  --font-primary: 'Poppins', sans-serif;
+  --font-secondary: 'Montserrat', sans-serif;
+
+  /* Spacing */
+  --section-padding: 80px 0;
+
+  /* Transitions */
+  --transition-fast: 0.3s ease;
+  --transition-smooth: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
