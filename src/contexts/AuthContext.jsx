@@ -141,7 +141,32 @@ export function AuthProvider({ children }) {
     if (uid === user?.uid) setProfile((p) => ({ ...p, role: newRole }));
   }
 
-  /* Request organiser role */
+  /* Sign up as organiser (no email verification — request goes to admin) */
+  async function signUpAsOrganiser(name, email, password, reason) {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(result.user, { displayName: name });
+    const newProfile = {
+      uid: result.user.uid,
+      email,
+      displayName: name,
+      photoURL: null,
+      role: ROLES.PARTICIPANT,
+      createdAt: new Date().toISOString(),
+    };
+    await setDoc(doc(db, 'users', result.user.uid), newProfile);
+    await setDoc(doc(db, 'organiserRequests', result.user.uid), {
+      uid: result.user.uid,
+      email,
+      displayName: name,
+      reason,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    });
+    setProfile(newProfile);
+    return result.user;
+  }
+
+  /* Request organiser role (for already-signed-in users) */
   async function requestOrganiserRole(reason) {
     if (!user) throw new Error('Not signed in');
     await setDoc(doc(db, 'organiserRequests', user.uid), {
@@ -180,6 +205,7 @@ export function AuthProvider({ children }) {
     signInWithGoogle,
     signUpWithEmail,
     signInWithEmail,
+    signUpAsOrganiser,
     signOut,
     resendVerificationEmail,
     refreshEmailVerified,

@@ -602,6 +602,234 @@
   font-size: 0.85rem;
 }
 
+/* ─── Organiser Auth — shared elements ─── */
+.cc-fullpage {
+  min-height: 100vh;
+  width: 100%;
+}
+.cc-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: rgba(255,255,255,0.5);
+  font-size: 1rem;
+}
+.cc-auth-logo {
+  margin-bottom: 8px;
+}
+.cc-logo-text {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, var(--primary, #B11226), var(--secondary, #F05A28));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.cc-logo-year {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 4px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 12px;
+}
+.cc-auth-title {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.7);
+  font-weight: 400;
+  margin-bottom: 24px;
+}
+.cc-auth-tabs {
+  display: flex;
+  gap: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 24px;
+}
+.cc-auth-tab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  font-family: var(--font-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cc-auth-tab.active {
+  background: linear-gradient(135deg, var(--primary, #B11226), var(--secondary, #F05A28));
+  color: #fff;
+  font-weight: 600;
+}
+.cc-auth-form {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cc-form-subtitle {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.4);
+  margin: 0 0 4px;
+  text-align: center;
+}
+.cc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cc-form-group label {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.55);
+  font-weight: 500;
+}
+.cc-form-group input,
+.cc-form-group textarea {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-family: var(--font-primary);
+  font-size: 0.88rem;
+  transition: border-color 0.2s;
+  resize: vertical;
+}
+.cc-form-group input:focus,
+.cc-form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary, #B11226);
+}
+.cc-form-error {
+  font-size: 0.8rem;
+  color: #f44336;
+  text-align: center;
+  margin: 0;
+}
+.cc-form-switch {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  margin: 0;
+}
+.cc-btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--primary, #B11226), var(--secondary, #F05A28));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.cc-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.cc-btn-secondary {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  font-family: var(--font-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cc-btn-secondary:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: #fff;
+}
+.cc-btn-link {
+  background: none;
+  border: none;
+  color: var(--secondary, #F05A28);
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.cc-btn-link:hover {
+  color: var(--primary, #B11226);
+}
+
+/* ─── Pending state ─── */
+.cc-pending-container {
+  max-width: 480px;
+}
+.cc-pending-icon {
+  font-size: 3.5rem;
+  margin: 8px 0 16px;
+}
+.cc-pending-title {
+  font-size: 1.3rem;
+  color: #F5B301;
+  margin-bottom: 10px;
+}
+.cc-pending-desc {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.cc-pending-contact {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cc-contact-label {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  margin: 0;
+}
+.cc-contact-link {
+  display: block;
+  color: var(--secondary, #F05A28);
+  font-size: 0.88rem;
+  text-decoration: none;
+  word-break: break-all;
+}
+.cc-contact-link:hover {
+  color: var(--primary, #B11226);
+  text-decoration: underline;
+}
+
+/* ─── Request Success state ─── */
+.cc-request-success {
+  text-align: center;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cc-success-icon {
+  font-size: 3rem;
+}
+.cc-request-success h3 {
+  color: #4CAF50;
+  font-size: 1.2rem;
+  margin: 0;
+}
+.cc-request-success p {
+  font-size: 0.84rem;
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+  line-height: 1.6;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   .cc-sidebar {

@@ -6,15 +6,19 @@ import EmailSignIn from '../components/auth/EmailSignIn';
 import '../styles/auth.css';
 
 export default function AuthPage() {
-  const { user, emailVerified, loading } = useAuth();
+  const { user, emailVerified, loading, profile } = useAuth();
   const [tab, setTab] = useState('signin');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user && emailVerified) {
-      navigate('/events', { replace: true });
+    if (!loading && user && emailVerified && profile) {
+      if (profile.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/events', { replace: true });
+      }
     }
-  }, [user, emailVerified, loading, navigate]);
+  }, [user, emailVerified, loading, profile, navigate]);
 
   if (loading) return <div className="loader">Loading…</div>;
 

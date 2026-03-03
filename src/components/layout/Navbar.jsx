@@ -70,7 +70,7 @@ export default function Navbar() {
             <>
               <li><Link to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link></li>
               {isOrganiser && (
-                <li><Link to="/coordinator/panel" onClick={() => setMenuOpen(false)}>Coordinator</Link></li>
+                <li><Link to="/organiser/panel" onClick={() => setMenuOpen(false)}>Coordinator</Link></li>
               )}
               {isAdmin && (
                 <li><Link to="/admin" onClick={() => setMenuOpen(false)}>Admin CC</Link></li>

@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function EmailSignIn() {
   const { signInWithEmail, signInWithGoogle } = useAuth();
-  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,9 +14,8 @@ export default function EmailSignIn() {
     setError('');
     setBusy(true);
     try {
-      const user = await signInWithEmail(email, password);
-      // If email not verified, the AuthPage/ProtectedRoute will handle showing verification screen
-      navigate('/events', { replace: true });
+      await signInWithEmail(email, password);
+      // AuthPage useEffect handles all redirects based on role + emailVerified
     } catch (err) {
       if (
         err.code === 'auth/invalid-credential' ||

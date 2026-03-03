@@ -9,7 +9,7 @@ import QRPublic from './pages/QRPublic';
 import ParticipantDashboard from './components/dashboard/participant/ParticipantDashboard';
 import AdminPanel from './pages/AdminPanel';
 import CoordinatorPanel from './pages/CoordinatorPanel';
-import CoordinatorAuth from './pages/CoordinatorAuth';
+import OrganiserAuth from './pages/OrganiserAuth';
 
 function ProtectedRoute({ children }) {
   const { user, loading, emailVerified } = useAuth();
@@ -23,6 +23,14 @@ function RoleRoute({ children, roles }) {
   const { profile, loading } = useAuth();
   if (loading) return <div className="loader">Loading…</div>;
   if (!profile || !roles.includes(profile.role)) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+function CoordinatorRoute({ children }) {
+  const { user, profile, loading } = useAuth();
+  if (loading) return <div className="loader">Loading…</div>;
+  if (!user) return <Navigate to="/organiser" replace />;
+  if (!profile || !['organiser', 'admin'].includes(profile.role)) return <Navigate to="/organiser" replace />;
   return children;
 }
 
@@ -40,15 +48,13 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/coordinator" element={<CoordinatorAuth />} />
+      <Route path="/organiser" element={<OrganiserAuth />} />
       <Route
-        path="/coordinator/panel"
+        path="/organiser/panel"
         element={
-          <ProtectedRoute>
-            <RoleRoute roles={['organiser', 'admin']}>
-              <CoordinatorPanel />
-            </RoleRoute>
-          </ProtectedRoute>
+          <CoordinatorRoute>
+            <CoordinatorPanel />
+          </CoordinatorRoute>
         }
       />
 
