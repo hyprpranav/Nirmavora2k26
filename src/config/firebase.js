@@ -4,6 +4,9 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   updateProfile,
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -11,6 +14,9 @@ import { getFirestore } from 'firebase/firestore';
 export {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   updateProfile,
 };
 

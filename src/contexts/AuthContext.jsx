@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
@@ -25,29 +27,48 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [otpVerified, setOtpVerified] = useState(false);
 
+  /* Handle redirect result on page load (for signInWithRedirect) */
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          console.log('[Auth] Redirect sign-in successful:', result.user.email);
+          await setDoc(doc(db, 'users', result.user.uid), { otpVerified: true }, { merge: true });
+          setOtpVerified(true);
+        }
+      })
+      .catch((err) => {
+        console.error('[Auth] Redirect result error:', err.code, err.message);
+      });
+  }, []);
+
   /* Listen to Firebase auth state */
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        const profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        if (profileDoc.exists()) {
-          setProfile(profileDoc.data());
-          setOtpVerified(profileDoc.data().otpVerified || false);
-        } else {
-          /* First-time user → create profile */
-          const newProfile = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-            role: ROLES.PARTICIPANT,
-            otpVerified: false,
-            createdAt: new Date().toISOString(),
-          };
-          await setDoc(doc(db, 'users', firebaseUser.uid), newProfile);
-          setProfile(newProfile);
-          setOtpVerified(false);
+        try {
+          const profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (profileDoc.exists()) {
+            setProfile(profileDoc.data());
+            setOtpVerified(profileDoc.data().otpVerified || false);
+          } else {
+            /* First-time user → create profile */
+            const newProfile = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              photoURL: firebaseUser.photoURL,
+              role: ROLES.PARTICIPANT,
+              otpVerified: false,
+              createdAt: new Date().toISOString(),
+            };
+            await setDoc(doc(db, 'users', firebaseUser.uid), newProfile);
+            setProfile(newProfile);
+            setOtpVerified(false);
+          }
+        } catch (err) {
+          console.error('[Auth] Error loading profile:', err);
         }
       } else {
         setUser(null);
@@ -59,14 +80,32 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
-  /* Google Sign-In – instant, no OTP needed (Google already verified email) */
+  /* Google Sign-In – try popup first, fall back to redirect */
   async function signInWithGoogle() {
-    const result = await signInWithPopup(auth, googleProvider);
-    const firebaseUser = result.user;
-    // Ensure profile has otpVerified: true for Google users
-    await setDoc(doc(db, 'users', firebaseUser.uid), { otpVerified: true }, { merge: true });
-    setOtpVerified(true);
-    return firebaseUser;
+    try {
+      console.log('[Auth] Attempting Google popup sign-in...');
+      const result = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+      console.log('[Auth] Popup sign-in success:', firebaseUser.email);
+      await setDoc(doc(db, 'users', firebaseUser.uid), { otpVerified: true }, { merge: true });
+      setOtpVerified(true);
+      return firebaseUser;
+    } catch (err) {
+      console.warn('[Auth] Popup failed:', err.code, err.message);
+      // If popup was blocked or failed, try redirect
+      if (
+        err.code === 'auth/popup-blocked' ||
+        err.code === 'auth/popup-closed-by-user' ||
+        err.code === 'auth/cancelled-popup-request' ||
+        err.code === 'auth/internal-error'
+      ) {
+        console.log('[Auth] Falling back to redirect sign-in...');
+        await signInWithRedirect(auth, googleProvider);
+        // Page will reload after redirect — result handled in useEffect above
+        return null;
+      }
+      throw err; // Re-throw for other errors (unauthorized domain etc.)
+    }
   }
 
   /* Email Sign-Up – creates Firebase user + Firestore profile */

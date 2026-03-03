@@ -33,8 +33,9 @@ export default function EmailSignUp() {
       await sendOTP(email, code, name);
       setStep(STEPS.OTP);
       startResendTimer();
-    } catch {
-      setError('Failed to send OTP. Please try again.');
+    } catch (err) {
+      console.error('[SignUp] OTP send error:', err);
+      setError(err.message || 'Failed to send OTP. Please try again.');
     } finally {
       setBusy(false);
     }
@@ -58,8 +59,9 @@ export default function EmailSignUp() {
       await sendOTP(email, code, name);
       startResendTimer();
       setError('');
-    } catch {
-      setError('Failed to resend OTP.');
+    } catch (err) {
+      console.error('[SignUp] OTP resend error:', err);
+      setError(err.message || 'Failed to resend OTP.');
     }
   }
 
@@ -102,10 +104,16 @@ export default function EmailSignUp() {
     setBusy(true);
     setError('');
     try {
-      await signInWithGoogle();
-      navigate('/events', { replace: true });
-    } catch {
-      setError('Google sign-in failed. Please try again.');
+      const result = await signInWithGoogle();
+      if (result) navigate('/events', { replace: true });
+      // If result is null, redirect is happening — page will reload
+    } catch (err) {
+      console.error('[SignUp] Google error:', err.code, err.message);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Domain not authorized in Firebase. Add your Vercel domain to Firebase → Auth → Settings → Authorized domains.');
+      } else {
+        setError(err.message || 'Google sign-in failed. Please try again.');
+      }
     } finally {
       setBusy(false);
     }

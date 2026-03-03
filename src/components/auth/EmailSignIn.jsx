@@ -39,10 +39,16 @@ export default function EmailSignIn() {
     setBusy(true);
     setError('');
     try {
-      await signInWithGoogle();
-      navigate('/events', { replace: true });
-    } catch {
-      setError('Google sign-in failed. Please try again.');
+      const result = await signInWithGoogle();
+      if (result) navigate('/events', { replace: true });
+      // If result is null, redirect is happening — page will reload
+    } catch (err) {
+      console.error('[SignIn] Google error:', err.code, err.message);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Domain not authorized. Add your Vercel domain to Firebase → Auth → Settings → Authorized domains.');
+      } else {
+        setError(err.message || 'Google sign-in failed. Please try again.');
+      }
     } finally {
       setBusy(false);
     }
