@@ -85,11 +85,22 @@ export async function markAttendance(docId, present) {
   });
 }
 
+/* Per-member attendance */
+export async function confirmMemberAttendance(docId, memberAttendance, attendanceStatus) {
+  await updateDoc(doc(db, TEAMS, docId), {
+    memberAttendance,
+    attendanceStatus,
+    attendanceConfirmed: true,
+    attendance: attendanceStatus === 'present',
+    attendanceAt: new Date().toISOString(),
+  });
+}
+
 /* ─── Settings ─── */
 export async function getSettings() {
   const snap = await getDoc(doc(db, SETTINGS, 'global'));
   if (snap.exists()) return snap.data();
-  const defaults = { registrationOpen: true, feedbackEnabled: false, attendanceEnabled: false };
+  const defaults = { registrationOpen: true, feedbackEnabled: false, attendanceEnabled: false, organisersCanEdit: false };
   await setDoc(doc(db, SETTINGS, 'global'), defaults);
   return defaults;
 }

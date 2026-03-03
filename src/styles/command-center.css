@@ -874,3 +874,235 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ═══════════════════════════════════════
+   Modal Overlay & Cards
+   ═══════════════════════════════════════ */
+.cc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+.cc-modal-card {
+  background: linear-gradient(135deg, #1a1b3a 0%, #16172e 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.cc-confirm-card {
+  max-width: 440px;
+  padding: 28px;
+}
+.cc-team-detail-card {
+  max-width: 720px;
+}
+
+/* Card Header */
+.cc-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cc-card-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #fff;
+}
+.cc-card-header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Card Body */
+.cc-card-body {
+  padding: 24px;
+}
+
+/* Detail Sections */
+.cc-detail-section {
+  margin-bottom: 24px;
+}
+.cc-detail-section h4 {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.6);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cc-detail-section h4 i {
+  color: #6366f1;
+}
+.cc-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.cc-detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cc-detail-label {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.cc-detail-value {
+  font-size: 0.88rem;
+  color: #fff;
+  word-break: break-all;
+}
+.cc-detail-field .cc-input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: #fff;
+  font-family: var(--font-primary);
+  font-size: 0.85rem;
+}
+.cc-detail-field .cc-input:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+/* Card Footer */
+.cc-card-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 8px;
+}
+
+/* ═══════════════════════════════════════
+   Attendance Inside Card
+   ═══════════════════════════════════════ */
+.cc-att-bulk-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.cc-att-members {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cc-att-member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+.cc-att-member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cc-att-member-label {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+}
+.cc-att-member-name {
+  font-size: 0.9rem;
+  color: #fff;
+}
+.cc-att-member-actions {
+  display: flex;
+  gap: 6px;
+}
+.cc-att-btn {
+  padding: 6px 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255,255,255,0.45);
+  font-family: var(--font-primary);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cc-att-btn.present.active {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: #4CAF50;
+  color: #4CAF50;
+  font-weight: 600;
+}
+.cc-att-btn.absent.active {
+  background: rgba(244, 67, 54, 0.15);
+  border-color: #f44336;
+  color: #f44336;
+  font-weight: 600;
+}
+.cc-att-btn:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: #fff;
+}
+
+/* Attendance status badges */
+.cc-status.present { background: rgba(76, 175, 80, 0.15); color: #4CAF50; }
+.cc-status.partial { background: rgba(245, 179, 1, 0.15); color: #F5B301; }
+.cc-status.absent { background: rgba(244, 67, 54, 0.15); color: #f44336; }
+.cc-status.not_marked { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); }
+
+/* ═══════════════════════════════════════
+   Note Banners
+   ═══════════════════════════════════════ */
+.cc-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.cc-note i {
+  margin-top: 2px;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.cc-note-warning {
+  background: rgba(245, 179, 1, 0.08);
+  border: 1px solid rgba(245, 179, 1, 0.2);
+  color: rgba(255,255,255,0.6);
+}
+.cc-note-warning i {
+  color: #F5B301;
+}
+.cc-note-info {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: rgba(255,255,255,0.6);
+}
+.cc-note-info i {
+  color: #6366f1;
+}
+
+/* ═══════════════════════════════════════
+   Clickable Team Row
+   ═══════════════════════════════════════ */
+.cc-team-row-clickable:hover {
+  background: rgba(99, 102, 241, 0.06);
+}

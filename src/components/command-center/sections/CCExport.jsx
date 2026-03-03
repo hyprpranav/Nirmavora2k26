@@ -10,6 +10,17 @@ export default function CCExport({ teams }) {
   return (
     <div className="cc-section">
       <h3>Export Data</h3>
+
+      {/* Warning Note */}
+      <div className="cc-note cc-note-warning">
+        <i className="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Important:</strong> If you plan to make edits to team data, download a backup first.
+          Exports always reflect the latest data. Download the current copy before making changes so
+          you have a backup for reference.
+        </div>
+      </div>
+
       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', marginBottom: 20 }}>
         Download CSV files from the current team data.
       </p>

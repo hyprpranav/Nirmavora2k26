@@ -14,11 +14,12 @@ import {
   updateTeamStatus,
   updateTeamDetails,
   markAttendance,
+  confirmMemberAttendance,
   getSettings,
   updateSettings,
 } from '../services/teamService';
 import { verifyPayment, rejectPayment } from '../services/paymentService';
-import { getAllUsers } from '../services/userService';
+import { getAllUsers, deleteUserProfile, changeUserRole, sendPasswordReset } from '../services/userService';
 import { generateTeamId } from '../utils/teamIdGenerator';
 import { sendShortlistConfirmation, sendWaitlistMessage } from '../config/emailjs';
 import { TEAM_STATUS, PAYMENT_STATUS, ROLES } from '../config/constants';
@@ -103,6 +104,10 @@ export default function AdminPanel() {
     await markAttendance(docId, present);
     loadAll();
   }
+  async function handleConfirmAttendance(docId, memberAtt, status) {
+    await confirmMemberAttendance(docId, memberAtt, status);
+    loadAll();
+  }
   async function handleToggleSetting(key) {
     const newVal = !settings[key];
     await updateSettings({ [key]: newVal });
@@ -123,6 +128,18 @@ export default function AdminPanel() {
     alert('User promoted to Coordinator.');
     loadAll();
   }
+  async function handleDeleteUser(uid) {
+    await deleteUserProfile(uid);
+    loadAll();
+  }
+  async function handleDemoteUser(uid) {
+    await changeUserRole(uid, ROLES.PARTICIPANT);
+    loadAll();
+  }
+  async function handleResetPassword(email) {
+    await sendPasswordReset(email);
+    alert(`Password reset email sent to ${email}`);
+  }
 
   async function handleSignOut() {
     await signOut();
@@ -142,6 +159,14 @@ export default function AdminPanel() {
     >
       {loading && <p style={{ color: 'rgba(255,255,255,0.4)' }}>Loading data…</p>}
 
+      {/* Admin edit note */}
+      {!loading && (section === 'teams' || section === 'attendance') && (
+        <div className="cc-note cc-note-info">
+          <i className="fas fa-info-circle"></i>
+          <span>As <strong style={{ color: '#F5B301' }}>Master Admin</strong>, you can edit teams and mark attendance regardless of toggle settings. Download a backup before making changes.</span>
+        </div>
+      )}
+
       {!loading && section === 'dashboard' && (
         <CCDashboard teams={teams} users={users} TEAM_STATUS={TEAM_STATUS} PAYMENT_STATUS={PAYMENT_STATUS} />
       )}
@@ -158,6 +183,9 @@ export default function AdminPanel() {
           onVerifyPayment={handleVerifyPayment}
           onRejectPayment={handleRejectPayment}
           PAYMENT_STATUS={PAYMENT_STATUS}
+          canEdit={true}
+          canAttendance={true}
+          onConfirmAttendance={handleConfirmAttendance}
         />
       )}
 
@@ -168,12 +196,20 @@ export default function AdminPanel() {
           onApproveRequest={handleApproveRequest}
           onRejectRequest={handleRejectRequest}
           onPromote={handlePromote}
+          onDeleteUser={handleDeleteUser}
+          onDemoteUser={handleDemoteUser}
+          onResetPassword={handleResetPassword}
           loading={usersLoading}
         />
       )}
 
       {!loading && section === 'attendance' && (
-        <CCAttendance teams={teams} onMarkAttendance={handleMarkAttendance} />
+        <CCAttendance
+          teams={teams}
+          onConfirmAttendance={handleConfirmAttendance}
+          attendanceClosed={false}
+          canEdit={true}
+        />
       )}
 
       {!loading && section === 'export' && (

@@ -1,0 +1,292 @@
+import React, { useState, useEffect } from 'react';
+
+/**
+ * Floating card that shows full team details.
+ * Props:
+ *   team          – the team object
+ *   onClose       – close the card
+ *   onSave        – (docId, updatedFields) save edited fields to Firestore
+ *   canEdit       – boolean: whether current user can enter edit mode
+ *   canAttendance – boolean: whether attendance section is accessible
+ *   onConfirmAttendance – (docId, memberAttendance, status) save attendance
+ */
+export default function TeamDetailCard({
+  team,
+  onClose,
+  onSave,
+  canEdit,
+  canAttendance,
+  onConfirmAttendance,
+}) {
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({});
+  const [attendanceMode, setAttendanceMode] = useState(false);
+  const [memberAtt, setMemberAtt] = useState({});
+  const [saving, setSaving] = useState(false);
+
+  // Build member list from team data
+  function getMembers(t) {
+    const m = [{ key: 'leader', label: 'Team Leader', name: t.leaderName }];
+    if (t.member1Name) m.push({ key: 'member1', label: 'Member 1', name: t.member1Name });
+    if (t.member2Name) m.push({ key: 'member2', label: 'Member 2', name: t.member2Name });
+    if (t.member3Name) m.push({ key: 'member3', label: 'Member 3', name: t.member3Name });
+    return m;
+  }
+
+  useEffect(() => {
+    if (!team) return;
+    // Init form with all editable fields
+    setForm({
+      teamId: team.teamId || '',
+      teamName: team.teamName || '',
+      collegeName: team.collegeName || '',
+      department: team.department || '',
+      year: team.year || '',
+      leaderName: team.leaderName || '',
+      leaderEmail: team.leaderEmail || '',
+      leaderPhone: team.leaderPhone || '',
+      member1Name: team.member1Name || '',
+      member1Email: team.member1Email || '',
+      member1Phone: team.member1Phone || '',
+      member2Name: team.member2Name || '',
+      member2Email: team.member2Email || '',
+      member2Phone: team.member2Phone || '',
+      member3Name: team.member3Name || '',
+      member3Email: team.member3Email || '',
+      member3Phone: team.member3Phone || '',
+      problemTitle: team.problemTitle || '',
+      sdgGoal: team.sdgGoal || '',
+      abstractLink: team.abstractLink || '',
+    });
+    // Init attendance from existing data or null
+    const existing = team.memberAttendance || {};
+    const att = { leader: existing.leader || null };
+    if (team.member1Name) att.member1 = existing.member1 || null;
+    if (team.member2Name) att.member2 = existing.member2 || null;
+    if (team.member3Name) att.member3 = existing.member3 || null;
+    setMemberAtt(att);
+  }, [team]);
+
+  if (!team) return null;
+
+  const members = getMembers(team);
+
+  function updateForm(key, val) {
+    setForm((f) => ({ ...f, [key]: val }));
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    await onSave(team.id, form);
+    setSaving(false);
+    setEditing(false);
+  }
+
+  function toggleMemberAtt(key) {
+    setMemberAtt((prev) => {
+      const cur = prev[key];
+      // cycle: null → present → absent → present
+      if (cur === null || cur === undefined) return { ...prev, [key]: 'present' };
+      if (cur === 'present') return { ...prev, [key]: 'absent' };
+      return { ...prev, [key]: 'present' };
+    });
+  }
+
+  function markAllPresent() {
+    const updated = {};
+    Object.keys(memberAtt).forEach((k) => { updated[k] = 'present'; });
+    setMemberAtt(updated);
+  }
+
+  function markAllAbsent() {
+    const updated = {};
+    Object.keys(memberAtt).forEach((k) => { updated[k] = 'absent'; });
+    setMemberAtt(updated);
+  }
+
+  async function confirmAttendance() {
+    setSaving(true);
+    const vals = Object.values(memberAtt);
+    const allPresent = vals.every((v) => v === 'present');
+    const allAbsent = vals.every((v) => v === 'absent');
+    const hasNull = vals.some((v) => v === null || v === undefined);
+    let status = 'partial';
+    if (allPresent) status = 'present';
+    else if (allAbsent) status = 'absent';
+    else if (hasNull) status = 'partial';
+    await onConfirmAttendance(team.id, memberAtt, status);
+    setSaving(false);
+    setAttendanceMode(false);
+  }
+
+  function renderField(label, key, type = 'text') {
+    if (editing) {
+      return (
+        <div className="cc-detail-field">
+          <span className="cc-detail-label">{label}</span>
+          <input
+            className="cc-input"
+            type={type}
+            value={form[key] || ''}
+            onChange={(e) => updateForm(key, e.target.value)}
+          />
+        </div>
+      );
+    }
+    return (
+      <div className="cc-detail-field">
+        <span className="cc-detail-label">{label}</span>
+        <span className="cc-detail-value">{form[key] || '—'}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="cc-modal-overlay" onClick={onClose}>
+      <div className="cc-modal-card cc-team-detail-card" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="cc-card-header">
+          <div>
+            <h3>{team.teamName}</h3>
+            <span className={`cc-status ${team.status}`} style={{ marginLeft: 8 }}>{team.status}</span>
+          </div>
+          <div className="cc-card-header-actions">
+            {canEdit && !editing && !attendanceMode && (
+              <button className="cc-btn-sm edit" title="Edit" onClick={() => setEditing(true)}>
+                <i className="fas fa-pen"></i> Edit
+              </button>
+            )}
+            {canAttendance && !editing && !attendanceMode && (
+              <button className="cc-btn-sm approve" title="Attendance" onClick={() => setAttendanceMode(true)}>
+                <i className="fas fa-clipboard-check"></i> Attendance
+              </button>
+            )}
+            <button className="cc-btn-sm reject" onClick={onClose}>
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="cc-card-body">
+          {!attendanceMode ? (
+            <>
+              {/* Team Info */}
+              <div className="cc-detail-section">
+                <h4><i className="fas fa-info-circle"></i> Team Info</h4>
+                <div className="cc-detail-grid">
+                  {renderField('Team ID', 'teamId')}
+                  {renderField('Team Name', 'teamName')}
+                  {renderField('College', 'collegeName')}
+                  {renderField('Department', 'department')}
+                  {renderField('Year', 'year')}
+                  {renderField('Event', 'eventType')}
+                </div>
+              </div>
+
+              {/* Leader */}
+              <div className="cc-detail-section">
+                <h4><i className="fas fa-user-tie"></i> Team Leader</h4>
+                <div className="cc-detail-grid">
+                  {renderField('Name', 'leaderName')}
+                  {renderField('Email', 'leaderEmail', 'email')}
+                  {renderField('Phone', 'leaderPhone', 'tel')}
+                </div>
+              </div>
+
+              {/* Members */}
+              {[1, 2, 3].map((n) => {
+                const nameKey = `member${n}Name`;
+                if (!team[nameKey]) return null;
+                return (
+                  <div className="cc-detail-section" key={n}>
+                    <h4><i className="fas fa-user"></i> Member {n}</h4>
+                    <div className="cc-detail-grid">
+                      {renderField('Name', `member${n}Name`)}
+                      {renderField('Email', `member${n}Email`, 'email')}
+                      {renderField('Phone', `member${n}Phone`, 'tel')}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Problem */}
+              <div className="cc-detail-section">
+                <h4><i className="fas fa-lightbulb"></i> Problem Statement</h4>
+                <div className="cc-detail-grid">
+                  {renderField('Problem Title', 'problemTitle')}
+                  {renderField('SDG Goal', 'sdgGoal')}
+                  {renderField('Abstract Link', 'abstractLink')}
+                </div>
+              </div>
+
+              {/* Save / Cancel */}
+              {editing && (
+                <div className="cc-card-footer-actions">
+                  <button className="cc-btn-sm reject" onClick={() => setEditing(false)} disabled={saving}>Cancel</button>
+                  <button className="cc-btn-sm approve" onClick={handleSave} disabled={saving}>
+                    {saving ? 'Saving…' : 'Save Changes'}
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            /* ─── Attendance Mode ─── */
+            <>
+              <div className="cc-detail-section">
+                <h4><i className="fas fa-clipboard-check"></i> Mark Attendance</h4>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', margin: '4px 0 16px' }}>
+                  Click each member to toggle Present / Absent. Then confirm.
+                </p>
+
+                <div className="cc-att-bulk-actions">
+                  <button className="cc-btn-sm approve" onClick={markAllPresent}>
+                    <i className="fas fa-check-double"></i> Mark All Present
+                  </button>
+                  <button className="cc-btn-sm reject" onClick={markAllAbsent}>
+                    <i className="fas fa-times-circle"></i> Mark All Absent
+                  </button>
+                </div>
+
+                <div className="cc-att-members">
+                  {members.map((m) => {
+                    const status = memberAtt[m.key];
+                    return (
+                      <div className="cc-att-member-row" key={m.key}>
+                        <div className="cc-att-member-info">
+                          <span className="cc-att-member-label">{m.label}</span>
+                          <span className="cc-att-member-name">{m.name}</span>
+                        </div>
+                        <div className="cc-att-member-actions">
+                          <button
+                            className={`cc-att-btn present${status === 'present' ? ' active' : ''}`}
+                            onClick={() => setMemberAtt((p) => ({ ...p, [m.key]: 'present' }))}
+                          >
+                            Present
+                          </button>
+                          <button
+                            className={`cc-att-btn absent${status === 'absent' ? ' active' : ''}`}
+                            onClick={() => setMemberAtt((p) => ({ ...p, [m.key]: 'absent' }))}
+                          >
+                            Absent
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="cc-card-footer-actions">
+                <button className="cc-btn-sm reject" onClick={() => setAttendanceMode(false)} disabled={saving}>Back</button>
+                <button className="cc-btn-sm approve" onClick={confirmAttendance} disabled={saving}>
+                  {saving ? 'Confirming…' : '✓ Confirm Attendance'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

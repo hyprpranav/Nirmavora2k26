@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 
-export default function CCUsers({ users, orgRequests, onApproveRequest, onRejectRequest, onPromote, loading }) {
+export default function CCUsers({
+  users,
+  orgRequests,
+  onApproveRequest,
+  onRejectRequest,
+  onPromote,
+  onDeleteUser,
+  onDemoteUser,
+  onResetPassword,
+  loading,
+}) {
   const [search, setSearch] = useState('');
   const [promoteUid, setPromoteUid] = useState('');
   const [tab, setTab] = useState('users');
+  const [confirmAction, setConfirmAction] = useState(null); // { action, user }
 
   const filtered = users.filter(u => {
     if (!search) return true;
@@ -21,8 +32,46 @@ export default function CCUsers({ users, orgRequests, onApproveRequest, onReject
     setPromoteUid('');
   }
 
+  async function executeConfirm() {
+    if (!confirmAction) return;
+    const { action, user: u } = confirmAction;
+    try {
+      if (action === 'delete') await onDeleteUser(u.id);
+      else if (action === 'demote') await onDemoteUser(u.id);
+      else if (action === 'reset') await onResetPassword(u.email);
+    } catch (err) {
+      console.error(`Failed to ${action}:`, err);
+    }
+    setConfirmAction(null);
+  }
+
   return (
     <>
+      {/* Confirm dialog */}
+      {confirmAction && (
+        <div className="cc-modal-overlay" onClick={() => setConfirmAction(null)}>
+          <div className="cc-modal-card cc-confirm-card" onClick={e => e.stopPropagation()}>
+            <h3>
+              {confirmAction.action === 'delete' && '⚠️ Delete User'}
+              {confirmAction.action === 'demote' && '↩️ Remove Coordinator'}
+              {confirmAction.action === 'reset' && '🔑 Reset Password'}
+            </h3>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: '12px 0' }}>
+              {confirmAction.action === 'delete' &&
+                `Are you sure you want to delete ${confirmAction.user.displayName || confirmAction.user.email}? This removes their profile permanently.`}
+              {confirmAction.action === 'demote' &&
+                `Demote ${confirmAction.user.displayName || confirmAction.user.email} back to participant?`}
+              {confirmAction.action === 'reset' &&
+                `Send a password reset email to ${confirmAction.user.email}?`}
+            </p>
+            <div className="cc-actions" style={{ justifyContent: 'flex-end', marginTop: 16 }}>
+              <button className="cc-btn-sm reject" onClick={() => setConfirmAction(null)}>Cancel</button>
+              <button className="cc-btn-sm approve" onClick={executeConfirm}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="cc-filter-bar" style={{ marginBottom: 8 }}>
         <button className={`cc-filter-btn${tab === 'users' ? ' active' : ''}`} onClick={() => setTab('users')}>
           All Users ({users.length})
@@ -54,13 +103,14 @@ export default function CCUsers({ users, orgRequests, onApproveRequest, onReject
                   <th>Email</th>
                   <th>Role</th>
                   <th>Signed Up</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={4} style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.3)' }}>Loading…</td></tr>
+                  <tr><td colSpan={5} style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.3)' }}>Loading…</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={4} style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.3)' }}>No users found</td></tr>
+                  <tr><td colSpan={5} style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.3)' }}>No users found</td></tr>
                 ) : (
                   filtered.map(u => (
                     <tr key={u.id}>
@@ -73,6 +123,42 @@ export default function CCUsers({ users, orgRequests, onApproveRequest, onReject
                       </td>
                       <td style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>
                         {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}
+                      </td>
+                      <td>
+                        <div className="cc-actions">
+                          {u.role !== 'admin' && (
+                            <>
+                              <button
+                                className="cc-btn-sm edit"
+                                title="Reset Password"
+                                onClick={() => setConfirmAction({ action: 'reset', user: u })}
+                              >
+                                <i className="fas fa-key"></i>
+                              </button>
+                              {u.role === 'organiser' && (
+                                <button
+                                  className="cc-btn-sm waitlist"
+                                  title="Remove Coordinator"
+                                  onClick={() => setConfirmAction({ action: 'demote', user: u })}
+                                >
+                                  <i className="fas fa-user-minus"></i>
+                                </button>
+                              )}
+                              <button
+                                className="cc-btn-sm reject"
+                                title="Delete User"
+                                onClick={() => setConfirmAction({ action: 'delete', user: u })}
+                              >
+                                <i className="fas fa-trash"></i>
+                              </button>
+                            </>
+                          )}
+                          {u.role === 'admin' && (
+                            <span style={{ fontSize: '0.75rem', color: '#F5B301', fontWeight: 600 }}>
+                              Master Admin
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))

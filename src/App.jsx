@@ -10,6 +10,7 @@ import ParticipantDashboard from './components/dashboard/participant/Participant
 import AdminPanel from './pages/AdminPanel';
 import CoordinatorPanel from './pages/CoordinatorPanel';
 import OrganiserAuth from './pages/OrganiserAuth';
+import FeedbackFloat from './components/FeedbackFloat';
 
 function ProtectedRoute({ children }) {
   const { user, loading, emailVerified } = useAuth();
@@ -36,6 +37,8 @@ function CoordinatorRoute({ children }) {
 
 export default function App() {
   return (
+    <>
+    <FeedbackFloat />
     <Routes>
       {/* ═══ Command Center — full-page, NO Navbar/Footer ═══ */}
       <Route
@@ -90,5 +93,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
+    </>
   );
 }

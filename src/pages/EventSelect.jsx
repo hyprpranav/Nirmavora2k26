@@ -1,8 +1,25 @@
 import { Link } from 'react-router-dom';
 import { EVENTS } from '../config/constants';
+import { useSettings } from '../contexts/SettingsContext';
 import '../styles/events.css';
 
 export default function EventSelect() {
+  const { settings } = useSettings();
+
+  if (!settings.registrationOpen) {
+    return (
+      <section className="event-select-page">
+        <div className="container" style={{ textAlign: 'center', padding: '80px 20px' }}>
+          <i className="fas fa-lock" style={{ fontSize: '3rem', color: 'rgba(255,255,255,0.2)', marginBottom: 20 }}></i>
+          <h2 style={{ color: '#fff', marginBottom: 12 }}>Registrations Closed</h2>
+          <p style={{ color: 'rgba(255,255,255,0.5)' }}>
+            Registrations are currently closed. Please check back later or contact the organisers.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="event-select-page">
       <div className="container">

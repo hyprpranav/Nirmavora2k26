@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import TeamDetailCard from '../TeamDetailCard';
 
 export default function CCTeams({
   teams,
@@ -11,12 +12,14 @@ export default function CCTeams({
   onVerifyPayment,
   onRejectPayment,
   PAYMENT_STATUS,
+  canEdit,
+  canAttendance,
+  onConfirmAttendance,
 }) {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [editId, setEditId] = useState(null);
-  const [editForm, setEditForm] = useState({});
   const [paymentView, setPaymentView] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
 
   const filters = ['all', 'pending', 'approved', 'waitlisted', 'cancelled'];
 
@@ -31,23 +34,26 @@ export default function CCTeams({
     return matchFilter && matchSearch;
   });
 
-  function startEdit(team) {
-    setEditId(team.id);
-    setEditForm({
-      teamName: team.teamName,
-      collegeName: team.collegeName,
-      leaderName: team.leaderName,
-      leaderPhone: team.leaderPhone,
-    });
-  }
-
-  async function saveEdit() {
-    await onEdit(editId, editForm);
-    setEditId(null);
-  }
-
   return (
     <>
+      {/* Team Detail Card Modal */}
+      {selectedTeam && (
+        <TeamDetailCard
+          team={selectedTeam}
+          onClose={() => setSelectedTeam(null)}
+          onSave={async (docId, data) => {
+            await onEdit(docId, data);
+            setSelectedTeam(null);
+          }}
+          canEdit={canEdit}
+          canAttendance={canAttendance}
+          onConfirmAttendance={async (docId, memberAtt, status) => {
+            if (onConfirmAttendance) await onConfirmAttendance(docId, memberAtt, status);
+            setSelectedTeam(null);
+          }}
+        />
+      )}
+
       {/* Toggle between teams and payments view (admin only) */}
       {showPayments && (
         <div className="cc-filter-bar" style={{ marginBottom: 8 }}>
@@ -101,71 +107,51 @@ export default function CCTeams({
                   <th>Leader</th>
                   <th>Members</th>
                   <th>Status</th>
+                  <th>Attendance</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(team => (
-                  <tr key={team.id}>
+                  <tr
+                    key={team.id}
+                    className="cc-team-row-clickable"
+                    onClick={() => setSelectedTeam(team)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <td>{team.teamId || '—'}</td>
-                    <td>
-                      {editId === team.id ? (
-                        <input
-                          className="cc-input"
-                          value={editForm.teamName}
-                          onChange={e => setEditForm({ ...editForm, teamName: e.target.value })}
-                          style={{ padding: '5px 8px', fontSize: '0.8rem' }}
-                        />
-                      ) : (
-                        team.teamName
-                      )}
-                    </td>
+                    <td>{team.teamName}</td>
                     <td style={{ textTransform: 'capitalize' }}>{team.eventType}</td>
-                    <td>
-                      {editId === team.id ? (
-                        <input
-                          className="cc-input"
-                          value={editForm.collegeName}
-                          onChange={e => setEditForm({ ...editForm, collegeName: e.target.value })}
-                          style={{ padding: '5px 8px', fontSize: '0.8rem' }}
-                        />
-                      ) : (
-                        team.collegeName
-                      )}
-                    </td>
+                    <td>{team.collegeName}</td>
                     <td>{team.leaderName}</td>
                     <td>{team.memberCount || team.members?.length || '—'}</td>
                     <td>
                       <span className={`cc-status ${team.status}`}>{team.status}</span>
                     </td>
                     <td>
-                      <div className="cc-actions">
-                        {editId === team.id ? (
+                      <span className={`cc-status ${team.attendanceStatus || 'not_marked'}`}>
+                        {team.attendanceStatus === 'present' ? '✓ Present' :
+                         team.attendanceStatus === 'partial' ? '◐ Partial' :
+                         team.attendanceStatus === 'absent' ? '✗ Absent' :
+                         '—'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="cc-actions" onClick={(e) => e.stopPropagation()}>
+                        {team.status === 'pending' && (
                           <>
-                            <button className="cc-btn-sm approve" onClick={saveEdit}>Save</button>
-                            <button className="cc-btn-sm reject" onClick={() => setEditId(null)}>Cancel</button>
-                          </>
-                        ) : (
-                          <>
-                            {team.status === 'pending' && (
-                              <>
-                                <button className="cc-btn-sm approve" onClick={() => onApprove(team)}>
-                                  Approve
-                                </button>
-                                <button className="cc-btn-sm waitlist" onClick={() => onWaitlist(team)}>
-                                  Waitlist
-                                </button>
-                              </>
-                            )}
-                            {team.status !== 'cancelled' && (
-                              <button className="cc-btn-sm reject" onClick={() => onCancel(team)}>
-                                Cancel
-                              </button>
-                            )}
-                            <button className="cc-btn-sm edit" onClick={() => startEdit(team)}>
-                              Edit
+                            <button className="cc-btn-sm approve" onClick={() => onApprove(team)}>
+                              Approve
+                            </button>
+                            <button className="cc-btn-sm waitlist" onClick={() => onWaitlist(team)}>
+                              Waitlist
                             </button>
                           </>
+                        )}
+                        {team.status !== 'cancelled' && (
+                          <button className="cc-btn-sm reject" onClick={() => onCancel(team)}>
+                            Cancel
+                          </button>
                         )}
                       </div>
                     </td>
@@ -173,7 +159,7 @@ export default function CCTeams({
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 20 }}>
+                    <td colSpan={9} style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 20 }}>
                       No teams found
                     </td>
                   </tr>

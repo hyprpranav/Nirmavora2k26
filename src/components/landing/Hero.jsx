@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
 import ThreeBackground from '../layout/ThreeBackground';
 import { EVENT, ORGANISERS } from '../../config/constants';
+import { useSettings } from '../../contexts/SettingsContext';
 import '../../styles/landing.css';
 
 export default function Hero() {
+  const { settings } = useSettings();
+
   return (
     <section id="home" className="hero">
       <ThreeBackground />
@@ -33,9 +36,15 @@ export default function Hero() {
           <a href="#designathon" className="btn btn-secondary">
             <i className="fas fa-compass"></i> Explore Events
           </a>
-          <Link to="/auth" className="btn btn-primary">
-            <i className="fas fa-rocket"></i> Register Now
-          </Link>
+          {settings.registrationOpen ? (
+            <Link to="/auth" className="btn btn-primary">
+              <i className="fas fa-rocket"></i> Register Now
+            </Link>
+          ) : (
+            <span className="btn btn-disabled">
+              <i className="fas fa-lock"></i> Registrations Closed
+            </span>
+          )}
         </div>
       </div>
     </section>
