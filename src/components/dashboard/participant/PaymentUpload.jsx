@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { updatePayment } from '../../../services/paymentService';
-import { PAYMENT_STATUS, EVENT } from '../../../config/constants';
+import { PAYMENT_STATUS, EVENT, DEVELOPER } from '../../../config/constants';
+
+/* The QR image — place your UPI QR at src/assets/statics/images/upi-qr.png */
+let upiQrImage = null;
+try {
+  // Vite resolves this at build time; if file doesn't exist the import will fail gracefully
+  const modules = import.meta.glob('../../../assets/statics/images/upi-qr.*', { eager: true });
+  const key = Object.keys(modules)[0];
+  if (key) upiQrImage = modules[key].default;
+} catch (_) { /* QR not yet added */ }
 
 export default function PaymentUpload({ team }) {
   const [txnId, setTxnId] = useState('');
@@ -34,7 +43,9 @@ export default function PaymentUpload({ team }) {
         <p>
           {team.paymentStatus === PAYMENT_STATUS.VERIFIED
             ? '✅ Payment verified. You are confirmed!'
-            : 'Payment upload will be available after your team is approved.'}
+            : team.status === 'approved'
+              ? '⏳ Payment uploaded. Awaiting admin verification.'
+              : 'Payment upload will be available after your team is approved.'}
         </p>
       </div>
     );
@@ -55,9 +66,21 @@ export default function PaymentUpload({ team }) {
   return (
     <div className="payment-section">
       <h3>Upload Payment Proof</h3>
-      <div className="upi-info">
-        <p><strong>UPI ID:</strong> {EVENT.upiId || 'Contact organiser for UPI details'}</p>
-        <p><strong>Amount:</strong> ₹{EVENT.feePerHead} × team members</p>
+
+      {/* UPI Details + QR */}
+      <div className="upi-info" style={{ textAlign: 'center' }}>
+        {upiQrImage && (
+          <div style={{ marginBottom: 16 }}>
+            <img src={upiQrImage} alt="UPI Payment QR" style={{ maxWidth: 220, borderRadius: 12, border: '2px solid var(--accent)' }} />
+          </div>
+        )}
+        <p><strong>UPI ID:</strong> {EVENT.upiId || 'Will be updated soon — contact developer'}</p>
+        <p><strong>Amount:</strong> ₹{EVENT.feePerHead} × {team.memberCount || 'team members'} = ₹{EVENT.feePerHead * (team.memberCount || 3)}</p>
+        {!upiQrImage && !EVENT.upiId && (
+          <p style={{ color: '#FF9800', fontSize: '0.85rem', marginTop: 8 }}>
+            <i className="fas fa-exclamation-circle"></i> Payment QR / UPI ID will be updated shortly. Contact the developer if needed.
+          </p>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="payment-form">
@@ -74,6 +97,16 @@ export default function PaymentUpload({ team }) {
           {busy ? 'Uploading…' : 'Upload Payment'}
         </button>
       </form>
+
+      {/* Developer contact for payment issues */}
+      <div className="dash-note dash-note-info" style={{ marginTop: 20 }}>
+        <i className="fas fa-headset"></i>
+        <span>
+          Facing payment issues or need help? Contact the developer:<br/>
+          <strong>Email:</strong> <a href={`mailto:${DEVELOPER.email}`}>{DEVELOPER.email}</a> &nbsp;|&nbsp;
+          <strong>Phone:</strong> <a href={`tel:+91${DEVELOPER.phoneRaw}`}>{DEVELOPER.phone}</a>
+        </span>
+      </div>
     </div>
   );
 }

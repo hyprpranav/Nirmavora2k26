@@ -1,4 +1,4 @@
-import { collection, getDocs, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, orderBy, query, setDoc, where } from 'firebase/firestore';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { db, auth } from '../config/firebase';
 
@@ -24,4 +24,22 @@ export async function changeUserRole(uid, role) {
 /* Send password reset email */
 export async function sendPasswordReset(email) {
   await sendPasswordResetEmail(auth, email);
+}
+
+/* Delete all organisers (role=organiser) from Firestore */
+export async function deleteAllOrganisers() {
+  const q = query(collection(db, USERS), where('role', '==', 'organiser'));
+  const snap = await getDocs(q);
+  const promises = snap.docs.map(d => deleteDoc(doc(db, USERS, d.id)));
+  await Promise.all(promises);
+  return snap.size;
+}
+
+/* Delete all participant users from Firestore */
+export async function deleteAllParticipants() {
+  const q = query(collection(db, USERS), where('role', '==', 'participant'));
+  const snap = await getDocs(q);
+  const promises = snap.docs.map(d => deleteDoc(doc(db, USERS, d.id)));
+  await Promise.all(promises);
+  return snap.size;
 }

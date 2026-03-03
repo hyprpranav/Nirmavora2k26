@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   updateDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -107,6 +108,14 @@ export async function getSettings() {
 
 export async function updateSettings(partial) {
   await setDoc(doc(db, SETTINGS, 'global'), partial, { merge: true });
+}
+
+/* ─── Bulk Delete ─── */
+export async function deleteAllTeams() {
+  const snap = await getDocs(collection(db, TEAMS));
+  const promises = snap.docs.map(d => deleteDoc(doc(db, TEAMS, d.id)));
+  await Promise.all(promises);
+  return snap.size;
 }
 
 /* ─── Feedback ─── */

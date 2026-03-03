@@ -1106,3 +1106,58 @@
 .cc-team-row-clickable:hover {
   background: rgba(99, 102, 241, 0.06);
 }
+
+/* ═══════════════════════════════════════
+   Danger Zone (Settings)
+   ═══════════════════════════════════════ */
+.cc-danger-zone {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid rgba(244, 67, 54, 0.3);
+}
+.cc-danger-zone h3 { color: #f44336; margin-bottom: 8px; }
+
+.cc-danger-row {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; flex-wrap: wrap;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.cc-danger-row strong { color: rgba(255,255,255,0.8); font-size: 0.92rem; }
+
+.cc-danger-btn {
+  padding: 10px 20px;
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-primary, sans-serif);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  white-space: nowrap;
+}
+.cc-danger-btn:hover { background: #d32f2f; }
+.cc-danger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cc-btn-secondary {
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  font-family: var(--font-primary, sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cc-btn-secondary:hover { background: rgba(255,255,255,0.12); }
+.cc-btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cc-danger-modal .cc-modal-header h3 { font-size: 1.1rem; }
+.cc-danger-modal .cc-modal-body p { line-height: 1.6; }
+.cc-danger-modal .cc-modal-footer {
+  display: flex; gap: 12px; justify-content: flex-end;
+}

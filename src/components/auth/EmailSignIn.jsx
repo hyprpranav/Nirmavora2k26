@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { DEVELOPER } from '../../config/constants';
 
 export default function EmailSignIn() {
   const { signInWithEmail, signInWithGoogle } = useAuth();
@@ -86,6 +87,16 @@ export default function EmailSignIn() {
           {busy ? 'Signing in…' : 'Sign In'}
         </button>
       </form>
+
+      {/* Forgot Password Note */}
+      <div className="auth-forgot-note">
+        <i className="fas fa-lock" style={{ marginRight: 6, color: '#FF9800' }}></i>
+        <span>
+          <strong>Forgot your password?</strong> Contact the developer to reset your password:<br/>
+          <a href={`mailto:${DEVELOPER.email}`}>{DEVELOPER.email}</a> &nbsp;|&nbsp;
+          <a href={`tel:+91${DEVELOPER.phoneRaw}`}>{DEVELOPER.phone}</a>
+        </span>
+      </div>
     </div>
   );
 }

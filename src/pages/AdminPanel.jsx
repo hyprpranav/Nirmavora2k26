@@ -15,11 +15,12 @@ import {
   updateTeamDetails,
   markAttendance,
   confirmMemberAttendance,
+  deleteAllTeams,
   getSettings,
   updateSettings,
 } from '../services/teamService';
 import { verifyPayment, rejectPayment } from '../services/paymentService';
-import { getAllUsers, deleteUserProfile, changeUserRole, sendPasswordReset } from '../services/userService';
+import { getAllUsers, deleteUserProfile, changeUserRole, sendPasswordReset, deleteAllOrganisers, deleteAllParticipants } from '../services/userService';
 import { generateTeamId } from '../utils/teamIdGenerator';
 import { sendShortlistConfirmation, sendWaitlistMessage } from '../config/emailjs';
 import { TEAM_STATUS, PAYMENT_STATUS, ROLES } from '../config/constants';
@@ -221,7 +222,13 @@ export default function AdminPanel() {
       )}
 
       {!loading && section === 'settings' && (
-        <CCSettings settings={settings} onToggle={handleToggleSetting} />
+        <CCSettings
+          settings={settings}
+          onToggle={handleToggleSetting}
+          onDeleteParticipants={async () => { await deleteAllTeams(); await deleteAllParticipants(); loadAll(); }}
+          onDeleteOrganisers={async () => { await deleteAllOrganisers(); loadAll(); }}
+          onDeleteAll={async () => { await deleteAllTeams(); await deleteAllParticipants(); await deleteAllOrganisers(); loadAll(); }}
+        />
       )}
     </CCLayout>
   );

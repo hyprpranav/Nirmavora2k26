@@ -146,3 +146,11 @@ export const PAYMENT_STATUS = {
   VERIFIED: 'verified',
   REJECTED: 'rejected',
 };
+
+/* ─── Developer Contact ─── */
+export const DEVELOPER = {
+  name: 'Harish Pranav',
+  email: 'harishspranav2006@gmail.com',
+  phone: '+91 78456 93765',
+  phoneRaw: '7845693765',
+};

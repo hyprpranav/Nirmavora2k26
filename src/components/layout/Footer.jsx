@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { EVENT, ORGANISERS } from '../../config/constants';
+import { EVENT, ORGANISERS, DEVELOPER } from '../../config/constants';
 
 export default function Footer() {
   return (
@@ -42,6 +42,17 @@ export default function Footer() {
               <li>
                 <i className="fas fa-phone"></i>{' '}
                 <a href={`tel:${EVENT.contactPhone.replace(/\s/g, '')}`}>{EVENT.contactPhone}</a>
+              </li>
+            </ul>
+            <h4 style={{ marginTop: 16 }}>Developer / Technical Support</h4>
+            <ul>
+              <li>
+                <i className="fas fa-envelope"></i>{' '}
+                <a href={`mailto:${DEVELOPER.email}`}>{DEVELOPER.email}</a>
+              </li>
+              <li>
+                <i className="fas fa-phone"></i>{' '}
+                <a href={`tel:+91${DEVELOPER.phoneRaw}`}>{DEVELOPER.phone}</a>
               </li>
             </ul>
             <div className="social-links">

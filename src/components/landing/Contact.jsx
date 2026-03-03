@@ -1,4 +1,4 @@
-import { EVENT } from '../../config/constants';
+import { EVENT, DEVELOPER } from '../../config/constants';
 
 export default function Contact() {
   return (
@@ -46,6 +46,13 @@ export default function Contact() {
                 <i className="fab fa-facebook"></i>
               </a>
             </div>
+          </div>
+          <div className="contact-card contact-card-dev">
+            <i className="fas fa-code"></i>
+            <h4>Developer / Technical Support</h4>
+            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>Facing errors, system issues, or need help?</p>
+            <a href={`mailto:${DEVELOPER.email}`}><i className="fas fa-envelope" style={{ marginRight: 6 }}></i>{DEVELOPER.email}</a>
+            <a href={`tel:+91${DEVELOPER.phoneRaw}`}><i className="fas fa-phone" style={{ marginRight: 6 }}></i>{DEVELOPER.phone}</a>
           </div>
         </div>
       </div>

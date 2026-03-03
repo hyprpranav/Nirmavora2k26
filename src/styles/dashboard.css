@@ -457,3 +457,100 @@
   font-family: var(--font-primary);
   outline: none;
 }
+
+/* ═══════════════════════════════
+   Dashboard Team Detail Cards
+   ═══════════════════════════════ */
+.dash-teams-section { display: flex; flex-direction: column; gap: 24px; }
+
+.dash-team-card {
+  background: var(--dark-base);
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-top: 12px;
+}
+.dash-team-card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.dash-team-card-header h4 { color: var(--soft-white); margin: 0; }
+
+.dash-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px 20px;
+}
+.dash-lbl {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.dash-val {
+  display: block;
+  color: var(--soft-white);
+  font-size: 0.92rem;
+}
+.dash-val a { color: var(--accent); text-decoration: underline; }
+
+.dash-members-list {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.dash-member {
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  font-size: 0.88rem;
+  color: var(--light-gray);
+}
+.dash-member strong { color: var(--accent); }
+
+.dash-team-payment {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--medium-gray);
+}
+
+/* Dashboard Notes */
+.dash-note {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 14px 18px; border-radius: 10px;
+  font-size: 0.85rem; border-left: 4px solid;
+}
+.dash-note i { margin-top: 2px; flex-shrink: 0; }
+.dash-note a { color: var(--accent); text-decoration: underline; }
+.dash-note-info {
+  background: rgba(33, 150, 243, 0.08);
+  border-color: #2196F3;
+  color: #90caf9;
+}
+.dash-note-info i { color: #2196F3; }
+.dash-note-warning {
+  background: rgba(255, 152, 0, 0.08);
+  border-color: #FF9800;
+  color: #ffcc80;
+}
+.dash-note-warning i { color: #FF9800; }
+
+/* Auth forgot password note */
+.auth-forgot-note {
+  display: flex; gap: 8px; align-items: flex-start;
+  padding: 12px 16px; margin-top: 16px;
+  background: rgba(255, 152, 0, 0.08);
+  border: 1px solid rgba(255, 152, 0, 0.2);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #ffcc80;
+  line-height: 1.5;
+}
+.auth-forgot-note a { color: var(--accent, #F5B301); text-decoration: underline; }
+
+/* Contact dev card highlight */
+.contact-card-dev {
+  border: 1px solid rgba(245, 179, 1, 0.3) !important;
+  background: rgba(245, 179, 1, 0.04) !important;
+}
