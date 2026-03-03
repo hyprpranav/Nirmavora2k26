@@ -136,7 +136,11 @@ def send_email(to_email, subject, html_body):
     msg["Subject"] = subject
     msg.attach(MIMEText(html_body, "html"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+    # Port 587 + STARTTLS is more reliable on cloud platforms than SSL port 465
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as server:
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
         server.login(EMAIL_ADDRESS, EMAIL_APP_PASSWORD)
         server.sendmail(EMAIL_ADDRESS, to_email, msg.as_string())
 
