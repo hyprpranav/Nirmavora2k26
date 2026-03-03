@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/command-center.css';
@@ -16,14 +16,14 @@ export default function CoordinatorAuth() {
   const [reason, setReason] = useState('');
   const [requestSent, setRequestSent] = useState(false);
 
-  /* If already authenticated and authorised, redirect */
-  if (user && emailVerified && profile) {
-    if (profile.role === 'admin' || profile.role === 'organiser') {
-      /* Use setTimeout to avoid render-time navigate */
-      setTimeout(() => navigate('/coordinator/panel'), 0);
-      return null;
+  /* Redirect once authenticated + authorised */
+  useEffect(() => {
+    if (user && emailVerified && profile) {
+      if (profile.role === 'admin' || profile.role === 'organiser') {
+        navigate('/coordinator/panel', { replace: true });
+      }
     }
-  }
+  }, [user, emailVerified, profile, navigate]);
 
   async function handleSignIn(e) {
     e.preventDefault();

@@ -94,6 +94,10 @@ export default function EmailSignUp() {
             We sent a verification link to <strong>{user?.email || email}</strong>.
             <br />Click the link in the email, then come back and press the button below.
           </p>
+          <div style={{ background: 'rgba(245, 179, 1, 0.08)', border: '1px solid rgba(245, 179, 1, 0.25)', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '0.82rem', color: '#F5B301', textAlign: 'left' }}>
+            <strong>📂 Check your Spam / Junk folder</strong> — Gmail sometimes routes our verification email there.
+            Look for an email from <em>noreply@nirmavora-1aab8.firebaseapp.com</em> and mark it as "Not Spam".
+          </div>
           {error && <p className="auth-error">{error}</p>}
           <button className="btn btn-primary w-full" onClick={handleCheckVerified} disabled={busy} style={{ marginBottom: '10px' }}>
             {busy ? 'Checking…' : "I've Verified — Continue"}

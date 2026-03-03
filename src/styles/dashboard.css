@@ -231,6 +231,39 @@
   display: block;
 }
 
+/* ─── CTA Banners (team status CTAs) ─── */
+.cta-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  border-left: 4px solid;
+  flex-wrap: wrap;
+}
+.cta-banner.cta-success {
+  background: rgba(76, 175, 80, 0.1);
+  border-color: #4CAF50;
+  color: #a5d6a7;
+}
+.cta-banner.cta-info {
+  background: rgba(33, 150, 243, 0.1);
+  border-color: #2196F3;
+  color: #90caf9;
+}
+.cta-banner.cta-warning {
+  background: rgba(255, 152, 0, 0.1);
+  border-color: #FF9800;
+  color: #ffcc80;
+}
+.cta-banner.cta-danger {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: #f44336;
+  color: #ef9a9a;
+}
+
 /* ─── Tables ─── */
 .dash-toolbar {
   display: flex;

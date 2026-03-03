@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import Navbar from './components/layout/Navbar';
-import Footer from './components/layout/Footer';
+import MainLayout from './components/layout/MainLayout';
 import Landing from './pages/Landing';
 import AuthPage from './pages/AuthPage';
 import EventSelect from './pages/EventSelect';
@@ -30,7 +29,7 @@ function RoleRoute({ children, roles }) {
 export default function App() {
   return (
     <Routes>
-      {/* ═══ Command Center – Full-page, NO Navbar/Footer ═══ */}
+      {/* ═══ Command Center — full-page, NO Navbar/Footer ═══ */}
       <Route
         path="/admin"
         element={
@@ -53,52 +52,37 @@ export default function App() {
         }
       />
 
-      {/* ═══ Main site with Navbar/Footer ═══ */}
-      <Route
-        path="*"
-        element={
-          <div className="app">
-            <Navbar />
-            <main>
-              <Routes>
-                {/* Public */}
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/qr/:teamId" element={<QRPublic />} />
-
-                {/* Protected – Participant */}
-                <Route
-                  path="/events"
-                  element={
-                    <ProtectedRoute>
-                      <EventSelect />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/register/:eventType"
-                  element={
-                    <ProtectedRoute>
-                      <RegisterPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <ParticipantDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        }
-      />
+      {/* ═══ Main site — Navbar + Footer via MainLayout ═══ */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Landing />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/qr/:teamId" element={<QRPublic />} />
+        <Route
+          path="/events"
+          element={
+            <ProtectedRoute>
+              <EventSelect />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/register/:eventType"
+          element={
+            <ProtectedRoute>
+              <RegisterPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <ParticipantDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
     </Routes>
   );
 }
