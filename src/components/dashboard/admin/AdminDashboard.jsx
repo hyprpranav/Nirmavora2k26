@@ -17,6 +17,7 @@ import {
   exportTeamIdCSV,
 } from '../../../services/exportService';
 import { TEAM_STATUS, PAYMENT_STATUS, ROLES } from '../../../config/constants';
+import { sendTestEmail, sendNotification, wakeUpEmailService } from '../../../config/emailjs';
 import '../../../styles/dashboard.css';
 
 const TABS = ['Analytics', 'Teams', 'Payments', 'Attendance', 'Export', 'Settings'];
@@ -30,6 +31,16 @@ export default function AdminDashboard() {
 
   /* Promote organiser form */
   const [promoteUid, setPromoteUid] = useState('');
+
+  /* Test email */
+  const [testEmail, setTestEmail] = useState('');
+  const [testEmailStatus, setTestEmailStatus] = useState('');
+
+  /* Broadcast notification */
+  const [notifEmail, setNotifEmail] = useState('');
+  const [notifSubject, setNotifSubject] = useState('');
+  const [notifMessage, setNotifMessage] = useState('');
+  const [notifStatus, setNotifStatus] = useState('');
 
   useEffect(() => {
     loadData();
@@ -74,6 +85,31 @@ export default function AdminDashboard() {
     const newVal = !settings[key];
     await updateSettings({ [key]: newVal });
     setSettings((s) => ({ ...s, [key]: newVal }));
+  }
+
+  async function handleTestEmail() {
+    if (!testEmail.includes('@')) return setTestEmailStatus('Enter a valid email.');
+    setTestEmailStatus('Sending…');
+    try {
+      await wakeUpEmailService();
+      await sendTestEmail(testEmail);
+      setTestEmailStatus('✅ Test email sent! Check your inbox.');
+    } catch (err) {
+      setTestEmailStatus(`❌ Failed: ${err.message}`);
+    }
+  }
+
+  async function handleSendNotification() {
+    if (!notifEmail.includes('@')) return setNotifStatus('Enter a valid email.');
+    if (!notifMessage.trim()) return setNotifStatus('Enter a message.');
+    setNotifStatus('Sending…');
+    try {
+      await sendNotification(notifEmail, '', notifSubject || 'NIRMAVORA Update', notifMessage);
+      setNotifStatus('✅ Notification sent!');
+      setNotifEmail(''); setNotifSubject(''); setNotifMessage('');
+    } catch (err) {
+      setNotifStatus(`❌ Failed: ${err.message}`);
+    }
   }
 
   return (
@@ -272,6 +308,49 @@ export default function AdminDashboard() {
                 />
                 <button className="btn btn-primary" onClick={handlePromote}>Promote</button>
               </div>
+
+              <hr />
+              <h4>🔧 Test Email Configuration</h4>
+              <p style={{ color: '#999', fontSize: '0.85rem', marginBottom: '10px' }}>
+                Send a test email to verify the email service is working correctly.
+              </p>
+              <div className="form-row">
+                <input
+                  type="email"
+                  placeholder="your-email@gmail.com"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                />
+                <button className="btn btn-primary" onClick={handleTestEmail}>Send Test</button>
+              </div>
+              {testEmailStatus && <p style={{ marginTop: '8px', fontSize: '0.85rem' }}>{testEmailStatus}</p>}
+
+              <hr />
+              <h4>📧 Send Notification Email</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <input
+                  type="email"
+                  placeholder="Recipient email"
+                  value={notifEmail}
+                  onChange={(e) => setNotifEmail(e.target.value)}
+                  style={{ padding: '10px 14px', background: 'var(--dark-base)', border: '1px solid var(--medium-gray)', borderRadius: '6px', color: 'var(--soft-white)', fontFamily: 'var(--font-primary)' }}
+                />
+                <input
+                  placeholder="Subject (optional)"
+                  value={notifSubject}
+                  onChange={(e) => setNotifSubject(e.target.value)}
+                  style={{ padding: '10px 14px', background: 'var(--dark-base)', border: '1px solid var(--medium-gray)', borderRadius: '6px', color: 'var(--soft-white)', fontFamily: 'var(--font-primary)' }}
+                />
+                <textarea
+                  placeholder="Message body"
+                  value={notifMessage}
+                  onChange={(e) => setNotifMessage(e.target.value)}
+                  rows={3}
+                  style={{ padding: '10px 14px', background: 'var(--dark-base)', border: '1px solid var(--medium-gray)', borderRadius: '6px', color: 'var(--soft-white)', fontFamily: 'var(--font-primary)', resize: 'vertical' }}
+                />
+                <button className="btn btn-primary" onClick={handleSendNotification}>Send Notification</button>
+              </div>
+              {notifStatus && <p style={{ marginTop: '8px', fontSize: '0.85rem' }}>{notifStatus}</p>}
             </div>
           )}
         </div>

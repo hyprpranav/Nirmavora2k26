@@ -1,5 +1,7 @@
 import os
+import sys
 import smtplib
+import traceback
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, request, jsonify
@@ -10,14 +12,39 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# CORS – open to all origins; endpoints are protected by X-API-Secret header
-CORS(app)
+# CORS – explicitly allow Content-Type and X-API-Secret headers
+CORS(app, resources={r"/*": {
+    "origins": "*",
+    "allow_headers": ["Content-Type", "X-API-Secret", "Authorization"],
+    "methods": ["GET", "POST", "OPTIONS"],
+    "max_age": 3600,
+}})
 
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 API_SECRET = os.getenv("API_SECRET", "nirmavora_2026_secret_key")
 
 EVENT_NAME = "NIRMAVORA FEST 2026"
+
+# Force flush print so logs show in Render immediately
+def log(msg):
+    print(f"[NIRMAVORA] {msg}", flush=True)
+
+
+@app.before_request
+def log_request():
+    log(f"{request.method} {request.path} from {request.headers.get('Origin', 'unknown')}")
+    if request.method == 'POST':
+        log(f"  Headers: Content-Type={request.content_type}, X-API-Secret={'present' if request.headers.get('X-API-Secret') else 'MISSING'}")
+
+
+@app.after_request
+def add_cors_headers(response):
+    # Belt-and-suspenders: always set CORS headers
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-API-Secret, Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    return response
 
 
 # ── Email Templates ────────────────────────────────────────────
@@ -130,6 +157,8 @@ def notification_html(name, subject, message):
 # ── Send email via Gmail SMTP ─────────────────────────────────
 
 def send_email(to_email, subject, html_body):
+    log(f"  send_email → to={to_email}, subject={subject[:40]}")
+    log(f"  EMAIL_ADDRESS={EMAIL_ADDRESS}, APP_PASSWORD={'set' if EMAIL_APP_PASSWORD else 'NOT SET'}")
     msg = MIMEMultipart("alternative")
     msg["From"] = f"{EVENT_NAME} <{EMAIL_ADDRESS}>"
     msg["To"] = to_email
@@ -137,12 +166,16 @@ def send_email(to_email, subject, html_body):
     msg.attach(MIMEText(html_body, "html"))
 
     # Port 587 + STARTTLS is more reliable on cloud platforms than SSL port 465
+    log("  Connecting to smtp.gmail.com:587 ...")
     with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as server:
         server.ehlo()
         server.starttls()
         server.ehlo()
+        log("  STARTTLS handshake done, logging in...")
         server.login(EMAIL_ADDRESS, EMAIL_APP_PASSWORD)
+        log("  Login OK, sending...")
         server.sendmail(EMAIL_ADDRESS, to_email, msg.as_string())
+        log("  ✅ Email sent successfully!")
 
 
 # ── Middleware: verify API secret ──────────────────────────────
@@ -158,27 +191,73 @@ def verify_secret():
 
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok", "service": "nirmavora-email"})
+    return jsonify({
+        "status": "ok",
+        "service": "nirmavora-email",
+        "email_configured": bool(EMAIL_ADDRESS and EMAIL_APP_PASSWORD),
+    })
 
 
 @app.route("/api/send-otp", methods=["POST"])
 def send_otp():
+    log("send-otp endpoint hit")
     if not verify_secret():
+        log("  ❌ Unauthorized – bad API secret")
         return jsonify({"error": "Unauthorized"}), 401
 
-    data = request.json
+    data = request.json or {}
     to_email = data.get("to_email")
     name = data.get("name", "Participant")
     otp_code = data.get("otp_code")
+    log(f"  to_email={to_email}, name={name}, otp_code={otp_code}")
 
     if not to_email or not otp_code:
+        log("  ❌ Missing to_email or otp_code")
         return jsonify({"error": "to_email and otp_code are required"}), 400
 
     try:
         html = otp_html(name, otp_code)
         send_email(to_email, f"Your {EVENT_NAME} Verification Code: {otp_code}", html)
+        log("  ✅ OTP email sent successfully")
         return jsonify({"success": True, "message": "OTP sent"})
     except Exception as e:
+        log(f"  ❌ Error sending OTP: {e}")
+        log(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/test-email", methods=["POST"])
+def test_email():
+    """Send a test email – used from admin dashboard to verify email config."""
+    log("test-email endpoint hit")
+    if not verify_secret():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.json or {}
+    to_email = data.get("to_email")
+    if not to_email:
+        return jsonify({"error": "to_email is required"}), 400
+
+    try:
+        html = f"""
+        <div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;background:#121212;border:1px solid #B11226;border-radius:12px;overflow:hidden">
+          <div style="background:linear-gradient(135deg,#B11226,#F05A28);padding:28px;text-align:center">
+            <h1 style="margin:0;color:#fff;font-size:22px">{EVENT_NAME}</h1>
+            <p style="margin:6px 0 0;color:#ffffffcc;font-size:13px">Test Email ✅</p>
+          </div>
+          <div style="padding:32px;color:#e0e0e0">
+            <p>If you're reading this, <strong>email sending is working correctly!</strong></p>
+            <p style="color:#4CAF50;font-weight:700">SMTP connection to Gmail is healthy.</p>
+            <p style="color:#999;font-size:13px">Sent from Render email microservice.</p>
+          </div>
+        </div>
+        """
+        send_email(to_email, f"{EVENT_NAME} – Test Email", html)
+        log(f"  ✅ Test email sent to {to_email}")
+        return jsonify({"success": True, "message": f"Test email sent to {to_email}"})
+    except Exception as e:
+        log(f"  ❌ Test email failed: {e}")
+        log(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
 
