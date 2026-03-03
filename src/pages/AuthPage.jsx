@@ -3,24 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import EmailSignUp from '../components/auth/EmailSignUp';
 import EmailSignIn from '../components/auth/EmailSignIn';
-import { wakeUpEmailService } from '../config/emailjs';
 import '../styles/auth.css';
 
 export default function AuthPage() {
-  const { user, otpVerified, loading } = useAuth();
+  const { user, emailVerified, loading } = useAuth();
   const [tab, setTab] = useState('signin');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user && otpVerified) {
+    if (!loading && user && emailVerified) {
       navigate('/events', { replace: true });
     }
-  }, [user, otpVerified, loading, navigate]);
-
-  // Ping Render email service on page load so it's awake before user clicks Send OTP
-  useEffect(() => {
-    wakeUpEmailService();
-  }, []);
+  }, [user, emailVerified, loading, navigate]);
 
   if (loading) return <div className="loader">Loading…</div>;
 

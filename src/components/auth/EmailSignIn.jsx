@@ -16,7 +16,8 @@ export default function EmailSignIn() {
     setError('');
     setBusy(true);
     try {
-      await signInWithEmail(email, password);
+      const user = await signInWithEmail(email, password);
+      // If email not verified, the AuthPage/ProtectedRoute will handle showing verification screen
       navigate('/events', { replace: true });
     } catch (err) {
       if (
@@ -39,9 +40,8 @@ export default function EmailSignIn() {
     setBusy(true);
     setError('');
     try {
-      const result = await signInWithGoogle();
-      if (result) navigate('/events', { replace: true });
-      // If result is null, redirect is happening — page will reload
+      await signInWithGoogle();
+      // Redirect will happen — page reloads
     } catch (err) {
       console.error('[SignIn] Google error:', err.code, err.message);
       if (err.code === 'auth/unauthorized-domain') {
@@ -49,7 +49,6 @@ export default function EmailSignIn() {
       } else {
         setError(err.message || 'Google sign-in failed. Please try again.');
       }
-    } finally {
       setBusy(false);
     }
   }

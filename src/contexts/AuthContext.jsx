@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import {
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut as firebaseSignOut,
@@ -8,8 +7,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  sendEmailVerification,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../config/firebase';
 import { ROLES } from '../config/constants';
 
@@ -25,16 +25,16 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [otpVerified, setOtpVerified] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
 
-  /* Handle redirect result on page load (for signInWithRedirect) */
+  /* Handle redirect result on page load (for signInWithRedirect — Google) */
   useEffect(() => {
     getRedirectResult(auth)
       .then(async (result) => {
         if (result?.user) {
           console.log('[Auth] Redirect sign-in successful:', result.user.email);
-          await setDoc(doc(db, 'users', result.user.uid), { otpVerified: true }, { merge: true });
-          setOtpVerified(true);
+          // Google users are always verified
+          setEmailVerified(true);
         }
       })
       .catch((err) => {
@@ -47,11 +47,15 @@ export function AuthProvider({ children }) {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
+        // Google users are always verified; email users need emailVerified
+        const isVerified = firebaseUser.emailVerified ||
+          firebaseUser.providerData.some((p) => p.providerId === 'google.com');
+        setEmailVerified(isVerified);
+
         try {
           const profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           if (profileDoc.exists()) {
             setProfile(profileDoc.data());
-            setOtpVerified(profileDoc.data().otpVerified || false);
           } else {
             /* First-time user → create profile */
             const newProfile = {
@@ -60,12 +64,10 @@ export function AuthProvider({ children }) {
               displayName: firebaseUser.displayName,
               photoURL: firebaseUser.photoURL,
               role: ROLES.PARTICIPANT,
-              otpVerified: false,
               createdAt: new Date().toISOString(),
             };
             await setDoc(doc(db, 'users', firebaseUser.uid), newProfile);
             setProfile(newProfile);
-            setOtpVerified(false);
           }
         } catch (err) {
           console.error('[Auth] Error loading profile:', err);
@@ -73,58 +75,53 @@ export function AuthProvider({ children }) {
       } else {
         setUser(null);
         setProfile(null);
-        setOtpVerified(false);
+        setEmailVerified(false);
       }
       setLoading(false);
     });
     return unsub;
   }, []);
 
-  /* Google Sign-In – try popup first, fall back to redirect */
+  /* Google Sign-In — redirect (most reliable across all browsers) */
   async function signInWithGoogle() {
-    try {
-      console.log('[Auth] Attempting Google popup sign-in...');
-      const result = await signInWithPopup(auth, googleProvider);
-      const firebaseUser = result.user;
-      console.log('[Auth] Popup sign-in success:', firebaseUser.email);
-      await setDoc(doc(db, 'users', firebaseUser.uid), { otpVerified: true }, { merge: true });
-      setOtpVerified(true);
-      return firebaseUser;
-    } catch (err) {
-      console.warn('[Auth] Popup failed:', err.code, err.message);
-      // If popup was blocked or failed, try redirect
-      if (
-        err.code === 'auth/popup-blocked' ||
-        err.code === 'auth/popup-closed-by-user' ||
-        err.code === 'auth/cancelled-popup-request' ||
-        err.code === 'auth/internal-error'
-      ) {
-        console.log('[Auth] Falling back to redirect sign-in...');
-        await signInWithRedirect(auth, googleProvider);
-        // Page will reload after redirect — result handled in useEffect above
-        return null;
-      }
-      throw err; // Re-throw for other errors (unauthorized domain etc.)
-    }
+    console.log('[Auth] Starting Google redirect sign-in...');
+    await signInWithRedirect(auth, googleProvider);
+    // Page will reload after redirect — result handled in useEffect above
+    return null;
   }
 
-  /* Email Sign-Up – creates Firebase user + Firestore profile */
+  /* Email Sign-Up — creates Firebase user + sends verification email */
   async function signUpWithEmail(name, email, password) {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(result.user, { displayName: name });
+    // Send Firebase verification email (FREE, built-in)
+    await sendEmailVerification(result.user);
     const newProfile = {
       uid: result.user.uid,
       email,
       displayName: name,
       photoURL: null,
       role: ROLES.PARTICIPANT,
-      otpVerified: true, // OTP was verified before calling this
       createdAt: new Date().toISOString(),
     };
     await setDoc(doc(db, 'users', result.user.uid), newProfile);
     setProfile(newProfile);
-    setOtpVerified(true);
     return result.user;
+  }
+
+  /* Resend verification email */
+  async function resendVerificationEmail() {
+    if (!auth.currentUser) throw new Error('Not signed in');
+    await sendEmailVerification(auth.currentUser);
+  }
+
+  /* Refresh verification status (after user clicks link in email) */
+  async function refreshEmailVerified() {
+    if (!auth.currentUser) return false;
+    await auth.currentUser.reload();
+    const verified = auth.currentUser.emailVerified;
+    setEmailVerified(verified);
+    return verified;
   }
 
   /* Email Sign-In */
@@ -138,31 +135,58 @@ export function AuthProvider({ children }) {
     await firebaseSignOut(auth);
   }
 
-  /* Mark OTP as verified in Firestore */
-  async function markOtpVerified() {
-    if (!user) return;
-    await setDoc(doc(db, 'users', user.uid), { otpVerified: true }, { merge: true });
-    setProfile((p) => ({ ...p, otpVerified: true }));
-    setOtpVerified(true);
-  }
-
   /* Update profile role (admin use) */
   async function updateRole(uid, newRole) {
     await setDoc(doc(db, 'users', uid), { role: newRole }, { merge: true });
     if (uid === user?.uid) setProfile((p) => ({ ...p, role: newRole }));
   }
 
+  /* Request organiser role */
+  async function requestOrganiserRole(reason) {
+    if (!user) throw new Error('Not signed in');
+    await setDoc(doc(db, 'organiserRequests', user.uid), {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || profile?.displayName,
+      reason,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  /* Get pending organiser requests (admin only) */
+  async function getOrganiserRequests() {
+    const q = query(collection(db, 'organiserRequests'), where('status', '==', 'pending'));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  }
+
+  /* Approve or reject organiser request */
+  async function handleOrganiserRequest(requestId, uid, approve) {
+    if (approve) {
+      await updateRole(uid, ROLES.ORGANISER);
+    }
+    await setDoc(doc(db, 'organiserRequests', requestId), {
+      status: approve ? 'approved' : 'rejected',
+      decidedAt: new Date().toISOString(),
+    }, { merge: true });
+  }
+
   const value = {
     user,
     profile,
     loading,
-    otpVerified,
+    emailVerified,
     signInWithGoogle,
     signUpWithEmail,
     signInWithEmail,
     signOut,
-    markOtpVerified,
+    resendVerificationEmail,
+    refreshEmailVerified,
     updateRole,
+    requestOrganiserRole,
+    getOrganiserRequests,
+    handleOrganiserRequest,
     isAdmin: profile?.role === ROLES.ADMIN,
     isOrganiser: profile?.role === ROLES.ORGANISER || profile?.role === ROLES.ADMIN,
   };

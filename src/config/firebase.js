@@ -4,20 +4,20 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   updateProfile,
+  sendEmailVerification,
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 export {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   updateProfile,
+  sendEmailVerification,
 };
 
 const firebaseConfig = {

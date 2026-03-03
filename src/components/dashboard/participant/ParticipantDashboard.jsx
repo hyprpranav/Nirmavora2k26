@@ -10,10 +10,15 @@ import '../../../styles/dashboard.css';
 const TABS = ['Profile', 'Team', 'Payment', 'QR Code', 'Feedback'];
 
 export default function ParticipantDashboard() {
-  const { user, profile } = useAuth();
+  const { user, profile, requestOrganiserRole } = useAuth();
   const [tab, setTab] = useState('Profile');
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  /* Organiser request state */
+  const [requestReason, setRequestReason] = useState('');
+  const [requestStatus, setRequestStatus] = useState('');
+  const [requestBusy, setRequestBusy] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -51,6 +56,42 @@ export default function ParticipantDashboard() {
               <h3>{profile?.displayName || 'Participant'}</h3>
               <p>{profile?.email}</p>
               <span className="role-badge">{profile?.role}</span>
+
+              {/* Organiser Request — only show for participants */}
+              {profile?.role === 'participant' && (
+                <div style={{ marginTop: '24px', padding: '16px', background: 'var(--dark-base)', borderRadius: '8px', border: '1px solid var(--medium-gray)' }}>
+                  <h4 style={{ color: 'var(--primary-gold)', marginBottom: '8px' }}>Want to be an Organiser?</h4>
+                  <p style={{ color: 'var(--light-gray)', fontSize: '0.85rem', marginBottom: '12px' }}>
+                    Submit a request to the admin. Include your department and reason.
+                  </p>
+                  <textarea
+                    placeholder="e.g. I'm from Civil Dept, member of ICI Club, I'd like to help manage the designathon…"
+                    value={requestReason}
+                    onChange={(e) => setRequestReason(e.target.value)}
+                    rows={3}
+                    style={{ width: '100%', padding: '10px', background: 'var(--midnight-bg)', border: '1px solid var(--medium-gray)', borderRadius: '6px', color: 'var(--soft-white)', fontFamily: 'var(--font-primary)', resize: 'vertical', marginBottom: '10px' }}
+                  />
+                  <button
+                    className="btn btn-primary"
+                    disabled={requestBusy || !requestReason.trim()}
+                    onClick={async () => {
+                      setRequestBusy(true);
+                      setRequestStatus('');
+                      try {
+                        await requestOrganiserRole(requestReason);
+                        setRequestStatus('✅ Request submitted! Admin will review it.');
+                        setRequestReason('');
+                      } catch (err) {
+                        setRequestStatus('❌ Failed to submit request. Try again.');
+                      }
+                      setRequestBusy(false);
+                    }}
+                  >
+                    {requestBusy ? 'Submitting…' : 'Request Organiser Role'}
+                  </button>
+                  {requestStatus && <p style={{ marginTop: '8px', fontSize: '0.85rem' }}>{requestStatus}</p>}
+                </div>
+              )}
             </div>
           )}
 

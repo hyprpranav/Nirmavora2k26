@@ -23,7 +23,7 @@ import '../../../styles/dashboard.css';
 const TABS = ['Analytics', 'Teams', 'Payments', 'Attendance', 'Export', 'Settings'];
 
 export default function AdminDashboard() {
-  const { updateRole } = useAuth();
+  const { updateRole, getOrganiserRequests, handleOrganiserRequest } = useAuth();
   const [tab, setTab] = useState('Analytics');
   const [teams, setTeams] = useState([]);
   const [settings, setSettings] = useState({});
@@ -31,6 +31,10 @@ export default function AdminDashboard() {
 
   /* Promote organiser form */
   const [promoteUid, setPromoteUid] = useState('');
+
+  /* Organiser requests */
+  const [orgRequests, setOrgRequests] = useState([]);
+  const [orgRequestsLoading, setOrgRequestsLoading] = useState(false);
 
   /* Test email */
   const [testEmail, setTestEmail] = useState('');
@@ -44,6 +48,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     loadData();
+    loadOrgRequests();
   }, []);
 
   async function loadData() {
@@ -52,6 +57,27 @@ export default function AdminDashboard() {
     setTeams(t);
     setSettings(s);
     setLoading(false);
+  }
+
+  async function loadOrgRequests() {
+    setOrgRequestsLoading(true);
+    try {
+      const reqs = await getOrganiserRequests();
+      setOrgRequests(reqs);
+    } catch (err) {
+      console.error('Failed to load organiser requests:', err);
+    }
+    setOrgRequestsLoading(false);
+  }
+
+  async function handleApproveRequest(reqId, uid) {
+    await handleOrganiserRequest(reqId, uid, true);
+    loadOrgRequests();
+  }
+
+  async function handleRejectRequest(reqId, uid) {
+    await handleOrganiserRequest(reqId, uid, false);
+    loadOrgRequests();
   }
 
   /* Analytics computed */
@@ -308,6 +334,37 @@ export default function AdminDashboard() {
                 />
                 <button className="btn btn-primary" onClick={handlePromote}>Promote</button>
               </div>
+
+              <hr />
+              <h4>📋 Organiser Requests</h4>
+              <p style={{ color: '#999', fontSize: '0.85rem', marginBottom: '10px' }}>
+                Participants can request organiser access from their dashboard. Approve or reject below.
+              </p>
+              {orgRequestsLoading && <p>Loading requests…</p>}
+              {!orgRequestsLoading && orgRequests.length === 0 && (
+                <p style={{ color: '#666', fontSize: '0.85rem' }}>No pending requests.</p>
+              )}
+              {orgRequests.map((req) => (
+                <div key={req.id} style={{ padding: '12px', background: 'var(--dark-base)', borderRadius: '8px', marginBottom: '10px', border: '1px solid var(--medium-gray)' }}>
+                  <p style={{ marginBottom: '4px' }}>
+                    <strong>{req.displayName || 'Unknown'}</strong> ({req.email})
+                  </p>
+                  <p style={{ color: 'var(--light-gray)', fontSize: '0.85rem', marginBottom: '8px' }}>
+                    Reason: {req.reason}
+                  </p>
+                  <p style={{ color: '#666', fontSize: '0.75rem', marginBottom: '8px' }}>
+                    Requested: {new Date(req.createdAt).toLocaleString()}
+                  </p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button className="btn-sm approve" onClick={() => handleApproveRequest(req.id, req.uid)}>
+                      Approve
+                    </button>
+                    <button className="btn-sm cancel" onClick={() => handleRejectRequest(req.id, req.uid)}>
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
 
               <hr />
               <h4>🔧 Test Email Configuration</h4>

@@ -11,11 +11,11 @@ import ParticipantDashboard from './components/dashboard/participant/Participant
 import OrganiserDashboard from './components/dashboard/organiser/OrganiserDashboard';
 import AdminDashboard from './components/dashboard/admin/AdminDashboard';
 
-function ProtectedRoute({ children, requireOtp = true }) {
-  const { user, loading, otpVerified } = useAuth();
+function ProtectedRoute({ children }) {
+  const { user, loading, emailVerified } = useAuth();
   if (loading) return <div className="loader">Loading…</div>;
   if (!user) return <Navigate to="/auth" replace />;
-  if (requireOtp && !otpVerified) return <Navigate to="/auth?step=otp" replace />;
+  if (!emailVerified) return <Navigate to="/auth?verify=1" replace />;
   return children;
 }
 
