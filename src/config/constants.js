@@ -53,20 +53,13 @@ export const DESIGNATHON_THEMES = {
 };
 
 /* ─── Hackathon Tracks ─── */
-export const HACKATHON_TRACKS = {
-  software: [
-    'Web & Mobile Applications',
-    'AI / ML Solutions',
-    'IoT & Smart Systems',
-    'Data Analytics & Visualization',
-  ],
-  hardware: [
-    'Embedded Systems',
-    'Robotics & Automation',
-    'Sensor-based Solutions',
-    'Renewable Energy Prototypes',
-  ],
-};
+export const HACKATHON_TRACKS = [
+  { id: 'T1', name: 'Biotech & Health Tech',        icon: 'fas fa-heartbeat' },
+  { id: 'T2', name: 'Sustainable & Green-Tech',     icon: 'fas fa-leaf' },
+  { id: 'T3', name: 'Auto, Manu & Logi-Tech',       icon: 'fas fa-industry' },
+  { id: 'T4', name: 'Cyber-Tech',                   icon: 'fas fa-shield-alt' },
+  { id: 'T5', name: 'Rural & Agri-Tech',            icon: 'fas fa-seedling' },
+];
 
 /* ─── Timeline ─── */
 export const TIMELINE = [

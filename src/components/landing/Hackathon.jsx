@@ -14,29 +14,20 @@ export default function Hackathon() {
           </p>
         </div>
 
-        <div className="tracks-grid">
-          <div className="track-group">
-            <h3><i className="fas fa-laptop-code"></i> Software Tracks</h3>
-            <div className="track-cards">
-              {HACKATHON_TRACKS.software.map((track, i) => (
-                <div key={i} className="track-card">
-                  <span className="track-number">S{i + 1}</span>
-                  <p>{track}</p>
-                </div>
-              ))}
-            </div>
+        <div className="tracks-unified">
+          <div className="tracks-note">
+            <i className="fas fa-laptop-code"></i> Software &nbsp;&amp;&nbsp;
+            <i className="fas fa-microchip"></i> Hardware solutions are <strong>applicable for all tracks</strong>
           </div>
 
-          <div className="track-group">
-            <h3><i className="fas fa-microchip"></i> Hardware Tracks</h3>
-            <div className="track-cards">
-              {HACKATHON_TRACKS.hardware.map((track, i) => (
-                <div key={i} className="track-card">
-                  <span className="track-number">H{i + 1}</span>
-                  <p>{track}</p>
-                </div>
-              ))}
-            </div>
+          <div className="track-cards track-cards-centered">
+            {HACKATHON_TRACKS.map((track) => (
+              <div key={track.id} className="track-card">
+                <span className="track-number">{track.id}</span>
+                <i className={track.icon} style={{ fontSize: '1.4rem', color: 'var(--accent)', marginBottom: 6 }}></i>
+                <p>{track.name}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
