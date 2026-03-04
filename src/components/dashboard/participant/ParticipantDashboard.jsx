@@ -167,30 +167,26 @@ export default function ParticipantDashboard() {
               <div className="dash-teams-section">
                 {teams.map(t => renderTeamCard(t))}
 
-                {/* Register for another event */}
-                {(canRegisterHackathon || canRegisterDesignathon) && (
-                  <div className="cta-banner cta-info" style={{ marginTop: 20 }}>
-                    <span>
-                      💡 You can also register for the{' '}
-                      <strong>{canRegisterHackathon ? 'Hackathon' : 'Designathon'}</strong>{' '}
-                      with a different team.
-                    </span>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => navigate(`/register/${canRegisterHackathon ? 'hackathon' : 'designathon'}`)}
-                    >
-                      Register for {canRegisterHackathon ? 'Hackathon' : 'Designathon'}
-                    </button>
+                {/* ⚠️ Important Registration Rule Note */}
+                <div className="dash-rule-note" style={{ marginTop: 20 }}>
+                  <div className="dash-rule-note-header">
+                    <i className="fas fa-exclamation-triangle"></i>
+                    <strong>Important: Event Registration Rules</strong>
                   </div>
-                )}
-
-                {/* Note */}
-                <div className="dash-note dash-note-info" style={{ marginTop: 20 }}>
-                  <i className="fas fa-info-circle"></i>
-                  <span>
-                    <strong>Note:</strong> A participant cannot be in the same team for both Hackathon and Designathon.
-                    You may register for both events with <strong>different team members</strong>.
-                  </span>
+                  <ul className="dash-rule-list">
+                    <li>
+                      <i className="fas fa-ban"></i>
+                      <span>Both Hackathon &amp; Designathon happen <strong>simultaneously</strong> — the same team member or leader <strong>cannot participate in both events</strong>.</span>
+                    </li>
+                    <li>
+                      <i className="fas fa-ban"></i>
+                      <span>If you are already registered for one event, the <strong>same team members and the same leader</strong> are <strong>not allowed</strong> to register under the other event.</span>
+                    </li>
+                    <li>
+                      <i className="fas fa-check-circle" style={{ color: '#4CAF50' }}></i>
+                      <span>However, from this account you <strong>can register a brand-new team</strong> — with <strong>entirely different members</strong> — for the other event.</span>
+                    </li>
+                  </ul>
                 </div>
 
                 {/* Need changes? */}

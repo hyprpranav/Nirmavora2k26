@@ -155,13 +155,13 @@ export default function Contact() {
             <i className="fas fa-chalkboard-teacher"></i>
             <h4>Staff Coordinators</h4>
             <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>Guiding NIRMAVORA 2K26</p>
-            <span className="cc-hint"><i className="fas fa-hand-pointer"></i> Click to view</span>
+            <span className="cc-cta-btn"><i className="fas fa-eye"></i> View Coordinators</span>
           </div>
           <div className="contact-card contact-card-clickable" role="button" tabIndex={0} onClick={() => setModal('student')} onKeyDown={(e) => e.key === 'Enter' && setModal('student')}>
             <i className="fas fa-users"></i>
             <h4>Student Coordinators</h4>
             <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>Civil & Mechanical Clubs</p>
-            <span className="cc-hint"><i className="fas fa-hand-pointer"></i> Click to view</span>
+            <span className="cc-cta-btn"><i className="fas fa-eye"></i> View Coordinators</span>
           </div>
 
           <div className="contact-card contact-card-dev">
