@@ -62,7 +62,7 @@ export async function uploadAbstract(file, teamName) {
 
   const num = await getNextAbstractNumber();
   const safeName = teamName.replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
-  const publicId = `Abstract #${num} - ${safeName}`;
+  const publicId = `Abstract No.${num} - ${safeName}`;
 
   const { fileUrl, fileName } = await uploadToCloudinary(file, 'abstracts', publicId);
 
