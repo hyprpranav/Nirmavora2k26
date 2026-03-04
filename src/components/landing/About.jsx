@@ -13,8 +13,9 @@ export default function About() {
 
         <div className="about-content">
           <p className="about-intro">
-            <strong>{EVENT.name}</strong> is a prestigious National-Level{' '}
-            <span className="highlight">Designathon cum Hackathon</span> that brings together
+            <strong>{EVENT.name}</strong> is a prestigious National-Level Fest where we conduct two exciting events —{' '}
+            <span className="highlight">Hackathon</span> &amp;{' '}
+            <span className="highlight">Designathon</span> — bringing together
             brilliant minds from across the nation to solve real-world challenges through
             innovative engineering solutions.
           </p>
