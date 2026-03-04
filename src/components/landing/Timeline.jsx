@@ -58,8 +58,8 @@ export default function Timeline() {
             <div className="eip-item">
               <i className="fas fa-utensils"></i>
               <div>
-                <strong>Refreshments Provided</strong>
-                <p>Morning refreshment &amp; evening refreshment are provided by the organisers. <strong>Breakfast, lunch, and dinner are NOT included</strong> in the registration.</p>
+                <strong>Meals &amp; Refreshments</strong>
+                <p><strong>Lunch &amp; refreshments are provided</strong> by the organisers (included in the registration fee). Breakfast and dinner are the <strong>responsibility of the participants</strong>.</p>
               </div>
             </div>
 
