@@ -1,6 +1,6 @@
-import { collection, doc, getDoc, setDoc, runTransaction } from 'firebase/firestore';
-import { db } from '../config/firebase';
-import { uploadAbstractToDrive, uploadPaymentToDrive } from './driveService';
+import { doc, runTransaction } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../config/firebase';
 
 /**
  * Get the next abstract number using a Firestore counter.
@@ -19,9 +19,10 @@ async function getNextAbstractNumber() {
 }
 
 /**
- * Upload an abstract file to Google Drive.
+ * Upload an abstract file to Firebase Storage.
  * Auto-names as "Abstract #N - TeamName.ext"
  * Accepts PDF, PNG, JPG, DOCX.
+ * Max size: 5 MB.
  * Returns { abstractFileUrl, abstractFileName, abstractNumber }
  */
 export async function uploadAbstract(file, teamName) {
@@ -31,28 +32,30 @@ export async function uploadAbstract(file, teamName) {
     throw new Error('Invalid file type. Allowed: PDF, PNG, JPG, DOCX');
   }
 
-  const maxSize = 10 * 1024 * 1024; // 10 MB
+  const maxSize = 5 * 1024 * 1024; // 5 MB
   if (file.size > maxSize) {
-    throw new Error('File too large. Maximum size is 10 MB.');
+    throw new Error('Abstract file too large. Maximum allowed size is 5 MB.');
   }
 
   const num = await getNextAbstractNumber();
   const safeName = teamName.replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
   const fileName = `Abstract #${num} - ${safeName}.${ext}`;
 
-  const result = await uploadAbstractToDrive(file, fileName);
+  const storageRef = ref(storage, `abstracts/${fileName}`);
+  await uploadBytes(storageRef, file);
+  const fileUrl = await getDownloadURL(storageRef);
 
   return {
-    abstractFileUrl: result.fileUrl,
-    abstractFileName: result.fileName,
+    abstractFileUrl: fileUrl,
+    abstractFileName: fileName,
     abstractNumber: num,
-    abstractDriveId: result.fileId,
   };
 }
 
 /**
- * Upload a payment screenshot to Google Drive.
+ * Upload a payment screenshot to Firebase Storage.
  * Only accepts image formats (PNG, JPG, JPEG).
+ * Max size: 5 MB.
  * Returns { paymentScreenshotUrl, paymentScreenshotFileName }
  */
 export async function uploadPaymentScreenshot(file, teamName) {
@@ -71,10 +74,12 @@ export async function uploadPaymentScreenshot(file, teamName) {
   const timestamp = Date.now();
   const fileName = `Payment - ${safeName} - ${timestamp}.${ext}`;
 
-  const result = await uploadPaymentToDrive(file, fileName);
+  const storageRef = ref(storage, `payments/${fileName}`);
+  await uploadBytes(storageRef, file);
+  const fileUrl = await getDownloadURL(storageRef);
 
   return {
-    paymentScreenshotUrl: result.fileUrl,
-    paymentScreenshotFileName: result.fileName,
+    paymentScreenshotUrl: fileUrl,
+    paymentScreenshotFileName: fileName,
   };
 }
