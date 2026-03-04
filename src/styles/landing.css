@@ -428,9 +428,31 @@
 /* ─── Timeline ─── */
 .timeline-section { padding: var(--section-padding); }
 
+/* Legend */
+.timeline-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+.tl-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  color: var(--light-gray);
+}
+.tl-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
 .timeline {
   position: relative;
-  max-width: 700px;
+  max-width: 680px;
   margin: 0 auto;
   padding: 20px 0;
 }
@@ -446,33 +468,56 @@
 
 .timeline-item {
   position: relative;
-  padding-left: 50px;
-  margin-bottom: 30px;
+  padding-left: 52px;
+  margin-bottom: 22px;
 }
 .timeline-dot {
   position: absolute;
-  left: 14px;
-  top: 6px;
-  width: 14px;
-  height: 14px;
+  left: 10px;
+  top: 14px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid var(--dark-base);
+  background: var(--dark-base);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .timeline-content {
   background: var(--medium-gray);
-  padding: 16px 20px;
+  padding: 14px 18px;
   border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s;
 }
-.timeline-time {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--accent);
-  display: block;
+.timeline-item:hover .timeline-content {
+  border-left-color: var(--accent);
+}
+.tl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 4px;
 }
-.timeline-content h3 { font-size: 1.1rem; margin-bottom: 4px; }
-.timeline-content p { font-size: 0.9rem; }
+.timeline-time {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.tl-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.timeline-content h3 { font-size: 1rem; margin-bottom: 4px; color: var(--soft-white); }
+.timeline-content p { font-size: 0.87rem; color: var(--light-gray); line-height: 1.5; }
 
 .canteen-info {
   display: flex;
@@ -481,7 +526,7 @@
   background: var(--medium-gray);
   padding: 16px 24px;
   border-radius: var(--radius-sm);
-  max-width: 700px;
+  max-width: 680px;
   margin: 2rem auto 0;
 }
 .canteen-info i { font-size: 1.5rem; color: var(--accent); }

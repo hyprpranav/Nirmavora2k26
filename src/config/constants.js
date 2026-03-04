@@ -136,11 +136,62 @@ export const HACKATHON_TRACKS = [
 
 /* ─── Timeline ─── */
 export const TIMELINE = [
-  { time: '8:30 AM', title: 'Assembly', desc: 'All participants must assemble' },
-  { time: '9:00 – 10:00 AM', title: 'Inauguration', desc: 'Opening ceremony' },
-  { time: '10:00 AM – 6:00 PM', title: 'Hackathon', desc: '8-hour build session' },
-  { time: '11:00 – 12:00 PM', title: 'First Review', desc: 'Mentoring round' },
-  { time: '6:00 PM', title: 'Prize Distribution', desc: 'Closing & awards' },
+  {
+    time: '8:30 AM',
+    title: 'Assembly',
+    desc: 'All participants report and collect ID cards & event kits',
+    tag: 'both',
+    icon: 'fas fa-users',
+  },
+  {
+    time: '9:00 – 10:00 AM',
+    title: 'Inauguration',
+    desc: 'Opening ceremony with chief guests and event briefing',
+    tag: 'both',
+    icon: 'fas fa-flag',
+  },
+  {
+    time: '10:00 AM',
+    title: 'Events Begin',
+    desc: 'Hackathon build session starts · Designathon design sprint begins',
+    tag: 'both',
+    icon: 'fas fa-rocket',
+  },
+  {
+    time: '11:00 AM',
+    title: 'Morning Review — Hackathon',
+    desc: 'First mentoring round: teams receive feedback and guidance to shape their build direction',
+    tag: 'hackathon',
+    icon: 'fas fa-laptop-code',
+  },
+  {
+    time: '11:00 AM',
+    title: 'Design Brief Reveal — Designathon',
+    desc: 'Problem requirements and exact output criteria announced — Civil & Mechanical teams begin focused design work',
+    tag: 'designathon',
+    icon: 'fas fa-drafting-compass',
+  },
+  {
+    time: '4:30 PM',
+    title: 'Final Review — Hackathon',
+    desc: 'Evening evaluation round: judges assess prototypes and working solutions',
+    tag: 'hackathon',
+    icon: 'fas fa-search',
+  },
+  {
+    time: '4:30 PM',
+    title: 'Final Evaluation — Designathon',
+    desc: 'Design submissions reviewed by judges from Civil & Mechanical departments',
+    tag: 'designathon',
+    icon: 'fas fa-ruler-combined',
+  },
+  {
+    time: '6:00 PM',
+    title: 'Prize Distribution',
+    desc: 'Award ceremony — best projects from all tracks recognised and celebrated',
+    tag: 'both',
+    icon: 'fas fa-trophy',
+  },
 ];
 
 export const CANTEEN = {
