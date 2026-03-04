@@ -1,4 +1,4 @@
-import { TIMELINE, CANTEEN, EVENT } from '../../config/constants';
+import { TIMELINE, EVENT } from '../../config/constants';
 
 const TAG_LABELS = {
   both:        { label: 'Both Events',   color: 'var(--accent)' },
@@ -51,11 +51,34 @@ export default function Timeline() {
           })}
         </div>
 
-        <div className="canteen-info">
-          <i className="fas fa-utensils"></i>
-          <div>
-            <p><strong>Canteen:</strong> Morning opens {CANTEEN.morningOpen} · Dinner till {CANTEEN.dinnerClose}</p>
-            <p>Participants must assemble by <strong>{EVENT.assembleBy}</strong>.</p>
+        <div className="event-info-panel">
+          <h4 className="eip-title"><i className="fas fa-info-circle"></i> On-Day Information</h4>
+          <div className="eip-grid">
+
+            <div className="eip-item">
+              <i className="fas fa-utensils"></i>
+              <div>
+                <strong>Refreshments Provided</strong>
+                <p>Morning refreshment &amp; evening refreshment are provided by the organisers. <strong>Breakfast, lunch, and dinner are NOT included</strong> in the registration.</p>
+              </div>
+            </div>
+
+            <div className="eip-item">
+              <i className="fas fa-store"></i>
+              <div>
+                <strong>College Canteen</strong>
+                <p>The college mess will be <strong>closed</strong> on event day. The college canteen will be open till <strong>8:30 PM</strong>. Participants who wish to have dinner before leaving campus can grab it from the canteen.</p>
+              </div>
+            </div>
+
+            <div className="eip-item">
+              <i className="fas fa-bus"></i>
+              <div>
+                <strong>Bus Facility (College → Karur Bus Stand)</strong>
+                <p>If you need bus transport from college to Karur Bus Stand after the event, please <strong>intimate the organisers in advance</strong>. Contact them via the <a href="#contact">Contact section</a> below.</p>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

@@ -531,6 +531,50 @@
 }
 .canteen-info i { font-size: 1.5rem; color: var(--accent); }
 
+/* On-Day Info Panel */
+.event-info-panel {
+  max-width: 680px;
+  margin: 2.5rem auto 0;
+  background: var(--dark-base);
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+}
+.eip-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.eip-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.eip-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: var(--medium-gray);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent);
+}
+.eip-item i {
+  font-size: 1.1rem;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.eip-item strong { display: block; color: var(--soft-white); font-size: 0.9rem; margin-bottom: 4px; }
+.eip-item p { font-size: 0.84rem; color: var(--light-gray); line-height: 1.55; margin: 0; }
+.eip-item a { color: var(--accent); text-decoration: underline; }
+
 /* ─── Fees ─── */
 .fees-section { background: var(--dark-gray); }
 .fees-content { text-align: center; }
