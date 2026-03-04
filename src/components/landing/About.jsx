@@ -1,4 +1,4 @@
-import { EVENT, ORGANISERS } from '../../config/constants';
+import { EVENT, ORGANISERS, SDG_GOALS } from '../../config/constants';
 
 export default function About() {
   return (
@@ -45,9 +45,27 @@ export default function About() {
 
           <div className="stats-row">
             <div className="stat-card"><h3>2</h3><p>Events</p></div>
-            <div className="stat-card"><h3>17</h3><p>SDGs</p></div>
+            <div className="stat-card"><h3>6</h3><p>SDG Focus</p></div>
             <div className="stat-card"><h3>8</h3><p>Hour Hackathon</p></div>
             <div className="stat-card"><h3>∞</h3><p>Opportunities</p></div>
+          </div>
+
+          {/* SDG Focus badges */}
+          <div className="sdg-focus-section">
+            <h4 className="sdg-focus-title"><i className="fas fa-globe-americas"></i> Our 6 SDG Focus Areas</h4>
+            <p className="sdg-focus-sub">Hover over each goal to see how NIRMAVORA addresses it</p>
+            <div className="sdg-badges">
+              {SDG_GOALS.map((sdg) => (
+                <div key={sdg.value} className="sdg-badge" style={{ '--sdg-color': sdg.color }}>
+                  <span className="sdg-number">{sdg.value}</span>
+                  <span className="sdg-short">{sdg.label.split('–')[1]?.trim()}</span>
+                  <div className="sdg-tooltip">
+                    <strong>{sdg.label}</strong>
+                    <p>{sdg.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

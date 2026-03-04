@@ -63,10 +63,21 @@ function countMembers(data) {
 }
 
 /* ─── Queries ─── */
-export async function getTeamsByUser(userId) {
-  const q = query(collection(db, TEAMS), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+export async function getTeamsByUser(userId, userEmail) {
+  // Query by userId (no orderBy to avoid composite index requirement)
+  const q = query(collection(db, TEAMS), where('userId', '==', userId));
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  let teams = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  // Fallback: also search by leaderEmail in case team was added manually by admin
+  if (teams.length === 0 && userEmail) {
+    const q2 = query(collection(db, TEAMS), where('leaderEmail', '==', userEmail));
+    const snap2 = await getDocs(q2);
+    teams = snap2.docs.map((d) => ({ id: d.id, ...d.data() }));
+  }
+
+  // Sort client-side by createdAt descending
+  return teams.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 }
 
 export async function getAllTeams() {

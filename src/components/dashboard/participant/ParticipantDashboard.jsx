@@ -23,7 +23,7 @@ export default function ParticipantDashboard() {
     if (!user) return;
     setLoading(true);
     setFetchError('');
-    getTeamsByUser(user.uid)
+    getTeamsByUser(user.uid, user.email)
       .then((t) => {
         setTeams(t);
       })

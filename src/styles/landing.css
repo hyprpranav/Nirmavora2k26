@@ -154,6 +154,103 @@
 }
 .stat-card p { font-size: 0.9rem; }
 
+/* ─── SDG Focus Section ─── */
+.sdg-focus-section {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+.sdg-focus-title {
+  color: var(--soft-white);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.sdg-focus-title i { color: var(--accent); }
+.sdg-focus-sub {
+  color: var(--light-gray);
+  font-size: 0.85rem;
+  margin-bottom: 1.4rem;
+}
+.sdg-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+.sdg-badge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--dark-base);
+  border: 2px solid var(--sdg-color, var(--accent));
+  border-radius: 12px;
+  padding: 14px 20px;
+  min-width: 130px;
+  cursor: default;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.sdg-badge:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--sdg-color) 40%, transparent);
+}
+.sdg-number {
+  font-family: var(--font-secondary);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--sdg-color, var(--accent));
+  line-height: 1;
+}
+.sdg-short {
+  font-size: 0.78rem;
+  color: var(--light-gray);
+  text-align: center;
+  margin-top: 4px;
+  line-height: 1.3;
+  max-width: 110px;
+}
+.sdg-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dark-gray);
+  border: 1px solid var(--sdg-color, var(--accent));
+  border-radius: 10px;
+  padding: 12px 14px;
+  width: 230px;
+  text-align: left;
+  z-index: 99;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.sdg-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top-color: var(--sdg-color, var(--accent));
+}
+.sdg-tooltip strong {
+  display: block;
+  color: var(--sdg-color, var(--accent));
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+.sdg-tooltip p {
+  color: var(--light-gray);
+  font-size: 0.8rem;
+  margin: 0;
+  line-height: 1.5;
+}
+.sdg-badge:hover .sdg-tooltip { display: block; }
+
 /* ─── Designathon & Hackathon ─── */
 .designathon-section,
 .hackathon-section {

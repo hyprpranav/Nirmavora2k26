@@ -151,25 +151,14 @@ export const CANTEEN = {
 /* ─── Facilities included in fee ─── */
 export const FACILITIES = ['Lunch', 'Refreshments', 'ID Card', 'Event Kit'];
 
-/* ─── SDG Goals dropdown ─── */
+/* ─── SDG Goals (6 focus SDGs for NIRMAVORA) ─── */
 export const SDG_GOALS = [
-  { value: '1', label: 'SDG 1 – No Poverty' },
-  { value: '2', label: 'SDG 2 – Zero Hunger' },
-  { value: '3', label: 'SDG 3 – Good Health & Well-Being' },
-  { value: '4', label: 'SDG 4 – Quality Education' },
-  { value: '5', label: 'SDG 5 – Gender Equality' },
-  { value: '6', label: 'SDG 6 – Clean Water & Sanitation' },
-  { value: '7', label: 'SDG 7 – Affordable & Clean Energy' },
-  { value: '8', label: 'SDG 8 – Decent Work & Economic Growth' },
-  { value: '9', label: 'SDG 9 – Industry, Innovation & Infrastructure' },
-  { value: '10', label: 'SDG 10 – Reduced Inequalities' },
-  { value: '11', label: 'SDG 11 – Sustainable Cities & Communities' },
-  { value: '12', label: 'SDG 12 – Responsible Consumption & Production' },
-  { value: '13', label: 'SDG 13 – Climate Action' },
-  { value: '14', label: 'SDG 14 – Life Below Water' },
-  { value: '15', label: 'SDG 15 – Life on Land' },
-  { value: '16', label: 'SDG 16 – Peace, Justice & Strong Institutions' },
-  { value: '17', label: 'SDG 17 – Partnerships for the Goals' },
+  { value: '6',  label: 'SDG 6 – Clean Water & Sanitation',              color: '#26BDE2', desc: 'Rainwater harvesting, smart drainage, wastewater reuse systems' },
+  { value: '7',  label: 'SDG 7 – Affordable & Clean Energy',              color: '#FCC30B', desc: 'Solar-powered systems, renewable energy models, energy-efficient designs' },
+  { value: '9',  label: 'SDG 9 – Industry, Innovation & Infrastructure',  color: '#FD6925', desc: 'Smart infrastructure, construction innovation, automation & manufacturing' },
+  { value: '11', label: 'SDG 11 – Sustainable Cities & Communities',      color: '#FD9D24', desc: 'Smart city planning, flood-resilient layouts, transport optimization' },
+  { value: '12', label: 'SDG 12 – Responsible Consumption & Production',  color: '#BF8B2E', desc: 'Waste-based materials, sustainable products, responsible production' },
+  { value: '13', label: 'SDG 13 – Climate Action',                        color: '#3F7E44', desc: 'CO₂ reduction, green building, climate-resilient engineering solutions' },
 ];
 
 /* ─── Departments ─── */
