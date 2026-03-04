@@ -6,10 +6,16 @@ const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 /**
  * Upload a file to Cloudinary using an unsigned upload preset.
+ * Uses 'raw' resource type for PDFs/docs so they get a proper download URL.
+ * Uses 'image' resource type for PNG/JPG.
  * Returns { fileUrl, fileName }
  */
 async function uploadToCloudinary(file, folder, publicId) {
-  const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const isRaw = ['pdf', 'doc', 'docx'].includes(ext);
+  const resourceType = isRaw ? 'raw' : 'image';
+
+  const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`;
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', UPLOAD_PRESET);
