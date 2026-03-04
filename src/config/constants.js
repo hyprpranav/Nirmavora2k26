@@ -39,16 +39,89 @@ export const EVENTS = {
 /* ─── Designathon Themes ─── */
 export const DESIGNATHON_THEMES = {
   civil: [
-    'Smart & Sustainable Infrastructure',
-    'Innovative Construction Materials',
-    'Transportation & Traffic Optimization',
-    'Water & Environmental Engineering',
+    {
+      title: 'Smart & Sustainable Infrastructure',
+      icon: 'fas fa-city',
+      items: [
+        'Low-cost housing solutions',
+        'Green building concepts',
+        'CO₂ reduction materials',
+        'Smart city micro-planning',
+        'Flood-resilient urban layouts',
+      ],
+    },
+    {
+      title: 'Innovative Construction Materials',
+      icon: 'fas fa-cubes',
+      items: [
+        'Waste-based construction blocks',
+        'Lightweight structural materials',
+        'Thermal insulation solutions',
+        'Rapid construction techniques',
+      ],
+    },
+    {
+      title: 'Transportation & Traffic Optimization',
+      icon: 'fas fa-traffic-light',
+      items: [
+        'Smart intersection design',
+        'Rural road development model',
+        'Public transport improvement system',
+        'AI-based traffic flow concept',
+      ],
+    },
+    {
+      title: 'Water & Environmental Engineering',
+      icon: 'fas fa-water',
+      items: [
+        'Rainwater harvesting systems',
+        'Wastewater reuse model',
+        'Smart drainage design',
+        'Sustainable solid waste solution',
+      ],
+    },
   ],
   mechanical: [
-    'Sustainable Energy Systems',
-    'Automation & Smart Mechanisms',
-    'Product Design & Innovation',
-    'Thermal & Fluid Systems',
+    {
+      title: 'Sustainable Energy Systems',
+      icon: 'fas fa-solar-panel',
+      items: [
+        'Micro wind turbine design',
+        'Solar-powered mechanical systems',
+        'Hybrid renewable energy model',
+        'Energy-efficient cooling systems',
+      ],
+    },
+    {
+      title: 'Automation & Smart Mechanisms',
+      icon: 'fas fa-robot',
+      items: [
+        'Low-cost automation prototype',
+        'Smart agricultural machine concept',
+        'Mechanical IoT integration idea',
+        'Assistive mechanical device design',
+      ],
+    },
+    {
+      title: 'Product Design & Innovation',
+      icon: 'fas fa-drafting-compass',
+      items: [
+        'Ergonomic industrial tool',
+        'Compact multipurpose device',
+        'Disaster relief mechanical system',
+        'Sustainable consumer product',
+      ],
+    },
+    {
+      title: 'Thermal & Fluid Systems',
+      icon: 'fas fa-thermometer-half',
+      items: [
+        'Heat exchanger optimization',
+        'Cooling system redesign',
+        'Efficient pumping system',
+        'HVAC energy-saving concept',
+      ],
+    },
   ],
 };
 

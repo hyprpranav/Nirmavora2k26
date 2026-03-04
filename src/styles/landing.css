@@ -256,6 +256,78 @@
   font-weight: 500;
 }
 
+/* ─── Designathon Accordion ─── */
+.theme-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.accordion-item {
+  background: var(--medium-gray);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.accordion-item.open {
+  border-color: var(--accent);
+}
+
+.accordion-header {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  transition: background 0.2s;
+}
+.accordion-header:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.accordion-title {
+  flex: 1;
+  color: var(--soft-white);
+  font-weight: 600;
+  font-size: 0.95rem;
+  font-family: var(--font-primary);
+}
+
+.accordion-chevron {
+  color: var(--light-gray);
+  font-size: 0.8rem;
+  transition: transform 0.25s ease;
+}
+.accordion-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  list-style: none;
+  padding: 4px 20px 16px 54px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.accordion-body li {
+  color: var(--light-gray);
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.accordion-body li i {
+  color: var(--secondary);
+  font-size: 0.75rem;
+}
+
 /* ─── Timeline ─── */
 .timeline-section { padding: var(--section-padding); }
 
