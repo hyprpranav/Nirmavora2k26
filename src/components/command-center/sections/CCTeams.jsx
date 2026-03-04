@@ -190,7 +190,7 @@ export default function CCTeams({
                     </td>
                     <td onClick={(e) => e.stopPropagation()}>
                       {team.abstractFileUrl ? (
-                        <a href={team.abstractFileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#22c55e', fontSize: '0.82rem' }} title={team.abstractFileName || 'Abstract'}>
+                        <a href={team.abstractFileUrl.replace('/image/upload/', '/raw/upload/')} target="_blank" rel="noopener noreferrer" style={{ color: '#22c55e', fontSize: '0.82rem' }} title={team.abstractFileName || 'Abstract'}>
                           <i className="fas fa-download"></i> Open
                         </a>
                       ) : team.abstractLink ? (

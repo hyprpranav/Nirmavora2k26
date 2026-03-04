@@ -223,7 +223,7 @@ export default function TeamDetailCard({
                   <div style={{ marginTop: 12 }}>
                     {team.abstractFileUrl ? (
                       <a
-                        href={team.abstractFileUrl}
+                        href={team.abstractFileUrl.replace('/image/upload/', '/raw/upload/')}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="cc-btn-sm approve"
