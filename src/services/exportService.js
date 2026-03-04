@@ -27,7 +27,7 @@ export function exportMasterLogCSV(teams) {
     Member3: t.member3Name || '',
     MemberCount: t.memberCount || '',
     ProblemTitle: t.problemTitle,
-    SDG: t.sdgGoal,
+    SDG: Array.isArray(t.sdgGoals) ? t.sdgGoals.join(', ') : (t.sdgGoal || ''),
     AbstractFile: t.abstractFileName || t.abstractLink || '',
     AbstractURL: t.abstractFileUrl || t.abstractLink || '',
     Status: t.status,

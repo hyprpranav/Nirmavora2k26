@@ -55,7 +55,7 @@ export default function TeamDetailCard({
       member3Email: team.member3Email || '',
       member3Phone: team.member3Phone || '',
       problemTitle: team.problemTitle || '',
-      sdgGoal: team.sdgGoal || '',
+      sdgGoal: Array.isArray(team.sdgGoals) ? team.sdgGoals.join(', ') : (team.sdgGoal || ''),
       abstractLink: team.abstractLink || '',
     });
     // Init attendance from existing data or null

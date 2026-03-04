@@ -327,7 +327,7 @@ function AddTeamForm({ onSubmit, onCancel }) {
     eventType: 'designathon',
     collegeName: '',
     teamName: '',
-    sdgGoal: '',
+    sdgGoals: [],
     problemTitle: '',
     miniDescription: '',
     leaderName: '',
@@ -405,8 +405,8 @@ function AddTeamForm({ onSubmit, onCancel }) {
             <input value={form.year} onChange={e => upd('year', e.target.value)} style={fieldStyle} />
           </div>
           <div>
-            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>SDG Goal</label>
-            <input value={form.sdgGoal} onChange={e => upd('sdgGoal', e.target.value)} style={fieldStyle} />
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>SDG Goals (comma-separated numbers)</label>
+            <input value={form.sdgGoals.join(', ')} onChange={e => upd('sdgGoals', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} style={fieldStyle} placeholder="e.g. 1, 7, 13" />
           </div>
           <div>
             <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Problem Title</label>

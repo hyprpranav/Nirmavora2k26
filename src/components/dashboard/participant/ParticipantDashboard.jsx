@@ -69,7 +69,7 @@ export default function ParticipantDashboard() {
           <div><span className="dash-lbl">Department</span><span className="dash-val">{t.department || '—'}</span></div>
           <div><span className="dash-lbl">Year</span><span className="dash-val">{t.year || '—'}</span></div>
           <div><span className="dash-lbl">Problem Title</span><span className="dash-val">{t.problemTitle || '—'}</span></div>
-          <div><span className="dash-lbl">SDG Goal</span><span className="dash-val">{t.sdgGoal || '—'}</span></div>
+          <div><span className="dash-lbl">SDG Goals</span><span className="dash-val">{(t.sdgGoals && t.sdgGoals.length > 0) ? t.sdgGoals.map(v => `SDG ${v}`).join(', ') : t.sdgGoal ? `SDG ${t.sdgGoal}` : '—'}</span></div>
           {(t.abstractFileUrl || t.abstractLink) && <div><span className="dash-lbl">Abstract</span><span className="dash-val">{t.abstractFileUrl ? (<><i className="fas fa-file"></i> {t.abstractFileName || 'Uploaded'} <a href={t.abstractFileUrl} target="_blank" rel="noopener noreferrer">Download ↗</a></>) : (<a href={t.abstractLink} target="_blank" rel="noopener noreferrer">View Abstract ↗</a>)}</span></div>}
         </div>
 

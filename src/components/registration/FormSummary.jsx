@@ -1,7 +1,12 @@
 import { SDG_GOALS } from '../../config/constants';
 
 export default function FormSummary({ data, eventType, onBack, onConfirm, submitting, error }) {
-  const sdg = SDG_GOALS.find((s) => s.value === data.sdgGoal);
+  // Support both array (sdgGoals) and legacy string (sdgGoal)
+  const selectedGoals = data.sdgGoals && data.sdgGoals.length > 0
+    ? data.sdgGoals.map(v => SDG_GOALS.find(s => s.value === v)?.label || `SDG ${v}`)
+    : data.sdgGoal
+      ? [SDG_GOALS.find(s => s.value === data.sdgGoal)?.label || data.sdgGoal]
+      : [];
 
   const members = [];
   if (data.member1Name) members.push({ name: data.member1Name, phone: data.member1Phone, email: data.member1Email });
@@ -17,7 +22,7 @@ export default function FormSummary({ data, eventType, onBack, onConfirm, submit
           <tr><td>Event</td><td>{eventType === 'designathon' ? 'Designathon' : 'Hackathon'}</td></tr>
           <tr><td>College</td><td>{data.collegeName}</td></tr>
           <tr><td>Team Name</td><td>{data.teamName}</td></tr>
-          <tr><td>SDG Goal</td><td>{sdg?.label || data.sdgGoal}</td></tr>
+          <tr><td>SDG Goals</td><td>{selectedGoals.length > 0 ? selectedGoals.join(', ') : '—'}</td></tr>
           <tr><td>Problem Title</td><td>{data.problemTitle}</td></tr>
           {data.miniDescription && <tr><td>Description</td><td>{data.miniDescription}</td></tr>}
           <tr><td>Department</td><td>{data.department}</td></tr>

@@ -25,7 +25,7 @@ export async function syncTeamToSheets(team) {
     team.member2Name || '',
     team.member3Name || '',
     team.problemTitle,
-    team.sdgGoal,
+    Array.isArray(team.sdgGoals) ? team.sdgGoals.join(', ') : (team.sdgGoal || ''),
     team.abstractLink,
     team.status,
     team.paymentStatus || 'not_paid',

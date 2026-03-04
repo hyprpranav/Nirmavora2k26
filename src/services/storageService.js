@@ -1,7 +1,6 @@
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../config/firebase';
 import { collection, doc, getDoc, setDoc, runTransaction } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { uploadAbstractToDrive, uploadPaymentToDrive } from './driveService';
 
 /**
  * Get the next abstract number using a Firestore counter.
@@ -20,7 +19,7 @@ async function getNextAbstractNumber() {
 }
 
 /**
- * Upload an abstract file to Firebase Storage.
+ * Upload an abstract file to Google Drive.
  * Auto-names as "Abstract #N - TeamName.ext"
  * Accepts PDF, PNG, JPG, DOCX.
  * Returns { abstractFileUrl, abstractFileName, abstractNumber }
@@ -40,16 +39,19 @@ export async function uploadAbstract(file, teamName) {
   const num = await getNextAbstractNumber();
   const safeName = teamName.replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
   const fileName = `Abstract #${num} - ${safeName}.${ext}`;
-  const storageRef = ref(storage, `abstracts/${fileName}`);
 
-  await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(storageRef);
+  const result = await uploadAbstractToDrive(file, fileName);
 
-  return { abstractFileUrl: url, abstractFileName: fileName, abstractNumber: num };
+  return {
+    abstractFileUrl: result.fileUrl,
+    abstractFileName: result.fileName,
+    abstractNumber: num,
+    abstractDriveId: result.fileId,
+  };
 }
 
 /**
- * Upload a payment screenshot to Firebase Storage.
+ * Upload a payment screenshot to Google Drive.
  * Only accepts image formats (PNG, JPG, JPEG).
  * Returns { paymentScreenshotUrl, paymentScreenshotFileName }
  */
@@ -68,10 +70,11 @@ export async function uploadPaymentScreenshot(file, teamName) {
   const safeName = teamName.replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
   const timestamp = Date.now();
   const fileName = `Payment - ${safeName} - ${timestamp}.${ext}`;
-  const storageRef = ref(storage, `payments/${fileName}`);
 
-  await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(storageRef);
+  const result = await uploadPaymentToDrive(file, fileName);
 
-  return { paymentScreenshotUrl: url, paymentScreenshotFileName: fileName };
+  return {
+    paymentScreenshotUrl: result.fileUrl,
+    paymentScreenshotFileName: result.fileName,
+  };
 }

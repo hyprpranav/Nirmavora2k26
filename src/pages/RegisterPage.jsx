@@ -19,7 +19,7 @@ export default function RegisterPage() {
     setStep('submitting');
     setError('');
     try {
-      /* Upload abstract file to Firebase Storage */
+      /* Upload abstract file to Google Drive */
       let abstractData = {};
       if (formData.abstractFile) {
         abstractData = await uploadAbstract(formData.abstractFile, formData.teamName);

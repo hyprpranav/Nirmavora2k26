@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   SDG_GOALS,
   DEPARTMENTS,
@@ -9,7 +9,7 @@ import {
 const initialForm = {
   collegeName: '',
   teamName: '',
-  sdgGoal: '',
+  sdgGoals: [],
   problemTitle: '',
   miniDescription: '',
   leaderName: '',
@@ -42,7 +42,7 @@ export default function RegistrationForm({ eventType, onNext }) {
     const e = {};
     if (!form.collegeName.trim()) e.collegeName = 'Required';
     if (!form.teamName.trim()) e.teamName = 'Required';
-    if (!form.sdgGoal) e.sdgGoal = 'Required';
+    if (!form.sdgGoals || form.sdgGoals.length === 0) e.sdgGoals = 'Select at least one SDG goal';
     if (!form.problemTitle.trim()) e.problemTitle = 'Required';
     if (!form.leaderName.trim()) e.leaderName = 'Required';
     if (!form.leaderPhone.match(/^\d{10}$/)) e.leaderPhone = 'Enter 10-digit phone';
@@ -92,14 +92,20 @@ export default function RegistrationForm({ eventType, onNext }) {
 
         <div className="form-row">
           <div className="form-group">
-            <label>SDG Goal *</label>
-            <select name="sdgGoal" value={form.sdgGoal} onChange={onChange}>
-              <option value="">Select SDG</option>
-              {SDG_GOALS.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
-            {errors.sdgGoal && <span className="form-error">{errors.sdgGoal}</span>}
+            <label>SDG Goals * <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'normal' }}>(select one or more)</span></label>
+            <SDGMultiSelect
+              selected={form.sdgGoals}
+              onChange={(vals) => {
+                setForm((f) => ({ ...f, sdgGoals: vals }));
+                setErrors((prev) => ({ ...prev, sdgGoals: '' }));
+              }}
+            />
+            {form.sdgGoals.length > 0 && (
+              <p style={{ fontSize: '0.82rem', marginTop: 6, color: 'var(--accent)' }}>
+                {form.sdgGoals.length} SDG{form.sdgGoals.length > 1 ? 's' : ''} selected
+              </p>
+            )}
+            {errors.sdgGoals && <span className="form-error">{errors.sdgGoals}</span>}
           </div>
           <div className="form-group">
             <label>Event Type</label>
@@ -222,5 +228,155 @@ export default function RegistrationForm({ eventType, onNext }) {
         </button>
       </div>
     </form>
+  );
+}
+
+/* ─── SDG Multi-Select Dropdown with Checkboxes ─── */
+function SDGMultiSelect({ selected, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  function toggleSDG(value) {
+    if (selected.includes(value)) {
+      onChange(selected.filter((v) => v !== value));
+    } else {
+      onChange([...selected, value]);
+    }
+  }
+
+  function selectAll() {
+    onChange(SDG_GOALS.map((s) => s.value));
+  }
+
+  function clearAll() {
+    onChange([]);
+  }
+
+  const displayText =
+    selected.length === 0
+      ? 'Select SDG Goals…'
+      : selected.length === 17
+        ? 'All 17 SDGs selected'
+        : `${selected.length} SDG${selected.length > 1 ? 's' : ''} selected`;
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      {/* Trigger button */}
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        style={{
+          width: '100%',
+          padding: '10px 14px',
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          borderRadius: 8,
+          color: selected.length > 0 ? '#fff' : 'rgba(255,255,255,0.4)',
+          textAlign: 'left',
+          cursor: 'pointer',
+          fontSize: '0.95rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <span>{displayText}</span>
+        <i className={`fas fa-chevron-${open ? 'up' : 'down'}`} style={{ fontSize: '0.75rem', opacity: 0.5 }}></i>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            zIndex: 50,
+            background: '#1a1a2e',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 8,
+            marginTop: 4,
+            maxHeight: 320,
+            overflowY: 'auto',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+          }}
+        >
+          {/* Select All / Clear All */}
+          <div
+            style={{
+              display: 'flex',
+              gap: 10,
+              padding: '8px 12px',
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              position: 'sticky',
+              top: 0,
+              background: '#1a1a2e',
+              zIndex: 1,
+            }}
+          >
+            <button
+              type="button"
+              onClick={selectAll}
+              style={{ fontSize: '0.8rem', color: '#22c55e', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+            >
+              ✓ Select All
+            </button>
+            <button
+              type="button"
+              onClick={clearAll}
+              style={{ fontSize: '0.8rem', color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+            >
+              ✗ Clear All
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              style={{ fontSize: '0.8rem', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', marginLeft: 'auto' }}
+            >
+              Done ✓
+            </button>
+          </div>
+
+          {/* SDG checkboxes */}
+          {SDG_GOALS.map((s) => (
+            <label
+              key={s.value}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '8px 12px',
+                cursor: 'pointer',
+                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                background: selected.includes(s.value) ? 'rgba(245,179,1,0.08)' : 'transparent',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = selected.includes(s.value) ? 'rgba(245,179,1,0.08)' : 'transparent')}
+            >
+              <input
+                type="checkbox"
+                checked={selected.includes(s.value)}
+                onChange={() => toggleSDG(s.value)}
+                style={{ accentColor: 'var(--accent)', width: 16, height: 16, cursor: 'pointer' }}
+              />
+              <span style={{ fontSize: '0.88rem', color: selected.includes(s.value) ? '#fff' : 'rgba(255,255,255,0.7)' }}>
+                {s.label}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
