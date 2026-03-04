@@ -9,20 +9,15 @@ import QRDownload from './QRDownload';
 import FeedbackForm from './FeedbackForm';
 import '../../../styles/dashboard.css';
 
-const TABS = ['Profile', 'Team', 'Payment', 'QR Code', 'Feedback'];
+const TABS = ['My Teams', 'Payment', 'QR Code', 'Feedback'];
 
 export default function ParticipantDashboard() {
-  const { user, profile, requestOrganiserRole } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState('Profile');
+  const [tab, setTab] = useState('My Teams');
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
-
-  /* Organiser request state */
-  const [requestReason, setRequestReason] = useState('');
-  const [requestStatus, setRequestStatus] = useState('');
-  const [requestBusy, setRequestBusy] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -47,22 +42,59 @@ export default function ParticipantDashboard() {
   const team = teams[0]; // primary
 
   const teamApproved = team?.status === TEAM_STATUS.APPROVED;
-  const paymentVerified = team?.paymentStatus === PAYMENT_STATUS.VERIFIED;
-  const paymentUploaded = team?.paymentStatus === PAYMENT_STATUS.UPLOADED;
-  const paymentNotPaid = !team?.paymentStatus || team?.paymentStatus === PAYMENT_STATUS.NOT_PAID;
-
   const canRegisterHackathon = teamApproved && !hackathonTeam;
   const canRegisterDesignathon = teamApproved && !designathonTeam;
 
+  /* Helper: readable status message */
+  function getStatusMessage(t) {
+    if (t.status === TEAM_STATUS.PENDING) {
+      return { icon: '⏳', text: `Your idea has been submitted and is waiting for approval.`, type: 'info' };
+    }
+    if (t.status === TEAM_STATUS.APPROVED) {
+      if (t.paymentStatus === PAYMENT_STATUS.VERIFIED) {
+        return { icon: '✅', text: `Your team has been shortlisted and payment is confirmed! You're all set for the event.`, type: 'success' };
+      }
+      if (t.paymentStatus === PAYMENT_STATUS.UPLOADED) {
+        return { icon: '⏳', text: `Your team has been shortlisted! Payment proof submitted — admin is reviewing.`, type: 'info' };
+      }
+      if (t.paymentStatus === PAYMENT_STATUS.REJECTED) {
+        return { icon: '⚠️', text: `Your team has been shortlisted but payment was rejected. Please re-upload.`, type: 'warning' };
+      }
+      return { icon: '🎉', text: `Your team has been shortlisted! Please complete your payment to confirm your spot.`, type: 'success' };
+    }
+    if (t.status === TEAM_STATUS.WAITLISTED) {
+      return { icon: '📋', text: `Your idea has been put on the waiting list. You will be notified if a slot opens up.`, type: 'warning' };
+    }
+    if (t.status === TEAM_STATUS.CANCELLED) {
+      return { icon: '❌', text: `Your registration was cancelled. Contact the organiser for details.`, type: 'danger' };
+    }
+    return { icon: 'ℹ️', text: 'Status unknown. Please contact the organiser.', type: 'info' };
+  }
+
   /* Render helper: team detail card */
-  function renderTeamDetails(t) {
+  function renderTeamCard(t) {
+    const statusMsg = getStatusMessage(t);
     return (
       <div className="dash-team-card" key={t.id}>
+        {/* Status Progress Bar */}
+        <TeamStatus team={t} />
+
+        {/* Status Message Banner */}
+        <div className={`cta-banner cta-${statusMsg.type}`} style={{ marginTop: 12, marginBottom: 16 }}>
+          <span>{statusMsg.icon} {statusMsg.text}</span>
+          {t.status === TEAM_STATUS.APPROVED && (!t.paymentStatus || t.paymentStatus === PAYMENT_STATUS.NOT_PAID) && (
+            <button className="btn btn-primary" onClick={() => setTab('Payment')} style={{ marginTop: 8 }}>Complete Payment →</button>
+          )}
+        </div>
+
+        {/* Team Header */}
         <div className="dash-team-card-header">
           <h4>{t.teamName}</h4>
           <span className={`status-badge st-${t.status}`}>{t.status}</span>
         </div>
         {t.teamId && <p className="team-id">Team ID: <strong>{t.teamId}</strong></p>}
+
+        {/* Team Details Grid */}
         <div className="dash-team-grid">
           <div><span className="dash-lbl">Event</span><span className="dash-val">{t.eventType === 'designathon' ? 'Designathon' : 'Hackathon'}</span></div>
           <div><span className="dash-lbl">College</span><span className="dash-val">{t.collegeName || '—'}</span></div>
@@ -70,9 +102,16 @@ export default function ParticipantDashboard() {
           <div><span className="dash-lbl">Year</span><span className="dash-val">{t.year || '—'}</span></div>
           <div><span className="dash-lbl">Problem Title</span><span className="dash-val">{t.problemTitle || '—'}</span></div>
           <div><span className="dash-lbl">SDG Goals</span><span className="dash-val">{(t.sdgGoals && t.sdgGoals.length > 0) ? t.sdgGoals.map(v => `SDG ${v}`).join(', ') : t.sdgGoal ? `SDG ${t.sdgGoal}` : '—'}</span></div>
-          {(t.abstractFileUrl || t.abstractLink) && <div><span className="dash-lbl">Abstract</span><span className="dash-val">{t.abstractFileUrl ? (<><i className="fas fa-file"></i> {t.abstractFileName || 'Uploaded'} <a href={t.abstractFileUrl} target="_blank" rel="noopener noreferrer">Download ↗</a></>) : (<a href={t.abstractLink} target="_blank" rel="noopener noreferrer">View Abstract ↗</a>)}</span></div>}
+          {(t.abstractFileUrl || t.abstractLink) && (
+            <div><span className="dash-lbl">Abstract</span><span className="dash-val">
+              {t.abstractFileUrl
+                ? (<><i className="fas fa-file-alt"></i> Submitted </>)
+                : (<a href={t.abstractLink} target="_blank" rel="noopener noreferrer">View Abstract ↗</a>)}
+            </span></div>
+          )}
         </div>
 
+        {/* Team Members */}
         <h5 style={{ marginTop: 16, marginBottom: 8, color: 'var(--accent)' }}>Team Members</h5>
         <div className="dash-members-list">
           <div className="dash-member"><strong>Leader:</strong> {t.leaderName} — {t.leaderEmail} {t.leaderPhone && `— ${t.leaderPhone}`}</div>
@@ -81,6 +120,7 @@ export default function ParticipantDashboard() {
           {t.member3Name && <div className="dash-member"><strong>Member 4:</strong> {t.member3Name} — {t.member3Email} {t.member3Phone && `— ${t.member3Phone}`}</div>}
         </div>
 
+        {/* Payment Status */}
         <div className="dash-team-payment">
           <span className="dash-lbl">Payment:</span>{' '}
           <span className={`status-badge st-${t.paymentStatus || 'not_paid'}`}>
@@ -95,6 +135,15 @@ export default function ParticipantDashboard() {
     <section className="dashboard-page">
       <div className="container">
         <h2 className="dash-title">Participant Dashboard</h2>
+
+        {/* Quick Profile Bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'var(--dark-base)', borderRadius: 8, marginBottom: 20, border: '1px solid var(--medium-gray)' }}>
+          {profile?.photoURL && <img src={profile.photoURL} alt="" style={{ width: 36, height: 36, borderRadius: '50%' }} />}
+          <div>
+            <strong style={{ color: 'var(--soft-white)' }}>{profile?.displayName || 'Participant'}</strong>
+            <span style={{ color: 'var(--light-gray)', fontSize: '0.85rem', marginLeft: 10 }}>{profile?.email}</span>
+          </div>
+        </div>
 
         <div className="dash-tabs">
           {TABS.map((t) => (
@@ -112,87 +161,11 @@ export default function ParticipantDashboard() {
           {loading && <p className="loader">Loading…</p>}
           {fetchError && <div className="cta-banner cta-danger"><span>{fetchError}</span></div>}
 
-          {/* ─── Profile ─── */}
-          {tab === 'Profile' && !loading && (
-            <div className="profile-card">
-              {profile?.photoURL && <img src={profile.photoURL} alt="" className="profile-avatar" />}
-              <h3>{profile?.displayName || 'Participant'}</h3>
-              <p>{profile?.email}</p>
-              <span className="role-badge">{profile?.role}</span>
-
-              {profile?.role === 'participant' && (
-                <div style={{ marginTop: '24px', padding: '16px', background: 'var(--dark-base)', borderRadius: '8px', border: '1px solid var(--medium-gray)' }}>
-                  <h4 style={{ color: 'var(--primary-gold)', marginBottom: '8px' }}>Want to be an Organiser?</h4>
-                  <p style={{ color: 'var(--light-gray)', fontSize: '0.85rem', marginBottom: '12px' }}>
-                    Submit a request to the admin. Include your department and reason.
-                  </p>
-                  <textarea
-                    placeholder="e.g. I'm from Civil Dept, member of ICI Club, I'd like to help manage the designathon…"
-                    value={requestReason}
-                    onChange={(e) => setRequestReason(e.target.value)}
-                    rows={3}
-                    style={{ width: '100%', padding: '10px', background: 'var(--midnight-bg)', border: '1px solid var(--medium-gray)', borderRadius: '6px', color: 'var(--soft-white)', fontFamily: 'var(--font-primary)', resize: 'vertical', marginBottom: '10px' }}
-                  />
-                  <button
-                    className="btn btn-primary"
-                    disabled={requestBusy || !requestReason.trim()}
-                    onClick={async () => {
-                      setRequestBusy(true);
-                      setRequestStatus('');
-                      try {
-                        await requestOrganiserRole(requestReason);
-                        setRequestStatus('✅ Request submitted! Admin will review it.');
-                        setRequestReason('');
-                      } catch (err) {
-                        setRequestStatus('❌ Failed to submit request. Try again.');
-                      }
-                      setRequestBusy(false);
-                    }}
-                  >
-                    {requestBusy ? 'Submitting…' : 'Request Organiser Role'}
-                  </button>
-                  {requestStatus && <p style={{ marginTop: '8px', fontSize: '0.85rem' }}>{requestStatus}</p>}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ─── Team ─── */}
-          {tab === 'Team' && !loading && (
+          {/* ─── My Teams (default tab) ─── */}
+          {tab === 'My Teams' && !loading && (
             teams.length > 0 ? (
               <div className="dash-teams-section">
-                {/* Show each registered team with full details */}
-                {teams.map(t => (
-                  <div key={t.id}>
-                    <TeamStatus team={t} />
-                    {renderTeamDetails(t)}
-
-                    {/* Status CTAs for this team */}
-                    <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      {t.status === TEAM_STATUS.APPROVED && (!t.paymentStatus || t.paymentStatus === PAYMENT_STATUS.NOT_PAID) && (
-                        <div className="cta-banner cta-success">
-                          <span>🎉 Your team <strong>{t.teamName}</strong> has been <strong>approved!</strong> Complete payment to confirm your slot.</span>
-                          <button className="btn btn-primary" onClick={() => setTab('Payment')}>Complete Payment →</button>
-                        </div>
-                      )}
-                      {t.status === TEAM_STATUS.APPROVED && t.paymentStatus === PAYMENT_STATUS.UPLOADED && (
-                        <div className="cta-banner cta-info"><span>⏳ Payment proof submitted for <strong>{t.teamName}</strong>. Admin is reviewing — check back soon.</span></div>
-                      )}
-                      {t.status === TEAM_STATUS.APPROVED && t.paymentStatus === PAYMENT_STATUS.VERIFIED && (
-                        <div className="cta-banner cta-success"><span>✅ <strong>{t.teamName}</strong> is fully confirmed for <strong>{t.eventType === 'designathon' ? 'Designathon' : 'Hackathon'}</strong>!</span></div>
-                      )}
-                      {t.status === TEAM_STATUS.WAITLISTED && (
-                        <div className="cta-banner cta-warning"><span>⏳ <strong>{t.teamName}</strong> is on the <strong>waitlist</strong>. You will be notified if a slot opens up.</span></div>
-                      )}
-                      {t.status === TEAM_STATUS.CANCELLED && (
-                        <div className="cta-banner cta-danger"><span>❌ <strong>{t.teamName}</strong> registration was cancelled. Contact the developer for details.</span></div>
-                      )}
-                      {t.status === TEAM_STATUS.PENDING && (
-                        <div className="cta-banner cta-info"><span>⏳ <strong>{t.teamName}</strong> is under review. You'll be updated once the admin reviews your submission.</span></div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                {teams.map(t => renderTeamCard(t))}
 
                 {/* Register for another event */}
                 {(canRegisterHackathon || canRegisterDesignathon) && (
@@ -211,21 +184,20 @@ export default function ParticipantDashboard() {
                   </div>
                 )}
 
-                {/* Important note */}
+                {/* Note */}
                 <div className="dash-note dash-note-info" style={{ marginTop: 20 }}>
                   <i className="fas fa-info-circle"></i>
                   <span>
                     <strong>Note:</strong> A participant cannot be in the same team for both Hackathon and Designathon.
-                    If you are registered in a Hackathon team, you cannot be part of the same members' Designathon team and vice versa.
                     You may register for both events with <strong>different team members</strong>.
                   </span>
                 </div>
 
-                {/* Need changes? Contact developer */}
+                {/* Need changes? */}
                 <div className="dash-note dash-note-warning" style={{ marginTop: 12 }}>
                   <i className="fas fa-edit"></i>
                   <span>
-                    Need to change your abstract, team details, or fix an error? Contact the developer as soon as possible:<br/>
+                    Need to change your abstract, team details, or fix an error? Contact the developer:<br/>
                     <strong>Email:</strong> <a href={`mailto:${DEVELOPER.email}`}>{DEVELOPER.email}</a> &nbsp;|&nbsp;
                     <strong>Phone:</strong> <a href={`tel:+91${DEVELOPER.phoneRaw}`}>{DEVELOPER.phone}</a>
                   </span>

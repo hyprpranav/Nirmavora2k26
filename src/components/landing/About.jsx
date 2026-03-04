@@ -34,7 +34,7 @@ export default function About() {
             <div className="about-card">
               <i className="fas fa-university"></i>
               <h4>All Departments Welcome</h4>
-              <p>ECE, EEE, AI/ML, Data Science, Biotech, and all engineering disciplines</p>
+              <p>Open to all BE, B.Tech & UG/PG students across every discipline</p>
             </div>
             <div className="about-card">
               <i className="fas fa-trophy"></i>

@@ -72,36 +72,21 @@ async function sendEmail(subject, toEmail, toName, messageBody) {
 /** Send shortlist confirmation */
 export async function sendShortlistConfirmation(email, name, teamName, teamId, eventType) {
   const subject = `🎉 Congratulations! Your team is shortlisted — NIRMAVORA FEST 2026`;
-  const message = `
-    <p>Hi <strong>${name}</strong>,</p>
-    <p>Great news! Your team <strong>${teamName}</strong> (ID: ${teamId}) has been <strong>shortlisted</strong> for the <strong>${eventType}</strong> at NIRMAVORA FEST 2026!</p>
-    <p>Please complete your payment to confirm your spot.</p>
-    <p>— Team NIRMAVORA</p>
-  `;
+  const message = `Hi ${name},\n\nGreat news! Your team "${teamName}" (ID: ${teamId}) has been shortlisted for the ${eventType} at NIRMAVORA FEST 2026!\n\nPlease complete your payment to confirm your spot.\n\n— Team NIRMAVORA`;
   return sendEmail(subject, email, name, message);
 }
 
 /** Send payment confirmation */
 export async function sendPaymentConfirmation(email, name, teamName, amount) {
   const subject = `✅ Payment Confirmed — NIRMAVORA FEST 2026`;
-  const message = `
-    <p>Hi <strong>${name}</strong>,</p>
-    <p>Your payment of <strong>₹${amount}</strong> for team <strong>${teamName}</strong> has been verified.</p>
-    <p>Your registration is now complete. See you at the fest!</p>
-    <p>— Team NIRMAVORA</p>
-  `;
+  const message = `Hi ${name},\n\nYour payment of ₹${amount} for team "${teamName}" has been verified.\n\nYour registration is now complete. See you at the fest!\n\n— Team NIRMAVORA`;
   return sendEmail(subject, email, name, message);
 }
 
 /** Send waitlist message */
 export async function sendWaitlistMessage(email, name, teamName) {
   const subject = `⏳ You're on the Waitlist — NIRMAVORA FEST 2026`;
-  const message = `
-    <p>Hi <strong>${name}</strong>,</p>
-    <p>Your team <strong>${teamName}</strong> has been placed on the <strong>waitlist</strong>.</p>
-    <p>We'll notify you if a spot opens up. Thank you for your interest!</p>
-    <p>— Team NIRMAVORA</p>
-  `;
+  const message = `Hi ${name},\n\nYour team "${teamName}" has been placed on the waitlist.\n\nWe'll notify you if a spot opens up. Thank you for your interest!\n\n— Team NIRMAVORA`;
   return sendEmail(subject, email, name, message);
 }
 
@@ -121,6 +106,6 @@ export async function sendTestEmail(email) {
     'NIRMAVORA FEST 2026 — Test Email ✅',
     email,
     'Admin',
-    '<p>If you are reading this, email sending is working correctly!</p><p>— NIRMAVORA Email System</p>'
+    'If you are reading this, email sending is working correctly!\n\n— NIRMAVORA Email System'
   );
 }

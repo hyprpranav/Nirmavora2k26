@@ -14,7 +14,7 @@ export const EVENT = {
   teamMax: 4,
   contactPhone: '+91 99625 31002',
   contactEmail: 'nirmavora2k26@gmail.com',
-  upiId: import.meta.env.VITE_UPI_ID || '',
+  upiId: import.meta.env.VITE_UPI_ID || 'balaji.anbu465-1@oksbi',
   upiName: import.meta.env.VITE_UPI_NAME || 'NIRMAVORA FEST 2026',
 };
 

@@ -23,14 +23,17 @@ export default function HowToReach() {
               <div className="direction-card">
                 <h4><i className="fas fa-bus"></i> From Karur</h4>
                 <p>
-                  Board <strong>Bus No. 1</strong> from Karur Old Bus Stand.
-                  Inform conductor: <em>Kumarasamy College</em> or <em>Thalavapalayam</em>.
+                  Catch <strong>Town Bus Route Line 1</strong> from Karur Old Bus Stand
+                  (available every 5–10 minutes on the Karur–Thalavapalayam route).
+                  Inform the conductor to drop you at <em>MKCE College</em>.
+                  The bus will drop you right at the college.
                 </p>
               </div>
               <div className="direction-card">
                 <h4><i className="fas fa-bus"></i> From Namakkal</h4>
                 <p>
-                  Board buses toward Karur and alight near <em>Kumarasamy College</em>.
+                  Board buses toward Karur. At Karur Bus Stand, catch <strong>Town Bus Route Line 1</strong> toward
+                  Thalavapalayam and alight at <em>MKCE College</em>.
                 </p>
               </div>
             </div>
