@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import RegistrationForm from '../components/registration/RegistrationForm';
 import FormSummary from '../components/registration/FormSummary';
 import { registerTeam } from '../services/registrationService';
+import { uploadAbstract } from '../services/storageService';
 import '../styles/forms.css';
 
 export default function RegisterPage() {
@@ -18,12 +19,25 @@ export default function RegisterPage() {
     setStep('submitting');
     setError('');
     try {
-      await registerTeam({ ...formData, eventType, userId: user.uid, userEmail: user.email });
+      /* Upload abstract file to Firebase Storage */
+      let abstractData = {};
+      if (formData.abstractFile) {
+        abstractData = await uploadAbstract(formData.abstractFile, formData.teamName);
+      }
+      /* Remove the File object before saving to Firestore (can't serialize) */
+      const { abstractFile, ...rest } = formData;
+      await registerTeam({
+        ...rest,
+        ...abstractData,
+        eventType,
+        userId: user.uid,
+        userEmail: user.email,
+      });
       setStep('done');
       setTimeout(() => navigate('/dashboard'), 2000);
     } catch (err) {
       console.error(err);
-      setError('Registration failed. Please try again.');
+      setError(err.message || 'Registration failed. Please try again.');
       setStep('summary');
     }
   }

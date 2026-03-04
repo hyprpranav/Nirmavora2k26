@@ -18,6 +18,7 @@ import {
   deleteAllTeams,
   getSettings,
   updateSettings,
+  registerTeamManually,
 } from '../services/teamService';
 import { verifyPayment, rejectPayment } from '../services/paymentService';
 import { getAllUsers, deleteUserProfile, changeUserRole, sendPasswordReset, deleteAllOrganisers, deleteAllParticipants } from '../services/userService';
@@ -90,7 +91,11 @@ export default function AdminPanel() {
     loadAll();
   }
   async function handleEdit(docId, data) {
-    await updateTeamDetails(docId, data);
+    await updateTeamDetails(docId, {
+      ...data,
+      lastEditedBy: user?.email || 'admin',
+      lastEditedAt: new Date().toISOString(),
+    });
     loadAll();
   }
   async function handleVerifyPayment(docId) {
@@ -106,7 +111,7 @@ export default function AdminPanel() {
     loadAll();
   }
   async function handleConfirmAttendance(docId, memberAtt, status) {
-    await confirmMemberAttendance(docId, memberAtt, status);
+    await confirmMemberAttendance(docId, memberAtt, status, user?.email || 'admin');
     loadAll();
   }
   async function handleToggleSetting(key) {
@@ -140,6 +145,11 @@ export default function AdminPanel() {
   async function handleResetPassword(email) {
     await sendPasswordReset(email);
     alert(`Password reset email sent to ${email}`);
+  }
+
+  async function handleAddTeam(data) {
+    await registerTeamManually(data, user?.email);
+    loadAll();
   }
 
   async function handleSignOut() {
@@ -187,6 +197,7 @@ export default function AdminPanel() {
           canEdit={true}
           canAttendance={true}
           onConfirmAttendance={handleConfirmAttendance}
+          onAddTeam={handleAddTeam}
         />
       )}
 

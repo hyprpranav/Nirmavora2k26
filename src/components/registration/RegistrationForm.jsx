@@ -26,7 +26,7 @@ const initialForm = {
   member3Email: '',
   department: '',
   year: '',
-  abstractLink: '',
+  abstractFile: null,
 };
 
 export default function RegistrationForm({ eventType, onNext }) {
@@ -51,7 +51,14 @@ export default function RegistrationForm({ eventType, onNext }) {
     if (!form.member2Name.trim()) e.member2Name = 'Required';
     if (!form.department) e.department = 'Required';
     if (!form.year) e.year = 'Required';
-    if (!form.abstractLink.match(/^https?:\/\//)) e.abstractLink = 'Must be a valid URL (Google Drive link)';
+    if (!form.abstractFile) e.abstractFile = 'Please upload your abstract file (PDF, PNG, JPG, or Word)';
+    else {
+      const ext = form.abstractFile.name.split('.').pop().toLowerCase();
+      if (!['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx'].includes(ext))
+        e.abstractFile = 'Allowed formats: PDF, PNG, JPG, DOCX';
+      else if (form.abstractFile.size > 10 * 1024 * 1024)
+        e.abstractFile = 'File too large. Maximum 10 MB.';
+    }
     return e;
   }
 
@@ -186,14 +193,26 @@ export default function RegistrationForm({ eventType, onNext }) {
       <fieldset>
         <legend>Abstract</legend>
         <div className="form-group">
-          <label>Abstract Drive Link *</label>
+          <label>Upload Abstract File *</label>
+          <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', margin: '0 0 8px' }}>
+            Accepted formats: PDF, PNG, JPG, Word (.docx) — Max 10 MB
+          </p>
           <input
-            name="abstractLink"
-            value={form.abstractLink}
-            onChange={onChange}
-            placeholder="https://drive.google.com/..."
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+            onChange={(e) => {
+              const file = e.target.files[0] || null;
+              setForm((f) => ({ ...f, abstractFile: file }));
+              setErrors((prev) => ({ ...prev, abstractFile: '' }));
+            }}
+            style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#fff', width: '100%' }}
           />
-          {errors.abstractLink && <span className="form-error">{errors.abstractLink}</span>}
+          {form.abstractFile && (
+            <p style={{ fontSize: '0.85rem', marginTop: 6, color: 'var(--accent)' }}>
+              <i className="fas fa-file"></i> {form.abstractFile.name} ({(form.abstractFile.size / 1024).toFixed(1)} KB)
+            </p>
+          )}
+          {errors.abstractFile && <span className="form-error">{errors.abstractFile}</span>}
         </div>
       </fieldset>
 

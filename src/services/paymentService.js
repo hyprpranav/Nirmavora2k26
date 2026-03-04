@@ -4,11 +4,13 @@ import { PAYMENT_STATUS } from '../config/constants';
 import { sendPaymentConfirmation } from '../config/emailjs';
 import { getTeamById } from './teamService';
 
-export async function updatePayment(docId, { txnId, screenshotLink }) {
+export async function updatePayment(docId, { txnId, screenshotUrl, screenshotFileName }) {
   await updateDoc(doc(db, 'teams', docId), {
     paymentStatus: PAYMENT_STATUS.UPLOADED,
     paymentTxnId: txnId,
-    paymentScreenshotLink: screenshotLink,
+    paymentScreenshotUrl: screenshotUrl || '',
+    paymentScreenshotFileName: screenshotFileName || '',
+    paymentScreenshotLink: screenshotUrl || '', // backward compat
     paymentUploadedAt: new Date().toISOString(),
   });
 }

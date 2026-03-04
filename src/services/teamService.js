@@ -28,6 +28,27 @@ export async function registerTeam(data) {
     attendance: false,
     createdAt: new Date().toISOString(),
     memberCount: countMembers(data),
+    addedBy: 'self',
+  };
+  const ref = await addDoc(collection(db, TEAMS), teamData);
+  return ref.id;
+}
+
+/* ─── Admin Manual Add ─── */
+export async function registerTeamManually(data, adminEmail) {
+  const teamData = {
+    ...data,
+    status: TEAM_STATUS.PENDING,
+    paymentStatus: PAYMENT_STATUS.NOT_PAID,
+    teamId: null,
+    attendance: false,
+    createdAt: new Date().toISOString(),
+    memberCount: countMembers(data),
+    addedBy: 'admin',
+    addedByEmail: adminEmail || 'admin',
+    addedAt: new Date().toISOString(),
+    userId: data.userId || null,
+    userEmail: data.userEmail || data.leaderEmail || '',
   };
   const ref = await addDoc(collection(db, TEAMS), teamData);
   return ref.id;
@@ -87,13 +108,15 @@ export async function markAttendance(docId, present) {
 }
 
 /* Per-member attendance */
-export async function confirmMemberAttendance(docId, memberAttendance, attendanceStatus) {
+export async function confirmMemberAttendance(docId, memberAttendance, attendanceStatus, markedBy) {
   await updateDoc(doc(db, TEAMS, docId), {
     memberAttendance,
     attendanceStatus,
     attendanceConfirmed: true,
     attendance: attendanceStatus === 'present',
     attendanceAt: new Date().toISOString(),
+    attendanceMarkedBy: markedBy || 'unknown',
+    attendanceMarkedAt: new Date().toISOString(),
   });
 }
 

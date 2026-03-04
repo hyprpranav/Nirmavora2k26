@@ -2,9 +2,9 @@
 export const EVENT = {
   name: 'NIRMAVORA FEST 2026',
   tagline: 'Where Ideas Take Shape',
-  date: '2026-02-19',
-  dateDisplay: '19 February 2026',
-  registrationDeadline: '2026-02-17T23:59:59',
+  date: '2026-03-18',
+  dateDisplay: '18 March 2026',
+  registrationDeadline: '2026-03-16T23:59:59',
   hackathonStart: '10:00 AM',
   hackathonEnd: '6:00 PM',
   hackathonDuration: '8 Hours',

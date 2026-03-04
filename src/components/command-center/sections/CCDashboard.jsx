@@ -12,6 +12,14 @@ export default function CCDashboard({ teams, users, TEAM_STATUS, PAYMENT_STATUS 
   const attended = teams.filter(t => t.attendance).length;
   const totalUsers = users ? users.length : 0;
 
+  /* Revenue: sum of memberCount × 350 for all VERIFIED payment teams */
+  const totalRevenue = teams
+    .filter(t => t.paymentStatus === PAYMENT_STATUS.VERIFIED)
+    .reduce((sum, t) => sum + ((t.memberCount || 3) * 350), 0);
+
+  /* Count of manually added teams */
+  const manualTeams = teams.filter(t => t.addedBy === 'admin').length;
+
   return (
     <>
       <div className="cc-stats-grid">
@@ -55,6 +63,16 @@ export default function CCDashboard({ teams, users, TEAM_STATUS, PAYMENT_STATUS 
           <div className="cc-stat-card blue">
             <div className="cc-stat-value">{totalUsers}</div>
             <div className="cc-stat-label">Total Users</div>
+          </div>
+        )}
+        <div className="cc-stat-card gold" style={{ borderLeft: '3px solid var(--accent)' }}>
+          <div className="cc-stat-value">₹{totalRevenue.toLocaleString('en-IN')}</div>
+          <div className="cc-stat-label">Revenue Collected</div>
+        </div>
+        {manualTeams > 0 && (
+          <div className="cc-stat-card purple">
+            <div className="cc-stat-value">{manualTeams}</div>
+            <div className="cc-stat-label">Manual Adds</div>
           </div>
         )}
       </div>

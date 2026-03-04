@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { updatePayment } from '../../../services/paymentService';
+import { uploadPaymentScreenshot } from '../../../services/storageService';
 import { PAYMENT_STATUS, EVENT, DEVELOPER } from '../../../config/constants';
 
 /* The QR image — place your UPI QR at src/assets/statics/images/upi-qr.png */
@@ -13,28 +14,46 @@ try {
 
 export default function PaymentUpload({ team }) {
   const [txnId, setTxnId] = useState('');
-  const [screenshotLink, setScreenshotLink] = useState('');
+  const [screenshotFile, setScreenshotFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [uploadProgress, setUploadProgress] = useState('');
 
   const canPay = team.status === 'approved' && team.paymentStatus !== PAYMENT_STATUS.VERIFIED;
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!txnId.trim() || !screenshotLink.match(/^https?:\/\//)) {
-      setError('Provide a valid Transaction ID and screenshot Drive link.');
+    if (!txnId.trim()) {
+      setError('Please provide a valid Transaction ID.');
+      return;
+    }
+    if (!screenshotFile) {
+      setError('Please upload a payment screenshot (PNG or JPG).');
+      return;
+    }
+    const ext = screenshotFile.name.split('.').pop().toLowerCase();
+    if (!['png', 'jpg', 'jpeg'].includes(ext)) {
+      setError('Only PNG and JPG screenshots are allowed.');
+      return;
+    }
+    if (screenshotFile.size > 5 * 1024 * 1024) {
+      setError('Screenshot too large. Max 5 MB.');
       return;
     }
     setBusy(true);
     setError('');
+    setUploadProgress('Uploading screenshot…');
     try {
-      await updatePayment(team.id, { txnId, screenshotLink });
+      const { paymentScreenshotUrl, paymentScreenshotFileName } = await uploadPaymentScreenshot(screenshotFile, team.teamName);
+      setUploadProgress('Saving payment info…');
+      await updatePayment(team.id, { txnId, screenshotUrl: paymentScreenshotUrl, screenshotFileName: paymentScreenshotFileName });
       setSuccess(true);
     } catch (err) {
-      setError('Upload failed. Try again.');
+      setError(err.message || 'Upload failed. Try again.');
     }
     setBusy(false);
+    setUploadProgress('');
   }
 
   if (!canPay) {
@@ -89,9 +108,23 @@ export default function PaymentUpload({ team }) {
           <input value={txnId} onChange={(e) => setTxnId(e.target.value)} placeholder="e.g., 123456789012" />
         </div>
         <div className="form-group">
-          <label>Screenshot Drive Link *</label>
-          <input value={screenshotLink} onChange={(e) => setScreenshotLink(e.target.value)} placeholder="https://drive.google.com/..." />
+          <label>Payment Screenshot *</label>
+          <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', margin: '0 0 8px' }}>
+            Upload a screenshot of the payment (PNG or JPG only, max 5 MB)
+          </p>
+          <input
+            type="file"
+            accept=".png,.jpg,.jpeg"
+            onChange={(e) => setScreenshotFile(e.target.files[0] || null)}
+            style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#fff', width: '100%' }}
+          />
+          {screenshotFile && (
+            <p style={{ fontSize: '0.85rem', marginTop: 6, color: 'var(--accent)' }}>
+              <i className="fas fa-image"></i> {screenshotFile.name} ({(screenshotFile.size / 1024).toFixed(1)} KB)
+            </p>
+          )}
         </div>
+        {uploadProgress && <p style={{ color: 'var(--accent)', fontSize: '0.85rem' }}><i className="fas fa-spinner fa-spin"></i> {uploadProgress}</p>}
         {error && <p className="auth-error">{error}</p>}
         <button type="submit" className="btn btn-primary" disabled={busy}>
           {busy ? 'Uploading…' : 'Upload Payment'}

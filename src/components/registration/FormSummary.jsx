@@ -22,7 +22,7 @@ export default function FormSummary({ data, eventType, onBack, onConfirm, submit
           {data.miniDescription && <tr><td>Description</td><td>{data.miniDescription}</td></tr>}
           <tr><td>Department</td><td>{data.department}</td></tr>
           <tr><td>Year</td><td>{data.year}</td></tr>
-          <tr><td>Abstract Link</td><td><a href={data.abstractLink} target="_blank" rel="noopener noreferrer">Open Link</a></td></tr>
+          <tr><td>Abstract</td><td>{data.abstractFile ? (<><i className="fas fa-file"></i> {data.abstractFile.name} ({(data.abstractFile.size / 1024).toFixed(1)} KB)</>) : '—'}</td></tr>
         </tbody>
       </table>
 

@@ -216,9 +216,94 @@ export default function TeamDetailCard({
                 <div className="cc-detail-grid">
                   {renderField('Problem Title', 'problemTitle')}
                   {renderField('SDG Goal', 'sdgGoal')}
-                  {renderField('Abstract Link', 'abstractLink')}
+                  {editing ? renderField('Abstract Link (legacy)', 'abstractLink') : null}
                 </div>
+                {/* Abstract File Download */}
+                {!editing && (
+                  <div style={{ marginTop: 12 }}>
+                    {team.abstractFileUrl ? (
+                      <a
+                        href={team.abstractFileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cc-btn-sm approve"
+                        style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                      >
+                        <i className="fas fa-download"></i> Download Abstract
+                        {team.abstractFileName && <span style={{ fontSize: '0.78rem', opacity: 0.7 }}> ({team.abstractFileName})</span>}
+                      </a>
+                    ) : team.abstractLink ? (
+                      <a
+                        href={team.abstractLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cc-btn-sm"
+                        style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                      >
+                        <i className="fas fa-external-link-alt"></i> Open Abstract Link
+                      </a>
+                    ) : (
+                      <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem' }}>No abstract uploaded</span>
+                    )}
+                  </div>
+                )}
+                {/* Payment Screenshot View */}
+                {!editing && (team.paymentScreenshotUrl || team.paymentScreenshotLink) && (
+                  <div style={{ marginTop: 10 }}>
+                    <a
+                      href={team.paymentScreenshotUrl || team.paymentScreenshotLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="cc-btn-sm"
+                      style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(99,102,241,0.2)', color: '#a5b4fc' }}
+                    >
+                      <i className="fas fa-image"></i> View Payment Screenshot
+                    </a>
+                    {team.paymentTxnId && (
+                      <span style={{ marginLeft: 10, fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)' }}>TXN: {team.paymentTxnId}</span>
+                    )}
+                  </div>
+                )}
               </div>
+
+              {/* Audit / Tracking Info */}
+              {!editing && (team.addedBy || team.lastEditedBy || team.attendanceMarkedBy) && (
+                <div className="cc-detail-section">
+                  <h4><i className="fas fa-history"></i> Audit Trail</h4>
+                  <div className="cc-detail-grid">
+                    {team.addedBy && (
+                      <div className="cc-detail-field">
+                        <span className="cc-detail-label">Added By</span>
+                        <span className="cc-detail-value">{team.addedBy === 'admin' ? '🛡️ Admin (Manual)' : '👤 Self-registered'}</span>
+                      </div>
+                    )}
+                    {team.lastEditedBy && (
+                      <div className="cc-detail-field">
+                        <span className="cc-detail-label">Last Edited By</span>
+                        <span className="cc-detail-value">{team.lastEditedBy}</span>
+                      </div>
+                    )}
+                    {team.lastEditedAt && (
+                      <div className="cc-detail-field">
+                        <span className="cc-detail-label">Last Edited At</span>
+                        <span className="cc-detail-value">{new Date(team.lastEditedAt).toLocaleString()}</span>
+                      </div>
+                    )}
+                    {team.attendanceMarkedBy && (
+                      <div className="cc-detail-field">
+                        <span className="cc-detail-label">Attendance By</span>
+                        <span className="cc-detail-value">{team.attendanceMarkedBy}</span>
+                      </div>
+                    )}
+                    {team.attendanceMarkedAt && (
+                      <div className="cc-detail-field">
+                        <span className="cc-detail-label">Attendance At</span>
+                        <span className="cc-detail-value">{new Date(team.attendanceMarkedAt).toLocaleString()}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Save / Cancel */}
               {editing && (

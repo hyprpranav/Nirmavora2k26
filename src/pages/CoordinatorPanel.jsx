@@ -64,7 +64,11 @@ export default function CoordinatorPanel() {
     loadTeams();
   }
   async function handleEdit(docId, data) {
-    await updateTeamDetails(docId, data);
+    await updateTeamDetails(docId, {
+      ...data,
+      lastEditedBy: user?.email || 'coordinator',
+      lastEditedAt: new Date().toISOString(),
+    });
     loadTeams();
   }
   async function handleMarkAttendance(docId, present) {
@@ -72,7 +76,7 @@ export default function CoordinatorPanel() {
     loadTeams();
   }
   async function handleConfirmAttendance(docId, memberAtt, status) {
-    await confirmMemberAttendance(docId, memberAtt, status);
+    await confirmMemberAttendance(docId, memberAtt, status, user?.email || 'coordinator');
     loadTeams();
   }
 
