@@ -21,6 +21,7 @@ export default function CCTeams({
   canAttendance,
   onConfirmAttendance,
   onAddTeam,
+  onDelete,
 }) {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -219,6 +220,15 @@ export default function CCTeams({
                         {team.status !== 'cancelled' && (
                           <button className="cc-btn-sm reject" onClick={() => onCancel(team)}>
                             Cancel
+                          </button>
+                        )}
+                        {onDelete && (
+                          <button
+                            className="cc-btn-sm"
+                            style={{ background: 'rgba(220,38,38,0.18)', color: '#f87171', border: '1px solid #f87171' }}
+                            onClick={() => onDelete(team)}
+                          >
+                            <i className="fas fa-trash"></i> Delete
                           </button>
                         )}
                       </div>

@@ -38,6 +38,9 @@ export default function CCExport({ teams }) {
         <button className="cc-export-btn" onClick={() => doExport('exportTeamIdCSV')}>
           <i className="fas fa-file-csv"></i> Team ID + Names
         </button>
+        <button className="cc-export-btn" onClick={() => doExport('exportTeamContactSheetCSV')}>
+          <i className="fas fa-address-book"></i> Team Contact Sheet
+        </button>
       </div>
     </div>
   );

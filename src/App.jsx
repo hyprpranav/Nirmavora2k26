@@ -10,6 +10,7 @@ import ParticipantDashboard from './components/dashboard/participant/Participant
 import AdminPanel from './pages/AdminPanel';
 import CoordinatorPanel from './pages/CoordinatorPanel';
 import OrganiserAuth from './pages/OrganiserAuth';
+import PublicDashboard from './pages/PublicDashboard';
 import FeedbackFloat from './components/FeedbackFloat';
 
 function ProtectedRoute({ children }) {
@@ -52,6 +53,8 @@ export default function App() {
         }
       />
       <Route path="/organiser" element={<OrganiserAuth />} />
+      {/* Public read-only dashboard — no auth needed */}
+      <Route path="/open-dashboard" element={<PublicDashboard />} />
       <Route
         path="/organiser/panel"
         element={

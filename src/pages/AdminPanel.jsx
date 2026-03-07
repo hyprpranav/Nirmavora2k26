@@ -16,6 +16,7 @@ import {
   markAttendance,
   confirmMemberAttendance,
   deleteAllTeams,
+  deleteTeam,
   getSettings,
   updateSettings,
   registerTeamManually,
@@ -151,6 +152,11 @@ export default function AdminPanel() {
     await registerTeamManually(data, user?.email);
     loadAll();
   }
+  async function handleDeleteTeam(team) {
+    if (!window.confirm(`Permanently DELETE "${team.teamName}" (${team.teamId || 'no ID'})? This cannot be undone.`)) return;
+    await deleteTeam(team.id);
+    loadAll();
+  }
 
   async function handleSignOut() {
     await signOut();
@@ -198,6 +204,7 @@ export default function AdminPanel() {
           canAttendance={true}
           onConfirmAttendance={handleConfirmAttendance}
           onAddTeam={handleAddTeam}
+          onDelete={handleDeleteTeam}
         />
       )}
 

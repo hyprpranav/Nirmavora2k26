@@ -144,6 +144,11 @@ export async function updateSettings(partial) {
   await setDoc(doc(db, SETTINGS, 'global'), partial, { merge: true });
 }
 
+/* ─── Single Team Delete ─── */
+export async function deleteTeam(docId) {
+  await deleteDoc(doc(db, TEAMS, docId));
+}
+
 /* ─── Bulk Delete ─── */
 export async function deleteAllTeams() {
   const snap = await getDocs(collection(db, TEAMS));

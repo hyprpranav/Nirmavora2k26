@@ -99,3 +99,33 @@ export function exportTeamIdCSV(teams) {
 
 /* ─── Alias for Organiser Dashboard ─── */
 export const exportTeamsCSV = exportMasterLogCSV;
+
+/* ─── Team Contact Sheet (row-per-member) ─── */
+export function exportTeamContactSheetCSV(teams) {
+  const rows = [];
+  let serial = 1;
+  teams.forEach((t) => {
+    const members = [
+      { name: t.leaderName, phone: t.leaderPhone || '', email: t.leaderEmail || '', role: 'Leader' },
+      t.member1Name ? { name: t.member1Name, phone: t.member1Phone || '', email: t.member1Email || '', role: 'Member' } : null,
+      t.member2Name ? { name: t.member2Name, phone: t.member2Phone || '', email: t.member2Email || '', role: 'Member' } : null,
+      t.member3Name ? { name: t.member3Name, phone: t.member3Phone || '', email: t.member3Email || '', role: 'Member' } : null,
+    ].filter(Boolean);
+
+    members.forEach((m) => {
+      rows.push({
+        'S.No': serial++,
+        'Team Name & ID': `${t.teamName} (${t.teamId || 'Pending'})`,
+        'Member Name': m.name,
+        'Role': m.role,
+        'Phone': m.phone,
+        'Email': m.email,
+        'College': t.collegeName || '',
+        'Event': t.eventType || '',
+        'Problem Title': t.problemTitle || '',
+        'Status': t.status || '',
+      });
+    });
+  });
+  downloadCSV('nirmavora_team_contact_sheet.csv', Papa.unparse(rows));
+}

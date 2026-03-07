@@ -12,6 +12,8 @@ try {
   if (key) upiQrImage = modules[key].default;
 } catch (_) { /* QR not yet added */ }
 
+const WA_GROUP_LINK = 'https://chat.whatsapp.com/G7OW7dpv7WaGjIa8yTuRgD?mode=hq2tswa';
+
 export default function PaymentUpload({ team }) {
   const [txnId, setTxnId] = useState('');
   const [screenshotFile, setScreenshotFile] = useState(null);
@@ -66,6 +68,7 @@ export default function PaymentUpload({ team }) {
               ? '⏳ Payment uploaded. Awaiting admin verification.'
               : 'Payment upload will be available after your team is approved.'}
         </p>
+        <WhatsAppBanner />
       </div>
     );
   }
@@ -140,6 +143,46 @@ export default function PaymentUpload({ team }) {
           <strong>Phone:</strong> <a href={`tel:+91${DEVELOPER.phoneRaw}`}>{DEVELOPER.phone}</a>
         </span>
       </div>
+      <WhatsAppBanner />
+    </div>
+  );
+}
+
+function WhatsAppBanner() {
+  return (
+    <div style={{
+      marginTop: 24,
+      padding: '16px 20px',
+      background: 'rgba(37,211,102,0.08)',
+      border: '1px solid rgba(37,211,102,0.25)',
+      borderRadius: 12,
+      textAlign: 'center',
+    }}>
+      <div style={{ color: '#25d366', fontWeight: 700, fontSize: '1rem', marginBottom: 8 }}>
+        <i className="fab fa-whatsapp" style={{ marginRight: 6 }}></i> Join Participants WhatsApp Group
+      </div>
+      <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', marginBottom: 12 }}>
+        Get updates, announcements and connect with other participants. Scan the QR or click the button.
+      </p>
+      <img
+        src="/whatsapp-qr.png"
+        alt="WhatsApp Group QR"
+        style={{ width: 160, height: 160, objectFit: 'contain', borderRadius: 10, marginBottom: 12, background: '#fff', padding: 4 }}
+      />
+      <br />
+      <a
+        href={WA_GROUP_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: '#25d366', color: '#fff', fontWeight: 700,
+          padding: '10px 22px', borderRadius: 8, textDecoration: 'none',
+          fontSize: '0.9rem',
+        }}
+      >
+        <i className="fab fa-whatsapp"></i> Join Group
+      </a>
     </div>
   );
 }
