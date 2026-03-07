@@ -25,3 +25,15 @@ export async function generateQRFromText(text) {
     color: { dark: '#121212', light: '#FAFAFA' },
   });
 }
+
+/**
+ * Black-on-white QR for print cards (saves ink).
+ */
+export async function generateTeamQRForPrint(team) {
+  const url = `${window.location.origin}/qr/${team.teamId}`;
+  return QRCode.toDataURL(url, {
+    width: 500,
+    margin: 2,
+    color: { dark: '#000000', light: '#FFFFFF' },
+  });
+}

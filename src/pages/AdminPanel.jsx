@@ -9,6 +9,7 @@ import CCAttendance from '../components/command-center/sections/CCAttendance';
 import CCExport from '../components/command-center/sections/CCExport';
 import CCEmail from '../components/command-center/sections/CCEmail';
 import CCSettings from '../components/command-center/sections/CCSettings';
+import CCQR from '../components/command-center/sections/CCQR';
 import {
   getAllTeams,
   updateTeamStatus,
@@ -34,6 +35,7 @@ const SECTION_TITLES = {
   attendance: 'Attendance',
   export: 'Export Data',
   email: 'Email & Notifications',
+  qr: 'QR Codes',
   settings: 'Settings',
 };
 
@@ -237,6 +239,10 @@ export default function AdminPanel() {
 
       {!loading && section === 'email' && (
         <CCEmail />
+      )}
+
+      {!loading && section === 'qr' && (
+        <CCQR teams={teams} />
       )}
 
       {!loading && section === 'settings' && (

@@ -120,6 +120,20 @@ img { max-width: 100%; height: auto; }
 
 .btn-large { padding: 16px 36px; font-size: 1.1rem; }
 
+.btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.8);
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-success { background: #22c55e; color: #fff; }
+.btn-success:hover { background: #16a34a; }
+.btn-danger { background: #ef4444; color: #fff; }
+.btn-danger:hover { background: #dc2626; }
+
 .btn-disabled {
   background: rgba(255,255,255,0.08);
   color: rgba(255,255,255,0.35);

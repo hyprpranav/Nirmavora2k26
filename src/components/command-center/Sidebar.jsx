@@ -7,6 +7,7 @@ const ADMIN_NAV = [
   { key: 'attendance', label: 'Attendance', icon: 'fas fa-clipboard-check' },
   { key: 'export', label: 'Export', icon: 'fas fa-file-export' },
   { key: 'email', label: 'Email & Notify', icon: 'fas fa-envelope' },
+  { key: 'qr', label: 'QR Codes', icon: 'fas fa-qrcode' },
   { key: 'settings', label: 'Settings', icon: 'fas fa-cog' },
 ];
 
@@ -15,6 +16,7 @@ const COORD_NAV = [
   { key: 'teams', label: 'Teams', icon: 'fas fa-users' },
   { key: 'attendance', label: 'Attendance', icon: 'fas fa-clipboard-check' },
   { key: 'export', label: 'Export', icon: 'fas fa-file-export' },
+  { key: 'qr', label: 'QR Codes', icon: 'fas fa-qrcode' },
 ];
 
 export default function Sidebar({ section, onNavigate, role, user, onSignOut }) {

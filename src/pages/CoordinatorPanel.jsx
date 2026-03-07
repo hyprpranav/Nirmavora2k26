@@ -7,6 +7,7 @@ import CCDashboard from '../components/command-center/sections/CCDashboard';
 import CCTeams from '../components/command-center/sections/CCTeams';
 import CCAttendance from '../components/command-center/sections/CCAttendance';
 import CCExport from '../components/command-center/sections/CCExport';
+import CCQR from '../components/command-center/sections/CCQR';
 import {
   getAllTeams,
   updateTeamStatus,
@@ -23,6 +24,7 @@ const SECTION_TITLES = {
   teams: 'Teams',
   attendance: 'Attendance',
   export: 'Export Data',
+  qr: 'QR Codes',
 };
 
 export default function CoordinatorPanel() {
@@ -144,6 +146,10 @@ export default function CoordinatorPanel() {
 
       {!loading && section === 'export' && (
         <CCExport teams={teams} />
+      )}
+
+      {!loading && section === 'qr' && (
+        <CCQR teams={teams} />
       )}
     </CCLayout>
   );

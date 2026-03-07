@@ -1161,3 +1161,57 @@
 .cc-danger-modal .cc-modal-footer {
   display: flex; gap: 12px; justify-content: flex-end;
 }
+
+/* --- CCQR — QR Management Section --- */
+.cc-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255,255,255,0.3);
+}
+.cc-empty i { font-size: 3rem; margin-bottom: 16px; display: block; }
+.cc-empty h3 { color: rgba(255,255,255,0.5); margin-bottom: 8px; }
+.cc-empty p { font-size: 0.9rem; }
+
+.cc-qr-section { padding: 4px 0; }
+
+.cc-qr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.cc-qr-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+.cc-qr-card:hover { border-color: rgba(245,179,1,0.4); }
+
+.cc-qr-card-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.cc-qr-team-name {
+  font-weight: 700;
+  color: #FAFAFA;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cc-qr-team-id {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #F5B301;
+}

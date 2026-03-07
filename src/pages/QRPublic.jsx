@@ -1,28 +1,72 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getTeamByTeamId } from '../services/teamService';
+import { getTeamByTeamId, markAttendance, addTeamNote, getTeamNotes } from '../services/teamService';
+import { generateTeamQR } from '../services/qrService';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/qr-public.css';
+
+const PAYMENT_LABELS = {
+  pending: 'Payment Pending',
+  uploaded: 'Payment Uploaded',
+  verified: 'Payment Verified âœ“',
+  rejected: 'Payment Rejected',
+};
 
 export default function QRPublic() {
   const { teamId } = useParams();
+  const { user, profile } = useAuth();
   const [team, setTeam] = useState(null);
+  const [qrUrl, setQrUrl] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [notes, setNotes] = useState([]);
+  const [noteText, setNoteText] = useState('');
+  const [submittingNote, setSubmittingNote] = useState(false);
+  const [markingAttendance, setMarkingAttendance] = useState(false);
+
+  const isStaff = profile && ['admin', 'organiser'].includes(profile.role);
 
   useEffect(() => {
-    getTeamByTeamId(teamId).then((t) => {
+    getTeamByTeamId(teamId).then(async (t) => {
       setTeam(t);
       setLoading(false);
+      if (t) {
+        generateTeamQR(t).then(setQrUrl).catch(console.error);
+        if (isStaff) {
+          const n = await getTeamNotes(t.id).catch(() => []);
+          setNotes(n);
+        }
+      }
     });
   }, [teamId]);
 
-  if (loading) return <div className="loader">Loading…</div>;
+  async function refreshNotes() {
+    if (!team) return;
+    const n = await getTeamNotes(team.id).catch(() => []);
+    setNotes(n);
+  }
+
+  async function handleAddNote() {
+    if (!noteText.trim() || !team) return;
+    setSubmittingNote(true);
+    await addTeamNote(team.id, noteText.trim(), user?.email, profile?.displayName || user?.displayName || user?.email);
+    setNoteText('');
+    await refreshNotes();
+    setSubmittingNote(false);
+  }
+
+  async function handleToggleAttendance() {
+    if (!team) return;
+    setMarkingAttendance(true);
+    const newVal = !team.attended;
+    await markAttendance(team.id, newVal);
+    setTeam(t => ({ ...t, attended: newVal }));
+    setMarkingAttendance(false);
+  }
+
+  if (loading) return <div className="loader">Loadingâ€¦</div>;
   if (!team) return <div className="qr-public"><p>Team not found.</p></div>;
 
-  const members = [
-    team.member1Name,
-    team.member2Name,
-    team.member3Name,
-  ].filter(Boolean);
+  const paymentColor = team.paymentStatus === 'verified' ? '#4ade80' : team.paymentStatus === 'rejected' ? '#f87171' : team.paymentStatus === 'uploaded' ? '#fbbf24' : 'rgba(255,255,255,0.4)';
 
   return (
     <section className="qr-public">
@@ -34,22 +78,82 @@ export default function QRPublic() {
           </span>
         </div>
 
-        <div className="qr-body">
-          <h3>{team.teamName}</h3>
-          <p className="qr-team-id">ID: {team.teamId}</p>
-          <p><strong>Problem:</strong> {team.problemTitle}</p>
-          <p><strong>College:</strong> {team.collegeName}</p>
+        {/* â”€â”€ Public view: only Team Name + QR + Team ID â”€â”€ */}
+        <div className="qr-body" style={{ textAlign: 'center' }}>
+          <h3 style={{ fontSize: '1.6rem', marginBottom: 8 }}>{team.teamName}</h3>
+          <p className="qr-team-id" style={{ marginBottom: 20 }}>ID: {team.teamId}</p>
 
-          <div className="qr-members">
-            <h4>Team Members</h4>
-            <ol>
-              <li><strong>{team.leaderName}</strong> (Leader)</li>
-              {members.map((m, i) => (
-                <li key={i}>{m}</li>
-              ))}
-            </ol>
+          {qrUrl
+            ? <img src={qrUrl} alt="Team QR" style={{ width: 200, height: 200, borderRadius: 12, display: 'block', margin: '0 auto 20px' }} />
+            : <div style={{ width: 200, height: 200, display: 'grid', placeItems: 'center', margin: '0 auto 20px', color: 'rgba(255,255,255,0.3)' }}>
+                <i className="fas fa-spinner fa-spin fa-2x"></i>
+              </div>
+          }
+
+          {/* Payment badge visible to all */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.06)' }}>
+            <i className="fas fa-rupee-sign" style={{ color: paymentColor }}></i>
+            <span style={{ color: paymentColor, fontWeight: 600, fontSize: '0.88rem' }}>{PAYMENT_LABELS[team.paymentStatus] || 'Unknown'}</span>
           </div>
         </div>
+
+        {/* â”€â”€ Staff-only section â”€â”€ */}
+        {isStaff && (
+          <div className="qr-staff-panel" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 24, paddingTop: 20 }}>
+            <h4 style={{ color: '#F5B301', marginBottom: 16 }}>
+              <i className="fas fa-shield-alt" style={{ marginRight: 8 }}></i>Staff Actions
+            </h4>
+
+            {/* Attendance */}
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginBottom: 8 }}>Overall Attendance</p>
+              <button
+                className={`btn ${team.attended ? 'btn-danger' : 'btn-success'}`}
+                onClick={handleToggleAttendance}
+                disabled={markingAttendance}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+              >
+                {markingAttendance ? <><i className="fas fa-spinner fa-spin"></i> Updatingâ€¦</>
+                  : team.attended ? <><i className="fas fa-times-circle"></i> Mark as Absent</>
+                  : <><i className="fas fa-check-circle"></i> Mark as Present</>}
+              </button>
+            </div>
+
+            {/* Add note */}
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginBottom: 8 }}>Add Note / Comment</p>
+              <textarea
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                placeholder="Write a note about this teamâ€¦"
+                rows={3}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', resize: 'vertical', fontSize: '0.9rem', boxSizing: 'border-box' }}
+              />
+              <button className="btn btn-primary" onClick={handleAddNote} disabled={submittingNote || !noteText.trim()}
+                style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                {submittingNote ? <><i className="fas fa-spinner fa-spin"></i> Savingâ€¦</> : <><i className="fas fa-plus"></i> Add Note</>}
+              </button>
+            </div>
+
+            {/* Notes */}
+            {notes.length > 0 && (
+              <div>
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginBottom: 8 }}>Notes ({notes.length})</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {notes.map(n => (
+                    <div key={n.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: '10px 14px', borderLeft: '3px solid #F5B301' }}>
+                      <div style={{ color: '#fff', fontSize: '0.9rem', marginBottom: 6 }}>{n.note}</div>
+                      <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.75rem' }}>
+                        â€” {n.commenterName || n.commenterEmail} Â· {new Date(n.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {notes.length === 0 && <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.8rem' }}>No notes yet.</p>}
+          </div>
+        )}
       </div>
     </section>
   );

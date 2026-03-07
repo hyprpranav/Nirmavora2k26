@@ -165,3 +165,22 @@ export async function submitFeedback(userId, data) {
     createdAt: new Date().toISOString(),
   });
 }
+
+/* ─── Team Notes / Comments (admin + organiser only) ─── */
+const NOTES = 'teamNotes';
+
+export async function addTeamNote(teamDocId, noteText, commenterEmail, commenterName) {
+  await addDoc(collection(db, NOTES), {
+    teamDocId,
+    note: noteText,
+    commenterEmail: commenterEmail || 'unknown',
+    commenterName: commenterName || commenterEmail || 'Staff',
+    createdAt: new Date().toISOString(),
+  });
+}
+
+export async function getTeamNotes(teamDocId) {
+  const q = query(collection(db, NOTES), where('teamDocId', '==', teamDocId), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
