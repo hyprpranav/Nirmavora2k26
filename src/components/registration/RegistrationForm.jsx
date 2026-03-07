@@ -26,6 +26,8 @@ const initialForm = {
   member3Email: '',
   department: '',
   year: '',
+  guideName: '',
+  guideEmail: '',
   abstractFile: null,
 };
 
@@ -191,6 +193,21 @@ export default function RegistrationForm({ eventType, onNext }) {
               ))}
             </select>
             {errors.year && <span className="form-error">{errors.year}</span>}
+          </div>
+        </div>
+      </fieldset>
+
+      {/* Guide Details (optional) */}
+      <fieldset>
+        <legend>Guide Details <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'normal' }}>(Optional)</span></legend>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Guide Name</label>
+            <input name="guideName" value={form.guideName} onChange={onChange} placeholder="Faculty guide name (if any)" />
+          </div>
+          <div className="form-group">
+            <label>Guide Email</label>
+            <input name="guideEmail" type="email" value={form.guideEmail} onChange={onChange} placeholder="Guide email (if any)" />
           </div>
         </div>
       </fieldset>

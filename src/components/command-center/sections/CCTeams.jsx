@@ -29,6 +29,7 @@ export default function CCTeams({
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [busyTeamId, setBusyTeamId] = useState(null);
 
   const filters = ['all', 'pending', 'approved', 'waitlisted', 'cancelled'];
 
@@ -201,25 +202,34 @@ export default function CCTeams({
                       ) : '—'}
                     </td>
                     <td>
-                      <span style={{ fontSize: '0.78rem', color: team.addedBy === 'admin' ? '#F5B301' : 'rgba(255,255,255,0.4)' }}>
-                        {team.addedBy === 'admin' ? '🛡️ Manual' : '👤 Signed up'}
+                      <span style={{ fontSize: '0.78rem', color: team.addedBy === 'admin' ? '#F5B301' : team.addedBy === 'coordinator' ? '#a78bfa' : 'rgba(255,255,255,0.4)' }}>
+                        {team.addedBy === 'admin' ? '🛡️ Manual' : team.addedBy === 'coordinator' ? '📋 Coordinator' : '👤 Signed up'}
                       </span>
                     </td>
                     <td>
                       <div className="cc-actions" onClick={(e) => e.stopPropagation()}>
                         {team.status === 'pending' && (
                           <>
-                            <button className="cc-btn-sm approve" onClick={() => onApprove(team)}>
-                              Approve
+                            <button className="cc-btn-sm approve" disabled={busyTeamId === team.id} onClick={async () => {
+                              setBusyTeamId(team.id);
+                              try { await onApprove(team); } finally { setBusyTeamId(null); }
+                            }}>
+                              {busyTeamId === team.id ? 'Processing…' : 'Approve'}
                             </button>
-                            <button className="cc-btn-sm waitlist" onClick={() => onWaitlist(team)}>
-                              Waitlist
+                            <button className="cc-btn-sm waitlist" disabled={busyTeamId === team.id} onClick={async () => {
+                              setBusyTeamId(team.id);
+                              try { await onWaitlist(team); } finally { setBusyTeamId(null); }
+                            }}>
+                              {busyTeamId === team.id ? '…' : 'Waitlist'}
                             </button>
                           </>
                         )}
                         {team.status !== 'cancelled' && (
-                          <button className="cc-btn-sm reject" onClick={() => onCancel(team)}>
-                            Cancel
+                          <button className="cc-btn-sm reject" disabled={busyTeamId === team.id} onClick={async () => {
+                            setBusyTeamId(team.id);
+                            try { await onCancel(team); } finally { setBusyTeamId(null); }
+                          }}>
+                            {busyTeamId === team.id ? '…' : 'Cancel'}
                           </button>
                         )}
                         {onDelete && (
@@ -354,6 +364,8 @@ function AddTeamForm({ onSubmit, onCancel }) {
     member3Email: '',
     department: '',
     year: '',
+    guideName: '',
+    guideEmail: '',
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -469,6 +481,14 @@ function AddTeamForm({ onSubmit, onCancel }) {
           <div>
             <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Member 3 Email</label>
             <input value={form.member3Email} onChange={e => upd('member3Email', e.target.value)} style={fieldStyle} type="email" />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Guide Name (Optional)</label>
+            <input value={form.guideName} onChange={e => upd('guideName', e.target.value)} style={fieldStyle} placeholder="Faculty guide" />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Guide Email (Optional)</label>
+            <input value={form.guideEmail} onChange={e => upd('guideEmail', e.target.value)} style={fieldStyle} type="email" placeholder="Guide email" />
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 14, alignItems: 'center' }}>

@@ -17,6 +17,7 @@ const COORD_NAV = [
   { key: 'attendance', label: 'Attendance', icon: 'fas fa-clipboard-check' },
   { key: 'export', label: 'Export', icon: 'fas fa-file-export' },
   { key: 'qr', label: 'QR Codes', icon: 'fas fa-qrcode' },
+  { key: 'contact', label: 'Contact Dev', icon: 'fas fa-headset' },
 ];
 
 export default function Sidebar({ section, onNavigate, role, user, onSignOut }) {

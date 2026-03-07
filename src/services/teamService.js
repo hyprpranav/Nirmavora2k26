@@ -54,6 +54,26 @@ export async function registerTeamManually(data, adminEmail) {
   return ref.id;
 }
 
+/* ─── Coordinator Add (goes to admin for approval) ─── */
+export async function registerTeamByCoordinator(data, coordinatorEmail) {
+  const teamData = {
+    ...data,
+    status: TEAM_STATUS.PENDING,
+    paymentStatus: PAYMENT_STATUS.NOT_PAID,
+    teamId: null,
+    attendance: false,
+    createdAt: new Date().toISOString(),
+    memberCount: countMembers(data),
+    addedBy: 'coordinator',
+    addedByEmail: coordinatorEmail || 'coordinator',
+    addedAt: new Date().toISOString(),
+    userId: data.userId || null,
+    userEmail: data.userEmail || data.leaderEmail || '',
+  };
+  const ref = await addDoc(collection(db, TEAMS), teamData);
+  return ref.id;
+}
+
 function countMembers(data) {
   let count = 1; // leader
   if (data.member1Name) count++;

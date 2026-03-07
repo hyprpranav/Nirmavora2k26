@@ -1,8 +1,9 @@
 ﻿import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getTeamByTeamId, markAttendance, addTeamNote, getTeamNotes } from '../services/teamService';
+import { getTeamByTeamId, markAttendance, addTeamNote, getTeamNotes, updateTeamDetails } from '../services/teamService';
 import { generateTeamQR } from '../services/qrService';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import '../styles/qr-public.css';
 
 const PAYMENT_LABELS = {
@@ -15,6 +16,7 @@ const PAYMENT_LABELS = {
 export default function QRPublic() {
   const { teamId } = useParams();
   const { user, profile } = useAuth();
+  const { settings: globalSettings } = useSettings();
   const [team, setTeam] = useState(null);
   const [qrUrl, setQrUrl] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,8 +24,13 @@ export default function QRPublic() {
   const [noteText, setNoteText] = useState('');
   const [submittingNote, setSubmittingNote] = useState(false);
   const [markingAttendance, setMarkingAttendance] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({});
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const isStaff = profile && ['admin', 'organiser'].includes(profile.role);
+  const isAdmin = profile?.role === 'admin';
+  const canEdit = isAdmin || !!globalSettings?.organisersCanEdit;
 
   useEffect(() => {
     getTeamByTeamId(teamId).then(async (t) => {
@@ -61,6 +68,32 @@ export default function QRPublic() {
     await markAttendance(team.id, newVal);
     setTeam(t => ({ ...t, attended: newVal }));
     setMarkingAttendance(false);
+  }
+
+  function startEditing() {
+    setEditForm({
+      teamName: team.teamName || '',
+      collegeName: team.collegeName || '',
+      leaderName: team.leaderName || '',
+      leaderPhone: team.leaderPhone || '',
+      leaderEmail: team.leaderEmail || '',
+      problemTitle: team.problemTitle || '',
+      miniDescription: team.miniDescription || '',
+    });
+    setEditing(true);
+  }
+
+  async function handleSaveEdit() {
+    if (!team) return;
+    setSavingEdit(true);
+    await updateTeamDetails(team.id, {
+      ...editForm,
+      lastEditedBy: user?.email || 'staff',
+      lastEditedAt: new Date().toISOString(),
+    });
+    setTeam(t => ({ ...t, ...editForm }));
+    setEditing(false);
+    setSavingEdit(false);
   }
 
   if (loading) return <div className="loader">Loadingâ€¦</div>;
@@ -113,10 +146,58 @@ export default function QRPublic() {
                 disabled={markingAttendance}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
               >
-                {markingAttendance ? <><i className="fas fa-spinner fa-spin"></i> Updatingâ€¦</>
+                {markingAttendance ? <><i className="fas fa-spinner fa-spin"></i> Updating…</>
                   : team.attended ? <><i className="fas fa-times-circle"></i> Mark as Absent</>
                   : <><i className="fas fa-check-circle"></i> Mark as Present</>}
               </button>
+            </div>
+
+            {/* Edit Team — button always visible for staff, but coordinators need admin permission */}
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginBottom: 8 }}>Edit Team Details</p>
+              {!editing ? (
+                <>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      if (canEdit) {
+                        startEditing();
+                      } else {
+                        alert('Editing is currently disabled by the admin. Ask the admin to enable "Organisers Can Edit" from Admin Dashboard → Settings.');
+                      }
+                    }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                  >
+                    <i className="fas fa-edit"></i> Edit Team
+                  </button>
+                  {!canEdit && (
+                    <p style={{ color: '#f87171', fontSize: '0.8rem', marginTop: 8 }}>
+                      <i className="fas fa-lock" style={{ marginRight: 6 }}></i>Editing disabled by admin
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {['teamName', 'collegeName', 'leaderName', 'leaderPhone', 'leaderEmail', 'problemTitle', 'miniDescription'].map(field => (
+                    <div key={field}>
+                      <label style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', textTransform: 'capitalize' }}>{field.replace(/([A-Z])/g, ' $1')}</label>
+                      <input
+                        value={editForm[field] || ''}
+                        onChange={e => setEditForm(f => ({ ...f, [field]: e.target.value }))}
+                        style={{ width: '100%', padding: '8px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                    <button className="btn btn-success" onClick={handleSaveEdit} disabled={savingEdit} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                      {savingEdit ? <><i className="fas fa-spinner fa-spin"></i> Saving…</> : <><i className="fas fa-check"></i> Save</>}
+                    </button>
+                    <button className="btn btn-danger" onClick={() => setEditing(false)} disabled={savingEdit} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                      <i className="fas fa-times"></i> Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Add note */}
