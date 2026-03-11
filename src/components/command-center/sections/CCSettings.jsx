@@ -10,6 +10,8 @@ export default function CCSettings({ settings, onToggle, onDeleteParticipants, o
 
   const toggles = [
     { key: 'registrationOpen', label: 'Registration Open', desc: 'Controls registration access on the landing page and event selection' },
+    { key: 'designathonRegistrationClosed', label: 'Close Designathon Registration', desc: 'When ON, Designathon registration is closed (even if overall registration is open)' },
+    { key: 'hackathonRegistrationClosed', label: 'Close Hackathon Registration', desc: 'When ON, Hackathon registration is closed (even if overall registration is open)' },
     { key: 'feedbackEnabled', label: 'Feedback Enabled', desc: 'Shows a floating feedback button on every page' },
     { key: 'attendanceEnabled', label: 'Attendance Enabled', desc: 'Allows organisers to mark attendance. Admin can always mark attendance.' },
     { key: 'organisersCanEdit', label: 'Organisers Can Edit', desc: 'When ON, coordinators can edit team details. Admin can always edit.' },

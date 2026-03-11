@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { getTeamNotes } from '../../services/teamService';
+
+const ADMIN_CODE = '8870881397';
 
 /**
  * Floating card that shows full team details.
@@ -9,6 +12,7 @@ import React, { useState, useEffect } from 'react';
  *   canEdit       – boolean: whether current user can enter edit mode
  *   canAttendance – boolean: whether attendance section is accessible
  *   onConfirmAttendance – (docId, memberAttendance, status) save attendance
+ *   isAdmin       – boolean: whether current user is admin (for event swap)
  */
 export default function TeamDetailCard({
   team,
@@ -17,12 +21,18 @@ export default function TeamDetailCard({
   canEdit,
   canAttendance,
   onConfirmAttendance,
+  isAdmin,
 }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
   const [attendanceMode, setAttendanceMode] = useState(false);
   const [memberAtt, setMemberAtt] = useState({});
   const [saving, setSaving] = useState(false);
+  const [notes, setNotes] = useState([]);
+  const [swapModal, setSwapModal] = useState(false);
+  const [swapPin, setSwapPin] = useState('');
+  const [swapError, setSwapError] = useState('');
+  const [swapping, setSwapping] = useState(false);
 
   // Build member list from team data
   function getMembers(t) {
@@ -57,6 +67,9 @@ export default function TeamDetailCard({
       problemTitle: team.problemTitle || '',
       sdgGoal: Array.isArray(team.sdgGoals) ? team.sdgGoals.join(', ') : (team.sdgGoal || ''),
       abstractLink: team.abstractLink || '',
+      guideName: team.guideName || '',
+      guideEmail: team.guideEmail || '',
+      eventType: team.eventType || '',
     });
     // Init attendance from existing data or null
     const existing = team.memberAttendance || {};
@@ -65,6 +78,8 @@ export default function TeamDetailCard({
     if (team.member2Name) att.member2 = existing.member2 || null;
     if (team.member3Name) att.member3 = existing.member3 || null;
     setMemberAtt(att);
+    // Load team notes
+    getTeamNotes(team.id).then(setNotes).catch(() => setNotes([]));
   }, [team]);
 
   if (!team) return null;
@@ -117,6 +132,20 @@ export default function TeamDetailCard({
     await onConfirmAttendance(team.id, memberAtt, status);
     setSaving(false);
     setAttendanceMode(false);
+  }
+
+  async function handleEventSwap() {
+    const cleaned = swapPin.replace(/\s/g, '');
+    if (cleaned !== ADMIN_CODE) {
+      setSwapError('Invalid code. Operation cancelled.');
+      return;
+    }
+    setSwapping(true);
+    const newEvent = team.eventType === 'designathon' ? 'hackathon' : 'designathon';
+    await onSave(team.id, { eventType: newEvent });
+    setSwapping(false);
+    setSwapModal(false);
+    setSwapPin('');
   }
 
   function renderField(label, key, type = 'text') {
@@ -209,6 +238,17 @@ export default function TeamDetailCard({
                   </div>
                 );
               })}
+
+              {/* Guide Details */}
+              {(team.guideName || team.guideEmail || editing) && (
+                <div className="cc-detail-section">
+                  <h4><i className="fas fa-chalkboard-teacher"></i> Guide Details</h4>
+                  <div className="cc-detail-grid">
+                    {renderField('Guide Name', 'guideName')}
+                    {renderField('Guide Email', 'guideEmail', 'email')}
+                  </div>
+                </div>
+              )}
 
               {/* Problem */}
               <div className="cc-detail-section">
@@ -314,6 +354,36 @@ export default function TeamDetailCard({
                   </button>
                 </div>
               )}
+
+              {/* Event Swap — Admin only */}
+              {!editing && isAdmin && (
+                <div className="cc-detail-section">
+                  <h4><i className="fas fa-exchange-alt"></i> Event Type Swap</h4>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', marginBottom: 10 }}>
+                    Current: <strong style={{ color: '#F5B301' }}>{team.eventType === 'designathon' ? 'Designathon' : 'Hackathon'}</strong>
+                  </p>
+                  <button className="cc-btn-sm edit" onClick={() => { setSwapModal(true); setSwapPin(''); setSwapError(''); }}>
+                    <i className="fas fa-exchange-alt"></i> Swap to {team.eventType === 'designathon' ? 'Hackathon' : 'Designathon'}
+                  </button>
+                </div>
+              )}
+
+              {/* Team Notes */}
+              {!editing && notes.length > 0 && (
+                <div className="cc-detail-section">
+                  <h4><i className="fas fa-sticky-note"></i> Team Notes ({notes.length})</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {notes.map((n) => (
+                      <div key={n.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: '10px 14px', borderLeft: '3px solid #F5B301' }}>
+                        <div style={{ color: '#fff', fontSize: '0.88rem', marginBottom: 4 }}>{n.note}</div>
+                        <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.72rem' }}>
+                          — {n.commenterName || n.commenterEmail} · {new Date(n.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             /* ─── Attendance Mode ─── */
@@ -372,6 +442,40 @@ export default function TeamDetailCard({
           )}
         </div>
       </div>
+
+      {/* Event Swap PIN Modal */}
+      {swapModal && (
+        <div className="cc-modal-overlay" style={{ zIndex: 1100 }} onClick={() => !swapping && setSwapModal(false)}>
+          <div className="cc-modal-card cc-danger-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <div className="cc-modal-header">
+              <h3 style={{ color: '#F5B301' }}><i className="fas fa-exchange-alt" style={{ marginRight: 8 }}></i>Swap Event Type</h3>
+            </div>
+            <div className="cc-modal-body">
+              <p style={{ marginBottom: 12, color: 'rgba(255,255,255,0.6)' }}>
+                Swap <strong>{team.teamName}</strong> from <strong>{team.eventType === 'designathon' ? 'Designathon' : 'Hackathon'}</strong> to <strong>{team.eventType === 'designathon' ? 'Hackathon' : 'Designathon'}</strong>.
+              </p>
+              <p style={{ marginBottom: 16, fontWeight: 600, color: '#F5B301' }}>Enter the 10-digit admin verification code to proceed.</p>
+              <input
+                type="text"
+                placeholder="Enter 10-digit code"
+                value={swapPin}
+                onChange={e => { setSwapPin(e.target.value); setSwapError(''); }}
+                maxLength={12}
+                style={{ width: '100%', padding: '12px 14px', background: 'var(--dark-base, #0d0d0d)', border: '1px solid #F5B30188', borderRadius: 8, color: '#fff', fontSize: '1.1rem', fontFamily: 'monospace', textAlign: 'center', letterSpacing: 3 }}
+                autoFocus
+                disabled={swapping}
+              />
+              {swapError && <p style={{ color: '#f44336', fontSize: '0.85rem', marginTop: 8 }}>{swapError}</p>}
+            </div>
+            <div className="cc-modal-footer">
+              <button className="cc-btn-secondary" onClick={() => setSwapModal(false)} disabled={swapping}>Cancel</button>
+              <button className="cc-btn-sm approve" onClick={handleEventSwap} disabled={swapping || !swapPin.trim()}>
+                {swapping ? 'Swapping…' : 'Confirm Swap'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

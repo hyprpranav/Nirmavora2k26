@@ -63,6 +63,20 @@ export default function EventSelect() {
         )}
 
         <div className="event-cards">
+          {settings.designathonRegistrationClosed ? (
+            <div className="event-card designathon-card" style={{ opacity: 0.5, pointerEvents: 'none' }}>
+              <div className="event-card-icon">
+                <i className="fas fa-pencil-ruler"></i>
+              </div>
+              <h3>Designathon</h3>
+              <p>Design innovative solutions for Civil & Mechanical engineering challenges</p>
+              <div className="event-card-details">
+                <span><i className="fas fa-palette"></i> 8 Themes</span>
+                <span><i className="fas fa-users"></i> 3–4 Members</span>
+              </div>
+              <span className="btn btn-disabled"><i className="fas fa-lock" style={{ marginRight: 6 }}></i>Registration Closed</span>
+            </div>
+          ) : (
           <Link to={`/register/${EVENTS.DESIGNATHON}`} className="event-card designathon-card">
             <div className="event-card-icon">
               <i className="fas fa-pencil-ruler"></i>
@@ -79,7 +93,22 @@ export default function EventSelect() {
             </div>
             <span className="btn btn-primary">Register →</span>
           </Link>
+          )}
 
+          {settings.hackathonRegistrationClosed ? (
+            <div className="event-card hackathon-card" style={{ opacity: 0.5, pointerEvents: 'none' }}>
+              <div className="event-card-icon">
+                <i className="fas fa-laptop-code"></i>
+              </div>
+              <h3>Hackathon</h3>
+              <p>Build prototypes in an 8-hour hackathon with software & hardware tracks</p>
+              <div className="event-card-details">
+                <span><i className="fas fa-code"></i> 8 Tracks</span>
+                <span><i className="fas fa-users"></i> 3–4 Members</span>
+              </div>
+              <span className="btn btn-disabled"><i className="fas fa-lock" style={{ marginRight: 6 }}></i>Registration Closed</span>
+            </div>
+          ) : (
           <Link to={`/register/${EVENTS.HACKATHON}`} className="event-card hackathon-card">
             <div className="event-card-icon">
               <i className="fas fa-laptop-code"></i>
@@ -96,6 +125,7 @@ export default function EventSelect() {
             </div>
             <span className="btn btn-primary">Register →</span>
           </Link>
+          )}
         </div>
       </div>
     </section>

@@ -207,6 +207,7 @@ export default function AdminPanel() {
           onConfirmAttendance={handleConfirmAttendance}
           onAddTeam={handleAddTeam}
           onDelete={handleDeleteTeam}
+          isAdmin={true}
         />
       )}
 

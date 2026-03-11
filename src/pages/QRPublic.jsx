@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getTeamByTeamId, markAttendance, addTeamNote, getTeamNotes, updateTeamDetails } from '../services/teamService';
+import { getTeamByTeamId, markAttendance, addTeamNote, getTeamNotes, updateTeamDetails, confirmMemberAttendance } from '../services/teamService';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import '../styles/qr-public.css';
@@ -25,6 +25,7 @@ export default function QRPublic() {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [savingEdit, setSavingEdit] = useState(false);
+  const [memberAtt, setMemberAtt] = useState({});
 
   const isStaff = profile && ['admin', 'organiser'].includes(profile.role);
   const isAdmin = profile?.role === 'admin';
@@ -34,6 +35,15 @@ export default function QRPublic() {
     getTeamByTeamId(teamId).then(async (t) => {
       setTeam(t);
       setLoading(false);
+      if (t) {
+        // Init member attendance from existing data
+        const existing = t.memberAttendance || {};
+        const att = { leader: existing.leader || null };
+        if (t.member1Name) att.member1 = existing.member1 || null;
+        if (t.member2Name) att.member2 = existing.member2 || null;
+        if (t.member3Name) att.member3 = existing.member3 || null;
+        setMemberAtt(att);
+      }
       if (t && isStaff) {
         const n = await getTeamNotes(t.id).catch(() => []);
         setNotes(n);
@@ -62,6 +72,20 @@ export default function QRPublic() {
     const newVal = !team.attended;
     await markAttendance(team.id, newVal);
     setTeam(t => ({ ...t, attended: newVal }));
+    setMarkingAttendance(false);
+  }
+
+  async function handleConfirmMemberAttendance() {
+    if (!team) return;
+    setMarkingAttendance(true);
+    const vals = Object.values(memberAtt);
+    const allPresent = vals.every(v => v === 'present');
+    const allAbsent = vals.every(v => v === 'absent');
+    let status = 'partial';
+    if (allPresent) status = 'present';
+    else if (allAbsent) status = 'absent';
+    await confirmMemberAttendance(team.id, memberAtt, status, user?.email || 'staff');
+    setTeam(t => ({ ...t, memberAttendance: memberAtt, attendanceStatus: status, attended: status === 'present' }));
     setMarkingAttendance(false);
   }
 
@@ -145,9 +169,12 @@ export default function QRPublic() {
 
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.05)' }}>
               <i className="fas fa-users" style={{ color: '#F5B301', marginTop: 2, width: 18 }}></i>
-              <div>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', marginBottom: 2 }}>Team Size</p>
-                <p style={{ color: '#fff', fontWeight: 600 }}>{memberCount} Member{memberCount !== 1 ? 's' : ''}</p>
+              <div style={{ flex: 1 }}>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', marginBottom: 6 }}>Team Members ({memberCount})</p>
+                <p style={{ color: '#fff', fontWeight: 600, marginBottom: 2 }}><i className="fas fa-user-tie" style={{ fontSize: '0.7rem', marginRight: 6, color: '#F5B301' }}></i>{team.leaderName || '-'} <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>(Leader)</span></p>
+                {team.member1Name && <p style={{ color: '#fff', fontWeight: 500, marginBottom: 2 }}><i className="fas fa-user" style={{ fontSize: '0.7rem', marginRight: 6, color: 'rgba(255,255,255,0.3)' }}></i>{team.member1Name}</p>}
+                {team.member2Name && <p style={{ color: '#fff', fontWeight: 500, marginBottom: 2 }}><i className="fas fa-user" style={{ fontSize: '0.7rem', marginRight: 6, color: 'rgba(255,255,255,0.3)' }}></i>{team.member2Name}</p>}
+                {team.member3Name && <p style={{ color: '#fff', fontWeight: 500, marginBottom: 2 }}><i className="fas fa-user" style={{ fontSize: '0.7rem', marginRight: 6, color: 'rgba(255,255,255,0.3)' }}></i>{team.member3Name}</p>}
               </div>
             </div>
 
@@ -171,20 +198,41 @@ export default function QRPublic() {
               <i className="fas fa-shield-alt" style={{ marginRight: 8 }}></i>Staff Actions
             </h4>
 
-            {/* Attendance */}
+            {/* Per-Member Attendance */}
             <div style={{ marginBottom: 20 }}>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginBottom: 8 }}>Overall Attendance</p>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginBottom: 10 }}>Member Attendance</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[
+                  { key: 'leader', label: 'Leader', name: team.leaderName },
+                  ...(team.member1Name ? [{ key: 'member1', label: 'Member 1', name: team.member1Name }] : []),
+                  ...(team.member2Name ? [{ key: 'member2', label: 'Member 2', name: team.member2Name }] : []),
+                  ...(team.member3Name ? [{ key: 'member3', label: 'Member 3', name: team.member3Name }] : []),
+                ].map(m => (
+                  <div key={m.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.05)' }}>
+                    <div>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}>{m.label}</span>
+                      <p style={{ color: '#fff', fontSize: '0.88rem', fontWeight: 500, margin: 0 }}>{m.name}</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button
+                        onClick={() => setMemberAtt(p => ({ ...p, [m.key]: 'present' }))}
+                        style={{ padding: '4px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, background: memberAtt[m.key] === 'present' ? '#4ade80' : 'rgba(255,255,255,0.1)', color: memberAtt[m.key] === 'present' ? '#000' : 'rgba(255,255,255,0.5)' }}
+                      >P</button>
+                      <button
+                        onClick={() => setMemberAtt(p => ({ ...p, [m.key]: 'absent' }))}
+                        style={{ padding: '4px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, background: memberAtt[m.key] === 'absent' ? '#f87171' : 'rgba(255,255,255,0.1)', color: memberAtt[m.key] === 'absent' ? '#000' : 'rgba(255,255,255,0.5)' }}
+                      >A</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
               <button
-                className={`btn ${team.attended ? 'btn-danger' : 'btn-success'}`}
-                onClick={handleToggleAttendance}
+                className="btn btn-success"
+                onClick={handleConfirmMemberAttendance}
                 disabled={markingAttendance}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                style={{ marginTop: 10, display: 'inline-flex', alignItems: 'center', gap: 8 }}
               >
-                {markingAttendance
-                  ? <><i className="fas fa-spinner fa-spin"></i> Updating...</>
-                  : team.attended
-                    ? <><i className="fas fa-times-circle"></i> Mark as Absent</>
-                    : <><i className="fas fa-check-circle"></i> Mark as Present</>}
+                {markingAttendance ? <><i className="fas fa-spinner fa-spin"></i> Saving...</> : <><i className="fas fa-check-circle"></i> Confirm Attendance</>}
               </button>
             </div>
 

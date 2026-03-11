@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { DEVELOPER } from '../config/constants';
 import EmailSignUp from '../components/auth/EmailSignUp';
 import EmailSignIn from '../components/auth/EmailSignIn';
 import '../styles/auth.css';
@@ -67,6 +68,11 @@ export default function AuthPage() {
             </p>
           </>
         )}
+
+        {/* Developer Contact */}
+        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 20 }}>
+          Facing issues? Contact developer: <a href={`mailto:${DEVELOPER.email}`} style={{ color: '#a5b4fc' }}>{DEVELOPER.name}</a> · <a href={`tel:+91${DEVELOPER.phoneRaw}`} style={{ color: '#a5b4fc' }}>{DEVELOPER.phone}</a>
+        </p>
       </div>
     </section>
   );

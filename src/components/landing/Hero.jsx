@@ -32,6 +32,11 @@ export default function Hero() {
         <p className="hero-subtitle">Designathon × Hackathon</p>
         <p className="hero-date">{EVENT.dateDisplay}</p>
 
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', maxWidth: 600, margin: '16px auto', lineHeight: 1.6, textAlign: 'center' }}>
+          Don't miss the <strong style={{ color: '#F5B301' }}>Designathon</strong> — a unique opportunity for Civil & Mechanical students to showcase their creativity and innovation.
+          Open to all departments! Compete, collaborate, and win <strong style={{ color: '#F5B301', fontSize: '1.05rem' }}>exciting surprise prizes!</strong>
+        </p>
+
         <div className="hero-cta">
           <a href="#designathon" className="btn btn-secondary">
             <i className="fas fa-compass"></i> Explore Events

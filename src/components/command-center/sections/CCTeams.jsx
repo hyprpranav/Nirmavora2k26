@@ -22,6 +22,7 @@ export default function CCTeams({
   onConfirmAttendance,
   onAddTeam,
   onDelete,
+  isAdmin,
 }) {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -61,6 +62,7 @@ export default function CCTeams({
             if (onConfirmAttendance) await onConfirmAttendance(docId, memberAtt, status);
             setSelectedTeam(null);
           }}
+          isAdmin={isAdmin}
         />
       )}
 
