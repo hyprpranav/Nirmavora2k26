@@ -129,3 +129,27 @@ export function exportTeamContactSheetCSV(teams) {
   });
   downloadCSV('nirmavora_team_contact_sheet.csv', Papa.unparse(rows));
 }
+
+/* ─── All Users Log CSV ─── */
+export function exportAllUsersCSV(users) {
+  const rows = users.map((u, i) => ({
+    'S.No': i + 1,
+    'Name': u.displayName || u.name || '',
+    'Email': u.email || '',
+    'Role': u.role || 'participant',
+    'Registered At': u.createdAt || '',
+  }));
+  downloadCSV('nirmavora_all_users.csv', Papa.unparse(rows));
+}
+
+/* ─── Participants Only CSV ─── */
+export function exportParticipantUsersCSV(users) {
+  const participants = users.filter(u => (u.role || 'participant') === 'participant');
+  const rows = participants.map((u, i) => ({
+    'S.No': i + 1,
+    'Name': u.displayName || u.name || '',
+    'Email': u.email || '',
+    'Registered At': u.createdAt || '',
+  }));
+  downloadCSV('nirmavora_participant_users.csv', Papa.unparse(rows));
+}

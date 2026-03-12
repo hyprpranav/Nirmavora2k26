@@ -1,10 +1,10 @@
 import React from 'react';
 
-export default function CCExport({ teams }) {
+export default function CCExport({ teams, users }) {
   /* Dynamic imports so the module is only loaded when export page is reached */
-  async function doExport(fn) {
+  async function doExport(fn, data) {
     const mod = await import('../../../services/exportService');
-    mod[fn](teams);
+    mod[fn](data || teams);
   }
 
   return (
@@ -40,6 +40,16 @@ export default function CCExport({ teams }) {
         </button>
         <button className="cc-export-btn" onClick={() => doExport('exportTeamContactSheetCSV')}>
           <i className="fas fa-address-book"></i> Team Contact Sheet
+        </button>
+      </div>
+
+      <h4 style={{ color: '#F5B301', marginTop: 28, marginBottom: 12 }}><i className="fas fa-users" style={{ marginRight: 8 }}></i>User Data Exports</h4>
+      <div className="cc-export-grid">
+        <button className="cc-export-btn" onClick={() => doExport('exportAllUsersCSV', users)}>
+          <i className="fas fa-file-csv"></i> All Users Log
+        </button>
+        <button className="cc-export-btn" onClick={() => doExport('exportParticipantUsersCSV', users)}>
+          <i className="fas fa-file-csv"></i> Participants Only
         </button>
       </div>
     </div>

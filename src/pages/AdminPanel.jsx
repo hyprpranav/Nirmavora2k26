@@ -235,7 +235,7 @@ export default function AdminPanel() {
       )}
 
       {!loading && section === 'export' && (
-        <CCExport teams={teams} />
+        <CCExport teams={teams} users={users} />
       )}
 
       {!loading && section === 'email' && (
