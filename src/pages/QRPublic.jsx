@@ -157,12 +157,12 @@ export default function QRPublic() {
               </div>
             </div>
 
-            {team.department && (
+            {(team.department || team.leaderDepartment) && (
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.05)' }}>
                 <i className="fas fa-graduation-cap" style={{ color: '#F5B301', marginTop: 2, width: 18 }}></i>
                 <div>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', marginBottom: 2 }}>Department</p>
-                  <p style={{ color: '#fff', fontWeight: 600 }}>{team.department}{team.year ? ' - ' + team.year : ''}</p>
+                  <p style={{ color: '#fff', fontWeight: 600 }}>{team.department || team.leaderDepartment}{team.year ? ' - ' + team.year : ''}</p>
                 </div>
               </div>
             )}
@@ -171,10 +171,10 @@ export default function QRPublic() {
               <i className="fas fa-users" style={{ color: '#F5B301', marginTop: 2, width: 18 }}></i>
               <div style={{ flex: 1 }}>
                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', marginBottom: 6 }}>Team Members ({memberCount})</p>
-                <p style={{ color: '#fff', fontWeight: 600, marginBottom: 2 }}><i className="fas fa-user-tie" style={{ fontSize: '0.7rem', marginRight: 6, color: '#F5B301' }}></i>{team.leaderName || '-'} <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>(Leader)</span></p>
-                {team.member1Name && <p style={{ color: '#fff', fontWeight: 500, marginBottom: 2 }}><i className="fas fa-user" style={{ fontSize: '0.7rem', marginRight: 6, color: 'rgba(255,255,255,0.3)' }}></i>{team.member1Name}</p>}
-                {team.member2Name && <p style={{ color: '#fff', fontWeight: 500, marginBottom: 2 }}><i className="fas fa-user" style={{ fontSize: '0.7rem', marginRight: 6, color: 'rgba(255,255,255,0.3)' }}></i>{team.member2Name}</p>}
-                {team.member3Name && <p style={{ color: '#fff', fontWeight: 500, marginBottom: 2 }}><i className="fas fa-user" style={{ fontSize: '0.7rem', marginRight: 6, color: 'rgba(255,255,255,0.3)' }}></i>{team.member3Name}</p>}
+                <p style={{ color: '#fff', fontWeight: 600, marginBottom: 2 }}><i className="fas fa-user-tie" style={{ fontSize: '0.7rem', marginRight: 6, color: '#F5B301' }}></i>{team.leaderName || '-'} <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>(Leader){team.leaderDepartment ? ` · ${team.leaderDepartment}` : ''}</span></p>
+                {team.member1Name && <p style={{ color: '#fff', fontWeight: 500, marginBottom: 2 }}><i className="fas fa-user" style={{ fontSize: '0.7rem', marginRight: 6, color: 'rgba(255,255,255,0.3)' }}></i>{team.member1Name}{team.member1Department ? <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}> · {team.member1Department}</span> : ''}</p>}
+                {team.member2Name && <p style={{ color: '#fff', fontWeight: 500, marginBottom: 2 }}><i className="fas fa-user" style={{ fontSize: '0.7rem', marginRight: 6, color: 'rgba(255,255,255,0.3)' }}></i>{team.member2Name}{team.member2Department ? <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}> · {team.member2Department}</span> : ''}</p>}
+                {team.member3Name && <p style={{ color: '#fff', fontWeight: 500, marginBottom: 2 }}><i className="fas fa-user" style={{ fontSize: '0.7rem', marginRight: 6, color: 'rgba(255,255,255,0.3)' }}></i>{team.member3Name}{team.member3Department ? <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}> · {team.member3Department}</span> : ''}</p>}
               </div>
             </div>
 

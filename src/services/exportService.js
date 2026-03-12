@@ -17,14 +17,18 @@ export function exportMasterLogCSV(teams) {
     TeamName: t.teamName,
     EventType: t.eventType,
     College: t.collegeName,
-    Department: t.department,
+    Department: t.department || '',
     Year: t.year,
     LeaderName: t.leaderName,
     LeaderEmail: t.leaderEmail,
     LeaderPhone: t.leaderPhone,
+    LeaderDepartment: t.leaderDepartment || t.department || '',
     Member1: t.member1Name || '',
+    Member1Department: t.member1Department || t.department || '',
     Member2: t.member2Name || '',
+    Member2Department: t.member2Department || t.department || '',
     Member3: t.member3Name || '',
+    Member3Department: t.member3Department || t.department || '',
     MemberCount: t.memberCount || '',
     ProblemTitle: t.problemTitle,
     SDG: Array.isArray(t.sdgGoals) ? t.sdgGoals.join(', ') : (t.sdgGoal || ''),
@@ -106,10 +110,10 @@ export function exportTeamContactSheetCSV(teams) {
   let serial = 1;
   teams.forEach((t) => {
     const members = [
-      { name: t.leaderName, phone: t.leaderPhone || '', email: t.leaderEmail || '', role: 'Leader' },
-      t.member1Name ? { name: t.member1Name, phone: t.member1Phone || '', email: t.member1Email || '', role: 'Member' } : null,
-      t.member2Name ? { name: t.member2Name, phone: t.member2Phone || '', email: t.member2Email || '', role: 'Member' } : null,
-      t.member3Name ? { name: t.member3Name, phone: t.member3Phone || '', email: t.member3Email || '', role: 'Member' } : null,
+      { name: t.leaderName, phone: t.leaderPhone || '', email: t.leaderEmail || '', role: 'Leader', department: t.leaderDepartment || t.department || '' },
+      t.member1Name ? { name: t.member1Name, phone: t.member1Phone || '', email: t.member1Email || '', role: 'Member', department: t.member1Department || t.department || '' } : null,
+      t.member2Name ? { name: t.member2Name, phone: t.member2Phone || '', email: t.member2Email || '', role: 'Member', department: t.member2Department || t.department || '' } : null,
+      t.member3Name ? { name: t.member3Name, phone: t.member3Phone || '', email: t.member3Email || '', role: 'Member', department: t.member3Department || t.department || '' } : null,
     ].filter(Boolean);
 
     members.forEach((m) => {
@@ -118,6 +122,7 @@ export function exportTeamContactSheetCSV(teams) {
         'Team Name & ID': `${t.teamName} (${t.teamId || 'Pending'})`,
         'Member Name': m.name,
         'Role': m.role,
+        'Department': m.department,
         'Phone': m.phone,
         'Email': m.email,
         'College': t.collegeName || '',

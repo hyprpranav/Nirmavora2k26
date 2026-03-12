@@ -15,16 +15,19 @@ const initialForm = {
   leaderName: '',
   leaderPhone: '',
   leaderEmail: '',
+  leaderDepartment: '',
   member1Name: '',
   member1Phone: '',
   member1Email: '',
+  member1Department: '',
   member2Name: '',
   member2Phone: '',
   member2Email: '',
+  member2Department: '',
   member3Name: '',
   member3Phone: '',
   member3Email: '',
-  department: '',
+  member3Department: '',
   year: '',
   guideName: '',
   guideEmail: '',
@@ -51,7 +54,10 @@ export default function RegistrationForm({ eventType, onNext }) {
     if (!form.leaderEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) e.leaderEmail = 'Invalid email';
     if (!form.member1Name.trim()) e.member1Name = 'Required';
     if (!form.member2Name.trim()) e.member2Name = 'Required';
-    if (!form.department) e.department = 'Required';
+    if (!form.leaderDepartment) e.leaderDepartment = 'Required';
+    if (!form.member1Department) e.member1Department = 'Required';
+    if (!form.member2Department) e.member2Department = 'Required';
+    if (form.member3Name.trim() && !form.member3Department) e.member3Department = 'Required';
     if (!form.year) e.year = 'Required';
     if (!form.abstractFile) e.abstractFile = 'Please upload your abstract file (PDF, PNG, JPG, or Word)';
     else {
@@ -146,44 +152,60 @@ export default function RegistrationForm({ eventType, onNext }) {
             {errors.leaderEmail && <span className="form-error">{errors.leaderEmail}</span>}
           </div>
         </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Department *</label>
+            <select name="leaderDepartment" value={form.leaderDepartment} onChange={onChange}>
+              <option value="">Select Department</option>
+              {DEPARTMENTS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+            {errors.leaderDepartment && <span className="form-error">{errors.leaderDepartment}</span>}
+          </div>
+        </div>
       </fieldset>
 
       {/* Members */}
       <fieldset>
         <legend>Team Members</legend>
         {[1, 2, 3].map((n) => (
-          <div key={n} className="form-row three">
-            <div className="form-group">
-              <label>Member {n} Name {n <= 2 ? '*' : '(Optional)'}</label>
-              <input name={`member${n}Name`} value={form[`member${n}Name`]} onChange={onChange} />
-              {errors[`member${n}Name`] && <span className="form-error">{errors[`member${n}Name`]}</span>}
+          <div key={n} style={{ marginBottom: n < 3 ? 16 : 0 }}>
+            <div className="form-row three">
+              <div className="form-group">
+                <label>Member {n} Name {n <= 2 ? '*' : '(Optional)'}</label>
+                <input name={`member${n}Name`} value={form[`member${n}Name`]} onChange={onChange} />
+                {errors[`member${n}Name`] && <span className="form-error">{errors[`member${n}Name`]}</span>}
+              </div>
+              <div className="form-group">
+                <label>Phone</label>
+                <input name={`member${n}Phone`} value={form[`member${n}Phone`]} onChange={onChange} maxLength={10} />
+              </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input name={`member${n}Email`} type="email" value={form[`member${n}Email`]} onChange={onChange} />
+              </div>
             </div>
-            <div className="form-group">
-              <label>Phone</label>
-              <input name={`member${n}Phone`} value={form[`member${n}Phone`]} onChange={onChange} maxLength={10} />
-            </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input name={`member${n}Email`} type="email" value={form[`member${n}Email`]} onChange={onChange} />
+            <div className="form-row">
+              <div className="form-group">
+                <label>Department {n <= 2 ? '*' : '(if filled above)'}</label>
+                <select name={`member${n}Department`} value={form[`member${n}Department`]} onChange={onChange}>
+                  <option value="">Select Department</option>
+                  {DEPARTMENTS.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+                {errors[`member${n}Department`] && <span className="form-error">{errors[`member${n}Department`]}</span>}
+              </div>
             </div>
           </div>
         ))}
       </fieldset>
 
-      {/* Dept & Year */}
+      {/* Year */}
       <fieldset>
         <legend>Academic Info</legend>
         <div className="form-row">
-          <div className="form-group">
-            <label>Department *</label>
-            <select name="department" value={form.department} onChange={onChange}>
-              <option value="">Select Department</option>
-              {DEPARTMENTS.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-            {errors.department && <span className="form-error">{errors.department}</span>}
-          </div>
           <div className="form-group">
             <label>Year *</label>
             <select name="year" value={form.year} onChange={onChange}>

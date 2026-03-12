@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getTeamNotes } from '../../services/teamService';
+import { DEPARTMENTS } from '../../config/constants';
 
 const ADMIN_CODE = '8870881397';
 
@@ -55,15 +56,19 @@ export default function TeamDetailCard({
       leaderName: team.leaderName || '',
       leaderEmail: team.leaderEmail || '',
       leaderPhone: team.leaderPhone || '',
+      leaderDepartment: team.leaderDepartment || '',
       member1Name: team.member1Name || '',
       member1Email: team.member1Email || '',
       member1Phone: team.member1Phone || '',
+      member1Department: team.member1Department || '',
       member2Name: team.member2Name || '',
       member2Email: team.member2Email || '',
       member2Phone: team.member2Phone || '',
+      member2Department: team.member2Department || '',
       member3Name: team.member3Name || '',
       member3Email: team.member3Email || '',
       member3Phone: team.member3Phone || '',
+      member3Department: team.member3Department || '',
       problemTitle: team.problemTitle || '',
       sdgGoal: Array.isArray(team.sdgGoals) ? team.sdgGoals.join(', ') : (team.sdgGoal || ''),
       abstractLink: team.abstractLink || '',
@@ -170,6 +175,32 @@ export default function TeamDetailCard({
     );
   }
 
+  function renderDeptField(label, key) {
+    if (editing) {
+      return (
+        <div className="cc-detail-field">
+          <span className="cc-detail-label">{label}</span>
+          <select
+            className="cc-input"
+            value={form[key] || ''}
+            onChange={(e) => updateForm(key, e.target.value)}
+          >
+            <option value="">Select Department</option>
+            {DEPARTMENTS.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+        </div>
+      );
+    }
+    return (
+      <div className="cc-detail-field">
+        <span className="cc-detail-label">{label}</span>
+        <span className="cc-detail-value">{form[key] || '—'}</span>
+      </div>
+    );
+  }
+
   return (
     <div className="cc-modal-overlay" onClick={onClose}>
       <div className="cc-modal-card cc-team-detail-card" onClick={(e) => e.stopPropagation()}>
@@ -213,13 +244,14 @@ export default function TeamDetailCard({
                 </div>
               </div>
 
-              {/* Leader */}
+              {/* Team Leader */}
               <div className="cc-detail-section">
                 <h4><i className="fas fa-user-tie"></i> Team Leader</h4>
                 <div className="cc-detail-grid">
                   {renderField('Name', 'leaderName')}
                   {renderField('Email', 'leaderEmail', 'email')}
                   {renderField('Phone', 'leaderPhone', 'tel')}
+                  {renderDeptField('Department', 'leaderDepartment')}
                 </div>
               </div>
 
@@ -234,6 +266,7 @@ export default function TeamDetailCard({
                       {renderField('Name', `member${n}Name`)}
                       {renderField('Email', `member${n}Email`, 'email')}
                       {renderField('Phone', `member${n}Phone`, 'tel')}
+                      {renderDeptField('Department', `member${n}Department`)}
                     </div>
                   </div>
                 );

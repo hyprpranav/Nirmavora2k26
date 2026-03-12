@@ -355,15 +355,19 @@ function AddTeamForm({ onSubmit, onCancel }) {
     leaderName: '',
     leaderPhone: '',
     leaderEmail: '',
+    leaderDepartment: '',
     member1Name: '',
     member1Phone: '',
     member1Email: '',
+    member1Department: '',
     member2Name: '',
     member2Phone: '',
     member2Email: '',
+    member2Department: '',
     member3Name: '',
     member3Phone: '',
     member3Email: '',
+    member3Department: '',
     department: '',
     year: '',
     guideName: '',
@@ -449,6 +453,10 @@ function AddTeamForm({ onSubmit, onCancel }) {
             <input value={form.leaderEmail} onChange={e => upd('leaderEmail', e.target.value)} style={fieldStyle} type="email" />
           </div>
           <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Leader Department</label>
+            <input value={form.leaderDepartment} onChange={e => upd('leaderDepartment', e.target.value)} style={fieldStyle} />
+          </div>
+          <div>
             <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Member 1 Name</label>
             <input value={form.member1Name} onChange={e => upd('member1Name', e.target.value)} style={fieldStyle} />
           </div>
@@ -459,6 +467,10 @@ function AddTeamForm({ onSubmit, onCancel }) {
           <div>
             <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Member 1 Email</label>
             <input value={form.member1Email} onChange={e => upd('member1Email', e.target.value)} style={fieldStyle} type="email" />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Member 1 Department</label>
+            <input value={form.member1Department} onChange={e => upd('member1Department', e.target.value)} style={fieldStyle} />
           </div>
           <div>
             <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Member 2 Name</label>
@@ -473,6 +485,10 @@ function AddTeamForm({ onSubmit, onCancel }) {
             <input value={form.member2Email} onChange={e => upd('member2Email', e.target.value)} style={fieldStyle} type="email" />
           </div>
           <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Member 2 Department</label>
+            <input value={form.member2Department} onChange={e => upd('member2Department', e.target.value)} style={fieldStyle} />
+          </div>
+          <div>
             <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Member 3 Name</label>
             <input value={form.member3Name} onChange={e => upd('member3Name', e.target.value)} style={fieldStyle} />
           </div>
@@ -483,6 +499,10 @@ function AddTeamForm({ onSubmit, onCancel }) {
           <div>
             <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Member 3 Email</label>
             <input value={form.member3Email} onChange={e => upd('member3Email', e.target.value)} style={fieldStyle} type="email" />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Member 3 Department</label>
+            <input value={form.member3Department} onChange={e => upd('member3Department', e.target.value)} style={fieldStyle} />
           </div>
           <div>
             <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Guide Name (Optional)</label>
