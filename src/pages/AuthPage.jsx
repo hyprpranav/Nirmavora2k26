@@ -12,6 +12,18 @@ export default function AuthPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (user && !emailVerified) {
+      setTab('signup');
+    }
+  }, [user, emailVerified]);
+
+  useEffect(() => {
+    if (user && emailVerified) {
+      setTab('signin');
+    }
+  }, [user, emailVerified]);
+
+  useEffect(() => {
     if (!loading && user && emailVerified && profile) {
       if (profile.role === 'admin') {
         navigate('/admin', { replace: true });

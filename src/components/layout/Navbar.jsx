@@ -19,6 +19,10 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
   function handleHashLink(hash) {
     setMenuOpen(false);
     if (!isLanding) {

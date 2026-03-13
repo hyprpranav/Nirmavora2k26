@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { DEVELOPER } from '../../config/constants';
 
 export default function EmailSignIn() {
   const { signInWithEmail, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +18,8 @@ export default function EmailSignIn() {
     setBusy(true);
     try {
       await signInWithEmail(email, password);
-      // AuthPage useEffect handles all redirects based on role + emailVerified
+      // Explicitly route after sign-in so mobile browsers do not leave users on auth screen.
+      navigate('/events', { replace: true });
     } catch (err) {
       if (
         err.code === 'auth/invalid-credential' ||
@@ -39,7 +42,7 @@ export default function EmailSignIn() {
     setError('');
     try {
       await signInWithGoogle();
-      // Redirect will happen — page reloads
+      // Redirect will happen with Firebase redirect flow.
     } catch (err) {
       console.error('[SignIn] Google error:', err.code, err.message);
       if (err.code === 'auth/unauthorized-domain') {
