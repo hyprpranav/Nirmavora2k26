@@ -1,5 +1,11 @@
 import Papa from 'papaparse';
 
+function getAddedByLabel(addedBy) {
+  if (addedBy === 'admin') return 'Admin (Manual)';
+  if (addedBy === 'coordinator') return 'Coordinator';
+  return 'Self-registered';
+}
+
 function downloadCSV(filename, csvString) {
   const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -41,7 +47,7 @@ export function exportMasterLogCSV(teams) {
     PaymentScreenshot: t.paymentScreenshotUrl || t.paymentScreenshotLink || '',
     Attendance: t.attendance ? 'Yes' : 'No',
     AttendanceStatus: t.attendanceStatus || '',
-    AddedBy: t.addedBy === 'admin' ? 'Admin (Manual)' : 'Self-registered',
+    AddedBy: getAddedByLabel(t.addedBy),
     AddedByEmail: t.addedByEmail || '',
     LastEditedBy: t.lastEditedBy || '',
     LastEditedAt: t.lastEditedAt || '',

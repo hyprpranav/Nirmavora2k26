@@ -40,6 +40,16 @@ export default function CCTeams({
     REJECTED: 'rejected',
   };
 
+  function getSourceMeta(team) {
+    if (team.addedBy === 'admin') {
+      return { label: 'Manual', icon: '🛡️', color: '#F5B301' };
+    }
+    if (team.addedBy === 'coordinator') {
+      return { label: 'Coordinator', icon: '📋', color: '#a78bfa' };
+    }
+    return { label: 'Signed up', icon: '👤', color: 'rgba(255,255,255,0.4)' };
+  }
+
   const filters = ['all', 'pending', 'approved', 'waitlisted', 'cancelled'];
 
   const filtered = teams.filter(t => {
@@ -194,7 +204,9 @@ export default function CCTeams({
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(team => (
+                {filtered.map(team => {
+                  const source = getSourceMeta(team);
+                  return (
                   <tr
                     key={team.id}
                     className="cc-team-row-clickable"
@@ -235,9 +247,16 @@ export default function CCTeams({
                       ) : '—'}
                     </td>
                     <td>
-                      <span style={{ fontSize: '0.78rem', color: team.addedBy === 'admin' ? '#F5B301' : team.addedBy === 'coordinator' ? '#a78bfa' : 'rgba(255,255,255,0.4)' }}>
-                        {team.addedBy === 'admin' ? '🛡️ Manual' : team.addedBy === 'coordinator' ? '📋 Coordinator' : '👤 Signed up'}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={{ fontSize: '0.78rem', color: source.color }}>
+                          {source.icon} {source.label}
+                        </span>
+                        {team.addedByEmail && (
+                          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', wordBreak: 'break-word' }}>
+                            {team.addedByEmail}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td>
                       <div className="cc-actions" onClick={(e) => e.stopPropagation()}>
@@ -279,7 +298,8 @@ export default function CCTeams({
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
                 {filtered.length === 0 && (
                   <tr>
                     <td colSpan={12} style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 20 }}>

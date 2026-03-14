@@ -91,6 +91,18 @@ export default function TeamDetailCard({
 
   const members = getMembers(team);
 
+  function getAddedByLabel(value) {
+    if (value === 'admin') return 'Admin (Manual)';
+    if (value === 'coordinator') return 'Coordinator';
+    return 'Self-registered';
+  }
+
+  function getAddedByIcon(value) {
+    if (value === 'admin') return '🛡️';
+    if (value === 'coordinator') return '📋';
+    return '👤';
+  }
+
   function updateForm(key, val) {
     setForm((f) => ({ ...f, [key]: val }));
   }
@@ -347,7 +359,13 @@ export default function TeamDetailCard({
                     {team.addedBy && (
                       <div className="cc-detail-field">
                         <span className="cc-detail-label">Added By</span>
-                        <span className="cc-detail-value">{team.addedBy === 'admin' ? '🛡️ Admin (Manual)' : '👤 Self-registered'}</span>
+                        <span className="cc-detail-value">{getAddedByIcon(team.addedBy)} {getAddedByLabel(team.addedBy)}</span>
+                      </div>
+                    )}
+                    {team.addedByEmail && (
+                      <div className="cc-detail-field">
+                        <span className="cc-detail-label">Created By Email</span>
+                        <span className="cc-detail-value">{team.addedByEmail}</span>
                       </div>
                     )}
                     {team.lastEditedBy && (
