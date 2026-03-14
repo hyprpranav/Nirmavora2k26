@@ -150,6 +150,16 @@ export default function AdminPanel() {
     alert(`Password reset email sent to ${email}`);
   }
 
+  async function handleCreateUser(data) {
+    await createParticipantUserByStaff({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      createdByEmail: user?.email,
+    });
+    loadAll();
+  }
+
   async function handleAddTeam(data) {
     const {
       accountName,
@@ -240,6 +250,7 @@ export default function AdminPanel() {
           onDeleteUser={handleDeleteUser}
           onDemoteUser={handleDemoteUser}
           onResetPassword={handleResetPassword}
+          onCreateUser={handleCreateUser}
           loading={usersLoading}
         />
       )}

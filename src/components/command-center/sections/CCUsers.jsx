@@ -9,12 +9,17 @@ export default function CCUsers({
   onDeleteUser,
   onDemoteUser,
   onResetPassword,
+  onCreateUser,
   loading,
 }) {
   const [search, setSearch] = useState('');
   const [promoteUid, setPromoteUid] = useState('');
   const [tab, setTab] = useState('users');
   const [confirmAction, setConfirmAction] = useState(null); // { action, user }
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '' });
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [createUserError, setCreateUserError] = useState('');
+  const [createUserSuccess, setCreateUserSuccess] = useState('');
 
   const filtered = users.filter(u => {
     if (!search) return true;
@@ -43,6 +48,35 @@ export default function CCUsers({
       console.error(`Failed to ${action}:`, err);
     }
     setConfirmAction(null);
+  }
+
+  async function handleCreateUserSubmit(e) {
+    e.preventDefault();
+    setCreateUserError('');
+    setCreateUserSuccess('');
+    if (!newUser.name.trim() || !newUser.email.trim() || !newUser.password.trim()) {
+      setCreateUserError('Name, email, and password are required.');
+      return;
+    }
+    if (newUser.password.length < 8) {
+      setCreateUserError('Password must be at least 8 characters.');
+      return;
+    }
+    setCreatingUser(true);
+    try {
+      await onCreateUser({
+        name: newUser.name.trim(),
+        email: newUser.email.trim(),
+        password: newUser.password,
+      });
+      setCreateUserSuccess('User account created successfully.');
+      setNewUser({ name: '', email: '', password: '' });
+      setTab('users');
+    } catch (err) {
+      setCreateUserError(err.message || 'Failed to create user.');
+    } finally {
+      setCreatingUser(false);
+    }
   }
 
   return (
@@ -82,7 +116,17 @@ export default function CCUsers({
         <button className={`cc-filter-btn${tab === 'promote' ? ' active' : ''}`} onClick={() => setTab('promote')}>
           Promote User
         </button>
+        <button className={`cc-filter-btn${tab === 'add' ? ' active' : ''}`} onClick={() => setTab('add')}>
+          Add User
+        </button>
       </div>
+
+      {createUserSuccess && (
+        <div className="cc-note" style={{ marginBottom: 10, borderColor: 'rgba(34,197,94,0.4)', color: '#4ade80' }}>
+          <i className="fas fa-check-circle"></i>
+          <span>{createUserSuccess}</span>
+        </div>
+      )}
 
       {tab === 'users' && (
         <>
@@ -215,6 +259,45 @@ export default function CCUsers({
               Promote
             </button>
           </div>
+        </div>
+      )}
+
+      {tab === 'add' && (
+        <div className="cc-section">
+          <h3>Create Participant User</h3>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.82rem', marginBottom: 14 }}>
+            This creates only a participant login account. It does not create any team.
+          </p>
+          <form onSubmit={handleCreateUserSubmit}>
+            <div className="cc-form-row" style={{ marginBottom: 10 }}>
+              <input
+                className="cc-input"
+                placeholder="Full name"
+                value={newUser.name}
+                onChange={(e) => setNewUser((u) => ({ ...u, name: e.target.value }))}
+              />
+              <input
+                className="cc-input"
+                type="email"
+                placeholder="Email"
+                value={newUser.email}
+                onChange={(e) => setNewUser((u) => ({ ...u, email: e.target.value }))}
+              />
+            </div>
+            <div className="cc-form-row" style={{ marginBottom: 10 }}>
+              <input
+                className="cc-input"
+                type="text"
+                placeholder="Default password (min 8 chars)"
+                value={newUser.password}
+                onChange={(e) => setNewUser((u) => ({ ...u, password: e.target.value }))}
+              />
+              <button className="cc-btn primary" type="submit" disabled={creatingUser}>
+                {creatingUser ? 'Creating…' : 'Create User'}
+              </button>
+            </div>
+          </form>
+          {createUserError && <p style={{ color: '#f87171', fontSize: '0.85rem' }}>{createUserError}</p>}
         </div>
       )}
     </>
