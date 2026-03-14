@@ -33,11 +33,18 @@ export default function CCTeams({
   const [showAddForm, setShowAddForm] = useState(false);
   const [busyTeamId, setBusyTeamId] = useState(null);
 
+  const PAYMENT = PAYMENT_STATUS || {
+    NOT_PAID: 'not_paid',
+    UPLOADED: 'uploaded',
+    VERIFIED: 'verified',
+    REJECTED: 'rejected',
+  };
+
   const filters = ['all', 'pending', 'approved', 'waitlisted', 'cancelled'];
 
   const filtered = teams.filter(t => {
     const matchFilter = filter === 'all' || t.status === filter;
-    const currentPayment = t.paymentStatus || PAYMENT_STATUS.NOT_PAID;
+    const currentPayment = t.paymentStatus || PAYMENT.NOT_PAID;
     const matchPayment = teamPaymentFilter === 'all' || currentPayment === teamPaymentFilter;
     const matchSearch =
       !search ||
@@ -154,7 +161,7 @@ export default function CCTeams({
           </div>
 
           <div className="cc-filter-bar" style={{ marginBottom: 10 }}>
-            {['all', PAYMENT_STATUS.NOT_PAID, PAYMENT_STATUS.UPLOADED, PAYMENT_STATUS.VERIFIED, PAYMENT_STATUS.REJECTED].map(f => (
+            {['all', PAYMENT.NOT_PAID, PAYMENT.UPLOADED, PAYMENT.VERIFIED, PAYMENT.REJECTED].map(f => (
               <button
                 key={f}
                 className={`cc-filter-btn${teamPaymentFilter === f ? ' active' : ''}`}
@@ -163,7 +170,7 @@ export default function CCTeams({
                 {f === 'all' ? 'All Payments' : f.replace('_', ' ')} (
                 {f === 'all'
                   ? teams.length
-                  : teams.filter(t => (t.paymentStatus || PAYMENT_STATUS.NOT_PAID) === f).length})
+                  : teams.filter(t => (t.paymentStatus || PAYMENT.NOT_PAID) === f).length})
               </button>
             ))}
           </div>
@@ -204,8 +211,8 @@ export default function CCTeams({
                       <span className={`cc-status ${team.status}`}>{team.status}</span>
                     </td>
                     <td>
-                      <span className={`cc-status ${team.paymentStatus || PAYMENT_STATUS.NOT_PAID}`}>
-                        {(team.paymentStatus || PAYMENT_STATUS.NOT_PAID).replace('_', ' ')}
+                      <span className={`cc-status ${team.paymentStatus || PAYMENT.NOT_PAID}`}>
+                        {(team.paymentStatus || PAYMENT.NOT_PAID).replace('_', ' ')}
                       </span>
                     </td>
                     <td>
@@ -316,7 +323,7 @@ export default function CCTeams({
               </thead>
               <tbody>
                 {teams
-                  .filter(t => t.paymentStatus && t.paymentStatus !== PAYMENT_STATUS.NOT_PAID)
+                  .filter(t => t.paymentStatus && t.paymentStatus !== PAYMENT.NOT_PAID)
                   .filter(t => paymentFilter === 'all' || t.paymentStatus === paymentFilter)
                   .map(t => (
                     <tr key={t.id}>
@@ -344,7 +351,7 @@ export default function CCTeams({
                       </td>
                       <td>
                         <div className="cc-actions">
-                          {t.paymentStatus === PAYMENT_STATUS.UPLOADED && (
+                          {t.paymentStatus === PAYMENT.UPLOADED && (
                             <>
                               <button className="cc-btn-sm approve" onClick={() => onVerifyPayment(t.id)}>
                                 Verify
