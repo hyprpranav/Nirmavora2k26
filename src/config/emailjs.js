@@ -69,6 +69,49 @@ async function sendEmail(subject, toEmail, toName, messageBody) {
   }
 }
 
+function getTeamRecipients(team) {
+  const recipients = [
+    { email: team?.leaderEmail, name: team?.leaderName || 'Team Leader' },
+    { email: team?.member1Email, name: team?.member1Name || 'Team Member' },
+    { email: team?.member2Email, name: team?.member2Name || 'Team Member' },
+    { email: team?.member3Email, name: team?.member3Name || 'Team Member' },
+  ];
+
+  const seen = new Set();
+  return recipients.filter((recipient) => {
+    const email = (recipient.email || '').trim().toLowerCase();
+    if (!email || seen.has(email)) return false;
+    seen.add(email);
+    return true;
+  });
+}
+
+async function sendEmailToTeam(team, builder) {
+  const recipients = getTeamRecipients(team);
+  if (recipients.length === 0) {
+    throw new Error('No team email addresses found for notification.');
+  }
+
+  const results = await Promise.allSettled(
+    recipients.map((recipient) => {
+      const content = builder(recipient);
+      return sendEmail(content.subject, recipient.email, recipient.name, content.message);
+    })
+  );
+
+  const delivered = results.filter((result) => result.status === 'fulfilled').length;
+  if (delivered === 0) {
+    const firstFailure = results.find((result) => result.status === 'rejected');
+    throw firstFailure?.reason || new Error('Failed to send team notification.');
+  }
+
+  return {
+    success: true,
+    delivered,
+    attempted: recipients.length,
+  };
+}
+
 /** Send shortlist confirmation */
 export async function sendShortlistConfirmation(email, name, teamName, teamId, eventType) {
   const subject = `🎉 Congratulations! Your team is shortlisted — NIRMAVORA FEST 2026`;
@@ -76,11 +119,25 @@ export async function sendShortlistConfirmation(email, name, teamName, teamId, e
   return sendEmail(subject, email, name, message);
 }
 
+export async function sendShortlistConfirmationToTeam(team, teamId) {
+  return sendEmailToTeam(team, (recipient) => ({
+    subject: `🎉 Congratulations! Your team is shortlisted — NIRMAVORA FEST 2026`,
+    message: `Hi ${recipient.name},\n\nGreat news! Your team "${team.teamName}" (ID: ${teamId}) has been shortlisted for the ${team.eventType} at NIRMAVORA FEST 2026!\n\nPlease complete your payment to confirm your spot.\n\n— Team NIRMAVORA`,
+  }));
+}
+
 /** Send waitlist promotion confirmation */
 export async function sendWaitlistPromotionMessage(email, name, teamName, teamId, eventType) {
   const subject = `🎉 Update: Your waitlisted team is now shortlisted — NIRMAVORA FEST 2026`;
   const message = `Hi ${name},\n\nExcellent news. Your team "${teamName}" (ID: ${teamId}) has now been moved from the waitlist to the shortlisted teams for the ${eventType} at NIRMAVORA FEST 2026.\n\nPlease complete your payment to confirm your spot. We are excited to have your team with us.\n\n— Team NIRMAVORA`;
   return sendEmail(subject, email, name, message);
+}
+
+export async function sendWaitlistPromotionMessageToTeam(team, teamId) {
+  return sendEmailToTeam(team, (recipient) => ({
+    subject: `🎉 Update: Your waitlisted team is now shortlisted — NIRMAVORA FEST 2026`,
+    message: `Hi ${recipient.name},\n\nExcellent news. Your team "${team.teamName}" (ID: ${teamId}) has now been moved from the waitlist to the shortlisted teams for the ${team.eventType} at NIRMAVORA FEST 2026.\n\nPlease complete your payment to confirm your spot. We are excited to have your team with us.\n\n— Team NIRMAVORA`,
+  }));
 }
 
 /** Send payment confirmation */
@@ -97,11 +154,25 @@ export async function sendWaitlistMessage(email, name, teamName) {
   return sendEmail(subject, email, name, message);
 }
 
+export async function sendWaitlistMessageToTeam(team) {
+  return sendEmailToTeam(team, (recipient) => ({
+    subject: `⏳ You're on the Waitlist — NIRMAVORA FEST 2026`,
+    message: `Hi ${recipient.name},\n\nYour team "${team.teamName}" has been placed on the waitlist for NIRMAVORA FEST 2026. Your idea is genuinely strong, and there is a very high chance of getting shortlisted if slots open in the next review.\n\nPlease stay ready and wait for our next update. We will notify you immediately if your team is moved forward.\n\n— Team NIRMAVORA`,
+  }));
+}
+
 /** Send cancellation update */
 export async function sendCancellationMessage(email, name, teamName) {
   const subject = `Important update for your team — NIRMAVORA FEST 2026`;
   const message = `Hi ${name},\n\nThis is an update regarding your team "${teamName}". At the moment, the registration for this team has been cancelled due to current slot constraints or review requirements.\n\nIf you need more details, please contact the organisers.\n\n— Team NIRMAVORA`;
   return sendEmail(subject, email, name, message);
+}
+
+export async function sendCancellationMessageToTeam(team) {
+  return sendEmailToTeam(team, (recipient) => ({
+    subject: `Important update for your team — NIRMAVORA FEST 2026`,
+    message: `Hi ${recipient.name},\n\nThis is an update regarding your team "${team.teamName}". At the moment, the registration for this team has been cancelled due to current slot constraints or review requirements.\n\nIf you need more details, please contact the organisers.\n\n— Team NIRMAVORA`,
+  }));
 }
 
 /** Send custom notification */

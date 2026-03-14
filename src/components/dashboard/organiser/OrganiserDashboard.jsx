@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAllTeams, updateTeamStatus, markAttendance, updateTeamDetails } from '../../../services/teamService';
 import { exportTeamsCSV } from '../../../services/exportService';
-import { sendCancellationMessage, sendShortlistConfirmation, sendWaitlistMessage, sendWaitlistPromotionMessage } from '../../../config/emailjs';
+import { sendCancellationMessageToTeam, sendShortlistConfirmationToTeam, sendWaitlistMessageToTeam, sendWaitlistPromotionMessageToTeam } from '../../../config/emailjs';
 import { generateTeamId } from '../../../utils/teamIdGenerator';
 import { TEAM_STATUS } from '../../../config/constants';
 import '../../../styles/dashboard.css';
@@ -33,22 +33,22 @@ export default function OrganiserDashboard() {
     const teamId = team.teamId || await generateTeamId(team.eventType, team.memberCount || 3);
     await updateTeamStatus(team.id, TEAM_STATUS.APPROVED, teamId);
     if (team.status === TEAM_STATUS.WAITLISTED) {
-      await sendWaitlistPromotionMessage(team.leaderEmail, team.leaderName, team.teamName, teamId, team.eventType);
+      await sendWaitlistPromotionMessageToTeam(team, teamId);
     } else {
-      await sendShortlistConfirmation(team.leaderEmail, team.leaderName, team.teamName, teamId, team.eventType);
+      await sendShortlistConfirmationToTeam(team, teamId);
     }
     loadTeams();
   }
 
   async function handleWaitlist(team) {
     await updateTeamStatus(team.id, TEAM_STATUS.WAITLISTED);
-    await sendWaitlistMessage(team.leaderEmail, team.leaderName, team.teamName);
+    await sendWaitlistMessageToTeam(team);
     loadTeams();
   }
 
   async function handleCancel(team) {
     await updateTeamStatus(team.id, TEAM_STATUS.CANCELLED);
-    await sendCancellationMessage(team.leaderEmail, team.leaderName, team.teamName);
+    await sendCancellationMessageToTeam(team);
     loadTeams();
   }
 
