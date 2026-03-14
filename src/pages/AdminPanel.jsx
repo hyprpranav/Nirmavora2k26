@@ -25,7 +25,7 @@ import {
 import { verifyPayment, rejectPayment } from '../services/paymentService';
 import { getAllUsers, deleteUserProfile, changeUserRole, sendPasswordReset, deleteAllOrganisers, deleteAllParticipants, createParticipantUserByStaff } from '../services/userService';
 import { generateTeamId } from '../utils/teamIdGenerator';
-import { sendShortlistConfirmation, sendWaitlistMessage } from '../config/emailjs';
+import { sendCancellationMessage, sendShortlistConfirmation, sendWaitlistMessage, sendWaitlistPromotionMessage } from '../config/emailjs';
 import { TEAM_STATUS, PAYMENT_STATUS, ROLES } from '../config/constants';
 
 const SECTION_TITLES = {
@@ -79,9 +79,13 @@ export default function AdminPanel() {
 
   /* ─── Handlers ─── */
   async function handleApprove(team) {
-    const teamId = await generateTeamId(team.eventType, team.memberCount || 3);
+    const teamId = team.teamId || await generateTeamId(team.eventType, team.memberCount || 3);
     await updateTeamStatus(team.id, TEAM_STATUS.APPROVED, teamId);
-    await sendShortlistConfirmation(team.leaderEmail, team.leaderName, team.teamName, teamId, team.eventType);
+    if (team.status === TEAM_STATUS.WAITLISTED) {
+      await sendWaitlistPromotionMessage(team.leaderEmail, team.leaderName, team.teamName, teamId, team.eventType);
+    } else {
+      await sendShortlistConfirmation(team.leaderEmail, team.leaderName, team.teamName, teamId, team.eventType);
+    }
     loadAll();
   }
   async function handleWaitlist(team) {
@@ -91,6 +95,7 @@ export default function AdminPanel() {
   }
   async function handleCancel(team) {
     await updateTeamStatus(team.id, TEAM_STATUS.CANCELLED);
+    await sendCancellationMessage(team.leaderEmail, team.leaderName, team.teamName);
     loadAll();
   }
   async function handleEdit(docId, data) {

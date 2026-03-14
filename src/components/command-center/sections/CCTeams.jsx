@@ -241,7 +241,7 @@ export default function CCTeams({
                     </td>
                     <td>
                       <div className="cc-actions" onClick={(e) => e.stopPropagation()}>
-                        {team.status === 'pending' && (
+                        {(team.status === 'pending' || team.status === 'waitlisted') && (
                           <>
                             <button className="cc-btn-sm approve" disabled={busyTeamId === team.id} onClick={async () => {
                               setBusyTeamId(team.id);
@@ -249,12 +249,14 @@ export default function CCTeams({
                             }}>
                               {busyTeamId === team.id ? 'Processing…' : 'Approve'}
                             </button>
-                            <button className="cc-btn-sm waitlist" disabled={busyTeamId === team.id} onClick={async () => {
-                              setBusyTeamId(team.id);
-                              try { await onWaitlist(team); } finally { setBusyTeamId(null); }
-                            }}>
-                              {busyTeamId === team.id ? '…' : 'Waitlist'}
-                            </button>
+                            {team.status === 'pending' && (
+                              <button className="cc-btn-sm waitlist" disabled={busyTeamId === team.id} onClick={async () => {
+                                setBusyTeamId(team.id);
+                                try { await onWaitlist(team); } finally { setBusyTeamId(null); }
+                              }}>
+                                {busyTeamId === team.id ? '…' : 'Waitlist'}
+                              </button>
+                            )}
                           </>
                         )}
                         {team.status !== 'cancelled' && (

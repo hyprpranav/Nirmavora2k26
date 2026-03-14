@@ -63,7 +63,11 @@ export default function ParticipantDashboard() {
       return { icon: '🎉', text: `Your team has been shortlisted! Please complete your payment to confirm your spot.`, type: 'success' };
     }
     if (t.status === TEAM_STATUS.WAITLISTED) {
-      return { icon: '📋', text: `Your idea has been put on the waiting list. You will be notified if a slot opens up.`, type: 'warning' };
+      return {
+        icon: '📋',
+        text: `Your team has been waitlisted. Your idea is strong, and there is a very high chance of shortlist movement in the next review. Please stay ready and wait for our update.`,
+        type: 'warning'
+      };
     }
     if (t.status === TEAM_STATUS.CANCELLED) {
       return { icon: '❌', text: `Your registration was cancelled. Contact the organiser for details.`, type: 'danger' };
@@ -84,6 +88,11 @@ export default function ParticipantDashboard() {
           <span>{statusMsg.icon} {statusMsg.text}</span>
           {t.status === TEAM_STATUS.APPROVED && (!t.paymentStatus || t.paymentStatus === PAYMENT_STATUS.NOT_PAID) && (
             <button className="btn btn-primary" onClick={() => setTab('Payment')} style={{ marginTop: 8 }}>Complete Payment →</button>
+          )}
+          {t.status === TEAM_STATUS.WAITLISTED && (
+            <div style={{ marginTop: 8, color: 'var(--soft-white)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+              Your team is most probably around 90% likely to be shortlisted. Please wait a little longer while we complete the next round of review.
+            </div>
           )}
         </div>
 

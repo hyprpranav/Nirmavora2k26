@@ -76,6 +76,13 @@ export async function sendShortlistConfirmation(email, name, teamName, teamId, e
   return sendEmail(subject, email, name, message);
 }
 
+/** Send waitlist promotion confirmation */
+export async function sendWaitlistPromotionMessage(email, name, teamName, teamId, eventType) {
+  const subject = `🎉 Update: Your waitlisted team is now shortlisted — NIRMAVORA FEST 2026`;
+  const message = `Hi ${name},\n\nExcellent news. Your team "${teamName}" (ID: ${teamId}) has now been moved from the waitlist to the shortlisted teams for the ${eventType} at NIRMAVORA FEST 2026.\n\nPlease complete your payment to confirm your spot. We are excited to have your team with us.\n\n— Team NIRMAVORA`;
+  return sendEmail(subject, email, name, message);
+}
+
 /** Send payment confirmation */
 export async function sendPaymentConfirmation(email, name, teamName, amount) {
   const subject = `✅ Payment Confirmed — NIRMAVORA FEST 2026`;
@@ -86,7 +93,14 @@ export async function sendPaymentConfirmation(email, name, teamName, amount) {
 /** Send waitlist message */
 export async function sendWaitlistMessage(email, name, teamName) {
   const subject = `⏳ You're on the Waitlist — NIRMAVORA FEST 2026`;
-  const message = `Hi ${name},\n\nYour team "${teamName}" has been placed on the waitlist.\n\nWe'll notify you if a spot opens up. Thank you for your interest!\n\n— Team NIRMAVORA`;
+  const message = `Hi ${name},\n\nYour team "${teamName}" has been placed on the waitlist for NIRMAVORA FEST 2026. Your idea is genuinely strong, and there is a very high chance of getting shortlisted if slots open in the next review.\n\nPlease stay ready and wait for our next update. We will notify you immediately if your team is moved forward.\n\n— Team NIRMAVORA`;
+  return sendEmail(subject, email, name, message);
+}
+
+/** Send cancellation update */
+export async function sendCancellationMessage(email, name, teamName) {
+  const subject = `Important update for your team — NIRMAVORA FEST 2026`;
+  const message = `Hi ${name},\n\nThis is an update regarding your team "${teamName}". At the moment, the registration for this team has been cancelled due to current slot constraints or review requirements.\n\nIf you need more details, please contact the organisers.\n\n— Team NIRMAVORA`;
   return sendEmail(subject, email, name, message);
 }
 
