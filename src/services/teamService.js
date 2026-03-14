@@ -39,7 +39,7 @@ export async function registerTeamManually(data, adminEmail) {
   const teamData = {
     ...data,
     status: TEAM_STATUS.PENDING,
-    paymentStatus: PAYMENT_STATUS.NOT_PAID,
+    paymentStatus: data.paymentStatus || PAYMENT_STATUS.NOT_PAID,
     teamId: null,
     attendance: false,
     createdAt: new Date().toISOString(),
@@ -49,6 +49,11 @@ export async function registerTeamManually(data, adminEmail) {
     addedAt: new Date().toISOString(),
     userId: data.userId || null,
     userEmail: data.userEmail || data.leaderEmail || '',
+    paymentTxnId: data.paymentTxnId || '',
+    paymentScreenshotUrl: data.paymentScreenshotUrl || '',
+    paymentScreenshotFileName: data.paymentScreenshotFileName || '',
+    paymentScreenshotLink: data.paymentScreenshotUrl || '',
+    paymentUploadedAt: data.paymentStatus && data.paymentStatus !== PAYMENT_STATUS.NOT_PAID ? new Date().toISOString() : null,
   };
   const ref = await addDoc(collection(db, TEAMS), teamData);
   return ref.id;
@@ -59,7 +64,7 @@ export async function registerTeamByCoordinator(data, coordinatorEmail) {
   const teamData = {
     ...data,
     status: TEAM_STATUS.PENDING,
-    paymentStatus: PAYMENT_STATUS.NOT_PAID,
+    paymentStatus: data.paymentStatus || PAYMENT_STATUS.NOT_PAID,
     teamId: null,
     attendance: false,
     createdAt: new Date().toISOString(),
@@ -69,6 +74,11 @@ export async function registerTeamByCoordinator(data, coordinatorEmail) {
     addedAt: new Date().toISOString(),
     userId: data.userId || null,
     userEmail: data.userEmail || data.leaderEmail || '',
+    paymentTxnId: data.paymentTxnId || '',
+    paymentScreenshotUrl: data.paymentScreenshotUrl || '',
+    paymentScreenshotFileName: data.paymentScreenshotFileName || '',
+    paymentScreenshotLink: data.paymentScreenshotUrl || '',
+    paymentUploadedAt: data.paymentStatus && data.paymentStatus !== PAYMENT_STATUS.NOT_PAID ? new Date().toISOString() : null,
   };
   const ref = await addDoc(collection(db, TEAMS), teamData);
   return ref.id;

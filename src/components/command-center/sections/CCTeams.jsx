@@ -28,6 +28,7 @@ export default function CCTeams({
   const [search, setSearch] = useState('');
   const [paymentView, setPaymentView] = useState(false);
   const [paymentFilter, setPaymentFilter] = useState('all');
+  const [teamPaymentFilter, setTeamPaymentFilter] = useState('all');
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [busyTeamId, setBusyTeamId] = useState(null);
@@ -36,13 +37,15 @@ export default function CCTeams({
 
   const filtered = teams.filter(t => {
     const matchFilter = filter === 'all' || t.status === filter;
+    const currentPayment = t.paymentStatus || PAYMENT_STATUS.NOT_PAID;
+    const matchPayment = teamPaymentFilter === 'all' || currentPayment === teamPaymentFilter;
     const matchSearch =
       !search ||
       (t.teamName || '').toLowerCase().includes(search.toLowerCase()) ||
       (t.teamId || '').toLowerCase().includes(search.toLowerCase()) ||
       (t.collegeName || '').toLowerCase().includes(search.toLowerCase()) ||
       (t.leaderName || '').toLowerCase().includes(search.toLowerCase());
-    return matchFilter && matchSearch;
+    return matchFilter && matchPayment && matchSearch;
   });
 
   return (
@@ -150,6 +153,21 @@ export default function CCTeams({
             ))}
           </div>
 
+          <div className="cc-filter-bar" style={{ marginBottom: 10 }}>
+            {['all', PAYMENT_STATUS.NOT_PAID, PAYMENT_STATUS.UPLOADED, PAYMENT_STATUS.VERIFIED, PAYMENT_STATUS.REJECTED].map(f => (
+              <button
+                key={f}
+                className={`cc-filter-btn${teamPaymentFilter === f ? ' active' : ''}`}
+                onClick={() => setTeamPaymentFilter(f)}
+              >
+                {f === 'all' ? 'All Payments' : f.replace('_', ' ')} (
+                {f === 'all'
+                  ? teams.length
+                  : teams.filter(t => (t.paymentStatus || PAYMENT_STATUS.NOT_PAID) === f).length})
+              </button>
+            ))}
+          </div>
+
           <div className="cc-table-wrap">
             <table className="cc-table">
               <thead>
@@ -161,6 +179,7 @@ export default function CCTeams({
                   <th>Leader</th>
                   <th>Members</th>
                   <th>Status</th>
+                  <th>Payment</th>
                   <th>Attendance</th>
                   <th>Abstract</th>
                   <th>Source</th>
@@ -183,6 +202,11 @@ export default function CCTeams({
                     <td>{team.memberCount || team.members?.length || '—'}</td>
                     <td>
                       <span className={`cc-status ${team.status}`}>{team.status}</span>
+                    </td>
+                    <td>
+                      <span className={`cc-status ${team.paymentStatus || PAYMENT_STATUS.NOT_PAID}`}>
+                        {(team.paymentStatus || PAYMENT_STATUS.NOT_PAID).replace('_', ' ')}
+                      </span>
                     </td>
                     <td>
                       <span className={`cc-status ${team.attendanceStatus || 'not_marked'}`}>
@@ -249,7 +273,7 @@ export default function CCTeams({
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={11} style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 20 }}>
+                    <td colSpan={12} style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 20 }}>
                       No teams found
                     </td>
                   </tr>
@@ -372,6 +396,12 @@ function AddTeamForm({ onSubmit, onCancel }) {
     year: '',
     guideName: '',
     guideEmail: '',
+    accountName: '',
+    accountEmail: '',
+    accountPassword: '',
+    paymentStatus: 'not_paid',
+    paymentTxnId: '',
+    paymentScreenshotUrl: '',
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -382,6 +412,18 @@ function AddTeamForm({ onSubmit, onCancel }) {
     e.preventDefault();
     if (!form.teamName.trim() || !form.leaderName.trim() || !form.collegeName.trim()) {
       setError('Team name, college, and leader name are required.');
+      return;
+    }
+    if (!form.accountEmail.trim() || !form.accountPassword.trim()) {
+      setError('Participant account email and default password are required.');
+      return;
+    }
+    if (form.accountPassword.length < 8) {
+      setError('Default password must be at least 8 characters.');
+      return;
+    }
+    if (form.paymentStatus !== 'not_paid' && !form.paymentScreenshotUrl.trim()) {
+      setError('Payment screenshot/proof URL is required when payment status is uploaded/verified/rejected.');
       return;
     }
     setBusy(true);
@@ -511,6 +553,43 @@ function AddTeamForm({ onSubmit, onCancel }) {
           <div>
             <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Guide Email (Optional)</label>
             <input value={form.guideEmail} onChange={e => upd('guideEmail', e.target.value)} style={fieldStyle} type="email" placeholder="Guide email" />
+          </div>
+
+          <div style={{ gridColumn: '1 / -1', marginTop: 6, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <label style={{ fontSize: '0.82rem', color: '#F5B301', fontWeight: 700 }}>Participant Account (auto-created)</label>
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Account Name</label>
+            <input value={form.accountName} onChange={e => upd('accountName', e.target.value)} style={fieldStyle} placeholder="Defaults to leader name" />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Account Email *</label>
+            <input value={form.accountEmail} onChange={e => upd('accountEmail', e.target.value)} style={fieldStyle} type="email" placeholder="participant login email" />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Default Password *</label>
+            <input value={form.accountPassword} onChange={e => upd('accountPassword', e.target.value)} style={fieldStyle} type="text" placeholder="minimum 8 characters" />
+          </div>
+
+          <div style={{ gridColumn: '1 / -1', marginTop: 6, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <label style={{ fontSize: '0.82rem', color: '#F5B301', fontWeight: 700 }}>Payment Proof (optional now, required when paid)</label>
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Payment Status</label>
+            <select value={form.paymentStatus} onChange={e => upd('paymentStatus', e.target.value)} style={fieldStyle}>
+              <option value="not_paid">not_paid</option>
+              <option value="uploaded">uploaded</option>
+              <option value="verified">verified</option>
+              <option value="rejected">rejected</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Payment TXN ID</label>
+            <input value={form.paymentTxnId} onChange={e => upd('paymentTxnId', e.target.value)} style={fieldStyle} placeholder="transaction id" />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Payment Proof URL</label>
+            <input value={form.paymentScreenshotUrl} onChange={e => upd('paymentScreenshotUrl', e.target.value)} style={fieldStyle} placeholder="https://..." />
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 14, alignItems: 'center' }}>

@@ -22,12 +22,23 @@ async function uploadToCloudinary(file, folder, publicId) {
   formData.append('folder', folder);
   formData.append('public_id', publicId);
 
-  const res = await fetch(url, { method: 'POST', body: formData });
+  let res;
+  try {
+    res = await fetch(url, { method: 'POST', body: formData });
+  } catch (err) {
+    throw new Error('Network error while uploading file. Please check internet and try again.');
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error?.message || 'Upload failed. Please try again.');
   }
+
   const data = await res.json();
+  if (!data?.secure_url) {
+    throw new Error('Upload succeeded but response was invalid. Please retry.');
+  }
+
   return { fileUrl: data.secure_url, fileName: publicId };
 }
 

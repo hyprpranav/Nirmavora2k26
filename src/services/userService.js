@@ -1,6 +1,8 @@
 import { collection, getDocs, deleteDoc, doc, orderBy, query, setDoc, where } from 'firebase/firestore';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { db, auth } from '../config/firebase';
+import { createUserWithEmailAndPassword, getAuth, sendPasswordResetEmail, signOut } from 'firebase/auth';
+import { getApps, initializeApp } from 'firebase/app';
+import { db, auth, firebaseConfig } from '../config/firebase';
+import { ROLES } from '../config/constants';
 
 const USERS = 'users';
 
@@ -24,6 +26,41 @@ export async function changeUserRole(uid, role) {
 /* Send password reset email */
 export async function sendPasswordReset(email) {
   await sendPasswordResetEmail(auth, email);
+}
+
+/* Create participant auth + profile from admin/coordinator panel without affecting current session */
+export async function createParticipantUserByStaff({ name, email, password, createdByEmail }) {
+  if (!name?.trim()) throw new Error('Account name is required.');
+  if (!email?.trim()) throw new Error('Account email is required.');
+  if (!password || password.length < 8) throw new Error('Default password must be at least 8 characters.');
+
+  const secondaryAppName = 'staff-provisioner-app';
+  const secondaryApp = getApps().find((a) => a.name === secondaryAppName)
+    || initializeApp(firebaseConfig, secondaryAppName);
+  const secondaryAuth = getAuth(secondaryApp);
+
+  try {
+    const result = await createUserWithEmailAndPassword(secondaryAuth, email.trim(), password);
+    const uid = result.user.uid;
+    await setDoc(doc(db, USERS, uid), {
+      uid,
+      email: email.trim(),
+      displayName: name.trim(),
+      photoURL: null,
+      role: ROLES.PARTICIPANT,
+      verificationBypass: true,
+      staffCreated: true,
+      createdByStaffEmail: createdByEmail || 'staff',
+      createdAt: new Date().toISOString(),
+    }, { merge: true });
+    await signOut(secondaryAuth);
+    return { uid, email: email.trim() };
+  } catch (err) {
+    if (err.code === 'auth/email-already-in-use') {
+      throw new Error('Account email already exists. Use another email or reset the existing account password.');
+    }
+    throw err;
+  }
 }
 
 /* Delete all organisers (role=organiser) from Firestore */

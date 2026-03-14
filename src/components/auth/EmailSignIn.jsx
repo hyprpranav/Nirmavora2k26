@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { DEVELOPER } from '../../config/constants';
 
 export default function EmailSignIn() {
-  const { signInWithEmail, signInWithGoogle } = useAuth();
+  const { signInWithEmail } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -37,32 +37,9 @@ export default function EmailSignIn() {
     }
   }
 
-  async function handleGoogle() {
-    setBusy(true);
-    setError('');
-    try {
-      await signInWithGoogle();
-      // Redirect will happen with Firebase redirect flow.
-    } catch (err) {
-      console.error('[SignIn] Google error:', err.code, err.message);
-      if (err.code === 'auth/unauthorized-domain') {
-        setError('Domain not authorized. Add your Vercel domain to Firebase → Auth → Settings → Authorized domains.');
-      } else {
-        setError(err.message || 'Google sign-in failed. Please try again.');
-      }
-      setBusy(false);
-    }
-  }
-
   return (
     <div className="auth-email-form">
-      {/* Google instant login */}
-      <button className="btn-google" onClick={handleGoogle} disabled={busy} type="button">
-        <i className="fab fa-google"></i>
-        Continue with Google
-      </button>
-
-      <div className="auth-divider"><span>or sign in with email</span></div>
+      <div className="auth-divider"><span>sign in with email</span></div>
 
       <form onSubmit={handleSignIn} className="auth-form-inner">
         <div className="form-group">

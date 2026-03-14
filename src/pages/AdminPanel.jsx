@@ -23,7 +23,7 @@ import {
   registerTeamManually,
 } from '../services/teamService';
 import { verifyPayment, rejectPayment } from '../services/paymentService';
-import { getAllUsers, deleteUserProfile, changeUserRole, sendPasswordReset, deleteAllOrganisers, deleteAllParticipants } from '../services/userService';
+import { getAllUsers, deleteUserProfile, changeUserRole, sendPasswordReset, deleteAllOrganisers, deleteAllParticipants, createParticipantUserByStaff } from '../services/userService';
 import { generateTeamId } from '../utils/teamIdGenerator';
 import { sendShortlistConfirmation, sendWaitlistMessage } from '../config/emailjs';
 import { TEAM_STATUS, PAYMENT_STATUS, ROLES } from '../config/constants';
@@ -151,7 +151,26 @@ export default function AdminPanel() {
   }
 
   async function handleAddTeam(data) {
-    await registerTeamManually(data, user?.email);
+    const {
+      accountName,
+      accountEmail,
+      accountPassword,
+      ...teamData
+    } = data;
+
+    const account = await createParticipantUserByStaff({
+      name: accountName || teamData.leaderName,
+      email: accountEmail,
+      password: accountPassword,
+      createdByEmail: user?.email,
+    });
+
+    await registerTeamManually({
+      ...teamData,
+      userId: account.uid,
+      userEmail: account.email,
+      leaderEmail: teamData.leaderEmail || account.email,
+    }, user?.email);
     loadAll();
   }
   async function handleDeleteTeam(team) {

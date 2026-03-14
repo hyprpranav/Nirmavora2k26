@@ -55,7 +55,10 @@ export function AuthProvider({ children }) {
         try {
           const profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           if (profileDoc.exists()) {
-            setProfile(profileDoc.data());
+            const data = profileDoc.data();
+            setProfile(data);
+            const bypass = data.verificationBypass === true;
+            setEmailVerified(isVerified || bypass);
           } else {
             /* First-time user → create profile */
             const newProfile = {

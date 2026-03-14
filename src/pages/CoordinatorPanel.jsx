@@ -16,6 +16,7 @@ import {
   confirmMemberAttendance,
   registerTeamByCoordinator,
 } from '../services/teamService';
+import { createParticipantUserByStaff } from '../services/userService';
 import { generateTeamId } from '../utils/teamIdGenerator';
 import { sendShortlistConfirmation, sendWaitlistMessage } from '../config/emailjs';
 import { TEAM_STATUS, PAYMENT_STATUS, DEVELOPER } from '../config/constants';
@@ -85,7 +86,26 @@ export default function CoordinatorPanel() {
   }
 
   async function handleAddTeam(data) {
-    await registerTeamByCoordinator(data, user?.email);
+    const {
+      accountName,
+      accountEmail,
+      accountPassword,
+      ...teamData
+    } = data;
+
+    const account = await createParticipantUserByStaff({
+      name: accountName || teamData.leaderName,
+      email: accountEmail,
+      password: accountPassword,
+      createdByEmail: user?.email,
+    });
+
+    await registerTeamByCoordinator({
+      ...teamData,
+      userId: account.uid,
+      userEmail: account.email,
+      leaderEmail: teamData.leaderEmail || account.email,
+    }, user?.email);
     loadTeams();
   }
 

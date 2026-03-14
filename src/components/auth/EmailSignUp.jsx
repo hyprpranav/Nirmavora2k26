@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function EmailSignUp() {
-  const { signInWithGoogle, signUpWithEmail, resendVerificationEmail, user, emailVerified, refreshEmailVerified } = useAuth();
+  const { signUpWithEmail, resendVerificationEmail, user, emailVerified, refreshEmailVerified } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -65,24 +65,6 @@ export default function EmailSignUp() {
     setBusy(false);
   }
 
-  /* Google instant sign-up */
-  async function handleGoogle() {
-    setBusy(true);
-    setError('');
-    try {
-      await signInWithGoogle();
-      // Redirect will happen — page reloads
-    } catch (err) {
-      console.error('[SignUp] Google error:', err.code, err.message);
-      if (err.code === 'auth/unauthorized-domain') {
-        setError('Domain not authorized in Firebase. Add your Vercel domain to Firebase → Auth → Settings → Authorized domains.');
-      } else {
-        setError(err.message || 'Google sign-in failed. Please try again.');
-      }
-      setBusy(false);
-    }
-  }
-
   /* After account created — show verification message */
   if (accountCreated || (user && !emailVerified)) {
     return (
@@ -94,8 +76,8 @@ export default function EmailSignUp() {
             We sent a verification link to <strong>{user?.email || email}</strong>.
             <br />Click the link in the email, then come back and press the button below.
           </p>
-          <div style={{ background: 'rgba(245, 179, 1, 0.08)', border: '1px solid rgba(245, 179, 1, 0.25)', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '0.82rem', color: '#F5B301', textAlign: 'left' }}>
-            <strong>📂 Check your Spam / Junk folder</strong> — Gmail sometimes routes our verification email there.
+          <div style={{ background: 'rgba(245, 179, 1, 0.12)', border: '1px solid rgba(245, 179, 1, 0.45)', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '0.84rem', color: '#F5B301', textAlign: 'left' }}>
+            <strong style={{ color: '#ffcc33' }}>📂 IMPORTANT: CHECK YOUR SPAM / JUNK FOLDER</strong> — Gmail sometimes routes our verification email there.
             Look for an email from <em>noreply@nirmavora-1aab8.firebaseapp.com</em> and mark it as "Not Spam".
           </div>
           {error && <p className="auth-error">{error}</p>}
@@ -117,13 +99,7 @@ export default function EmailSignUp() {
 
   return (
     <div className="auth-email-form">
-      {/* Google button always visible */}
-      <button className="btn-google" onClick={handleGoogle} disabled={busy} type="button">
-        <i className="fab fa-google"></i>
-        Continue with Google
-      </button>
-
-      <div className="auth-divider"><span>or sign up with email</span></div>
+      <div className="auth-divider"><span>sign up with email</span></div>
 
       <form onSubmit={handleCreateAccount} className="auth-form-inner">
         <div className="form-group">
