@@ -122,6 +122,13 @@ function buildCertificateRows(teams) {
 
   teams.forEach((team) => {
     const members = buildMembers(team);
+    const isMarked = team.attendanceMarkedAt || team.attendanceConfirmed;
+    const markedAt = isMarked && team.attendanceMarkedAt
+      ? new Date(team.attendanceMarkedAt).toLocaleString()
+      : 'Not Marked Yet';
+    const markedBy = isMarked && team.attendanceMarkedBy
+      ? team.attendanceMarkedBy
+      : 'No Coordinator Marked Yet';
     members.forEach((member) => {
       rows.push({
         'S.No': serial,
@@ -129,6 +136,8 @@ function buildCertificateRows(teams) {
         'Members': member.name,
         'College Name': team.collegeName || '',
         'Status': getMemberAttendanceStatus(team, member.key),
+        'Attendance Marked At': markedAt,
+        'Attendance Marked By': markedBy,
       });
     });
     serial += 1;
