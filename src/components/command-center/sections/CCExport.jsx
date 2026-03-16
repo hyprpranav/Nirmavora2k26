@@ -33,7 +33,10 @@ export default function CCExport({ teams, users }) {
           <i className="fas fa-file-csv"></i> Team Summary
         </button>
         <button className="cc-export-btn" onClick={() => doExport('exportCertificateCSV')}>
-          <i className="fas fa-file-csv"></i> Certificate Data
+          <i className="fas fa-file-csv"></i> Certificate Data (Marked Teams)
+        </button>
+        <button className="cc-export-btn" onClick={() => doExport('exportCertificateAllTeamsCSV')}>
+          <i className="fas fa-file-csv"></i> Certificate Data (All Teams)
         </button>
         <button className="cc-export-btn" onClick={() => doExport('exportTeamIdCSV')}>
           <i className="fas fa-file-csv"></i> Team ID + Names

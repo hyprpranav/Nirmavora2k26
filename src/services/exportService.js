@@ -99,8 +99,24 @@ export function exportTeamSummaryCSV(teams) {
   downloadCSV('nirmavora_team_summary.csv', Papa.unparse(rows));
 }
 
-/* ─── Certificate CSV ─── */
+/* ─── Certificate CSV (Marked Teams Only) ─── */
 export function exportCertificateCSV(teams) {
+  const markedTeams = teams.filter((team) => {
+    const status = (team.attendanceStatus || '').toLowerCase();
+    return status === 'present' || status === 'partial' || status === 'absent' || !!team.attendanceConfirmed;
+  });
+
+  const rows = buildCertificateRows(markedTeams);
+  downloadCSV('nirmavora_certificate_data.csv', Papa.unparse(rows));
+}
+
+/* ─── Certificate CSV (All Teams) ─── */
+export function exportCertificateAllTeamsCSV(teams) {
+  const rows = buildCertificateRows(teams);
+  downloadCSV('nirmavora_certificate_data_all_teams.csv', Papa.unparse(rows));
+}
+
+function buildCertificateRows(teams) {
   const rows = [];
   let serial = 1;
 
@@ -118,7 +134,7 @@ export function exportCertificateCSV(teams) {
     serial += 1;
   });
 
-  downloadCSV('nirmavora_certificate_data.csv', Papa.unparse(rows));
+  return rows;
 }
 
 /* ─── TeamID + TeamName CSV ─── */
