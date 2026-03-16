@@ -28,6 +28,7 @@ export default function TeamDetailCard({
 }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
+  const [openSlots, setOpenSlots] = useState(new Set());
   const [attendanceMode, setAttendanceMode] = useState(false);
   const [memberAtt, setMemberAtt] = useState({});
   const [saving, setSaving] = useState(false);
@@ -295,10 +296,30 @@ export default function TeamDetailCard({
               {/* Members */}
               {[1, 2, 3].map((n) => {
                 const nameKey = `member${n}Name`;
-                if (!team[nameKey]) return null;
+                const shouldShow = editing
+                  ? (!!form[nameKey] || openSlots.has(n))
+                  : !!team[nameKey];
+                if (!shouldShow) return null;
                 return (
                   <div className="cc-detail-section" key={n}>
-                    <h4><i className="fas fa-user"></i> Member {n}</h4>
+                    <h4 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span><i className="fas fa-user"></i> Member {n}</span>
+                      {editing && (
+                        <button
+                          className="cc-btn-sm reject"
+                          style={{ fontSize: '0.72rem', padding: '2px 10px' }}
+                          onClick={() => {
+                            updateForm(`member${n}Name`, '');
+                            updateForm(`member${n}Email`, '');
+                            updateForm(`member${n}Phone`, '');
+                            updateForm(`member${n}Department`, '');
+                            setOpenSlots((prev) => { const s = new Set(prev); s.delete(n); return s; });
+                          }}
+                        >
+                          <i className="fas fa-trash-alt"></i> Remove
+                        </button>
+                      )}
+                    </h4>
                     <div className="cc-detail-grid">
                       {renderField('Name', `member${n}Name`)}
                       {renderField('Email', `member${n}Email`, 'email')}
@@ -308,6 +329,22 @@ export default function TeamDetailCard({
                   </div>
                 );
               })}
+
+              {/* Add Member button — shown in edit mode when a slot is still available */}
+              {editing && (() => {
+                const nextSlot = [1, 2, 3].find((n) => !form[`member${n}Name`] && !openSlots.has(n));
+                if (!nextSlot) return null;
+                return (
+                  <div style={{ marginBottom: 12 }}>
+                    <button
+                      className="cc-btn-sm approve"
+                      onClick={() => setOpenSlots((prev) => new Set([...prev, nextSlot]))}
+                    >
+                      <i className="fas fa-user-plus"></i> Add Member {nextSlot}
+                    </button>
+                  </div>
+                );
+              })()}
 
               {/* Guide Details */}
               {(team.guideName || team.guideEmail || editing) && (
@@ -424,7 +461,7 @@ export default function TeamDetailCard({
               {/* Save / Cancel */}
               {editing && (
                 <div className="cc-card-footer-actions">
-                  <button className="cc-btn-sm reject" onClick={() => setEditing(false)} disabled={saving}>Cancel</button>
+                  <button className="cc-btn-sm reject" onClick={() => { setEditing(false); setOpenSlots(new Set()); }} disabled={saving}>Cancel</button>
                   <button className="cc-btn-sm approve" onClick={handleSave} disabled={saving}>
                     {saving ? 'Saving…' : 'Save Changes'}
                   </button>
