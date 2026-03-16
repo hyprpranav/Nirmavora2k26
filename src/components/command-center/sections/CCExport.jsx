@@ -38,6 +38,9 @@ export default function CCExport({ teams, users }) {
         <button className="cc-export-btn" onClick={() => doExport('exportCertificateAllTeamsCSV')}>
           <i className="fas fa-file-csv"></i> Certificate Data (All Teams)
         </button>
+        <button className="cc-export-btn" onClick={() => doExport('exportSignatureSheetCSV')}>
+          <i className="fas fa-signature"></i> Signature / Audition Sheet
+        </button>
         <button className="cc-export-btn" onClick={() => doExport('exportTeamIdCSV')}>
           <i className="fas fa-file-csv"></i> Team ID + Names
         </button>

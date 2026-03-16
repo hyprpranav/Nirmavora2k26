@@ -137,6 +137,28 @@ function buildCertificateRows(teams) {
   return rows;
 }
 
+/* ─── Signature / Audition Sheet CSV ─── */
+export function exportSignatureSheetCSV(teams) {
+  const rows = [];
+  let serial = 1;
+
+  teams.forEach((team) => {
+    const members = buildMembers(team);
+    members.forEach((member) => {
+      rows.push({
+        'S.No': serial,
+        'Team Name & ID': `${team.teamName || ''} (${team.teamId || 'Pending'})`,
+        'Members': member.name,
+        'College Name': team.collegeName || '',
+        'Signature': '',
+      });
+    });
+    serial += 1;
+  });
+
+  downloadCSV('nirmavora_signature_sheet.csv', Papa.unparse(rows));
+}
+
 /* ─── TeamID + TeamName CSV ─── */
 export function exportTeamIdCSV(teams) {
   const rows = teams
