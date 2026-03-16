@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
 import TeamDetailCard from '../TeamDetailCard';
 
-export default function CCAttendance({ teams, onConfirmAttendance, attendanceClosed, canEdit }) {
+const ADMIN_CODE = '8870881397';
+
+export default function CCAttendance({
+  teams,
+  onConfirmAttendance,
+  attendanceClosed,
+  canEdit,
+  isAdmin,
+  onResetTeamAttendance,
+  onResetAllAttendance,
+}) {
   const approved = teams.filter(t => t.status === 'approved');
   const present = approved.filter(t => t.attendanceStatus === 'present').length;
   const partial = approved.filter(t => t.attendanceStatus === 'partial').length;
@@ -9,6 +19,10 @@ export default function CCAttendance({ teams, onConfirmAttendance, attendanceClo
   const notMarked = approved.length - present - partial - absent;
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [pinModal, setPinModal] = useState(null);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   const filtered = approved.filter(t => {
     if (filter === 'all') return true;
@@ -29,6 +43,29 @@ export default function CCAttendance({ teams, onConfirmAttendance, attendanceClo
         </p>
       </div>
     );
+  }
+
+  async function confirmReset() {
+    const cleaned = pin.replace(/\s/g, '');
+    if (cleaned !== ADMIN_CODE) {
+      setPinError('Invalid code. Operation cancelled.');
+      return;
+    }
+
+    setResetting(true);
+    try {
+      if (pinModal?.mode === 'single' && pinModal?.team && onResetTeamAttendance) {
+        await onResetTeamAttendance(pinModal.team);
+      }
+      if (pinModal?.mode === 'all' && onResetAllAttendance) {
+        await onResetAllAttendance();
+      }
+      setPinModal(null);
+      setPin('');
+      setPinError('');
+    } finally {
+      setResetting(false);
+    }
   }
 
   return (
@@ -86,6 +123,24 @@ export default function CCAttendance({ teams, onConfirmAttendance, attendanceClo
         Click a team to open the attendance card and mark each member individually.
       </p>
 
+      {isAdmin && (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
+          <button
+            className="cc-btn-sm reject"
+            onClick={() => {
+              setPinModal({ mode: 'all' });
+              setPin('');
+              setPinError('');
+            }}
+          >
+            <i className="fas fa-undo-alt"></i> Restore All Attendance
+          </button>
+          <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.42)', alignSelf: 'center' }}>
+            Admin only: requires 10-digit verification code.
+          </span>
+        </div>
+      )}
+
       <div className="cc-table-wrap">
         <table className="cc-table">
           <thead>
@@ -95,6 +150,7 @@ export default function CCAttendance({ teams, onConfirmAttendance, attendanceClo
               <th>Event</th>
               <th>Members</th>
               <th>Attendance</th>
+              {isAdmin && <th>Admin Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -117,11 +173,27 @@ export default function CCAttendance({ teams, onConfirmAttendance, attendanceClo
                      'Not Marked'}
                   </span>
                 </td>
+                {isAdmin && (
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="cc-btn-sm"
+                      style={{ background: 'rgba(245,179,1,0.16)', color: '#F5B301', border: '1px solid rgba(245,179,1,0.45)' }}
+                      disabled={!team.attendanceStatus || team.attendanceStatus === 'not_marked'}
+                      onClick={() => {
+                        setPinModal({ mode: 'single', team });
+                        setPin('');
+                        setPinError('');
+                      }}
+                    >
+                      Unmark Team
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 20 }}>
+                <td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 20 }}>
                   No teams found
                 </td>
               </tr>
@@ -129,6 +201,46 @@ export default function CCAttendance({ teams, onConfirmAttendance, attendanceClo
           </tbody>
         </table>
       </div>
+
+      {pinModal && (
+        <div className="cc-modal-overlay" style={{ zIndex: 1100 }} onClick={() => !resetting && setPinModal(null)}>
+          <div className="cc-modal-card cc-danger-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
+            <div className="cc-modal-header">
+              <h3 style={{ color: '#F5B301' }}>
+                <i className="fas fa-shield-alt" style={{ marginRight: 8 }}></i>
+                Verify Admin Action
+              </h3>
+            </div>
+            <div className="cc-modal-body">
+              <p style={{ marginBottom: 12, color: 'rgba(255,255,255,0.6)' }}>
+                {pinModal.mode === 'all'
+                  ? 'This will restore attendance for all approved teams.'
+                  : `This will unmark attendance for ${pinModal.team?.teamName || 'this team'}.`}
+              </p>
+              <p style={{ marginBottom: 14, fontWeight: 600, color: '#F5B301' }}>
+                Enter the 10-digit admin verification code.
+              </p>
+              <input
+                type="text"
+                placeholder="Enter 10-digit code"
+                value={pin}
+                onChange={(e) => { setPin(e.target.value); setPinError(''); }}
+                maxLength={12}
+                style={{ width: '100%', padding: '12px 14px', background: 'var(--dark-base, #0d0d0d)', border: '1px solid #F5B30188', borderRadius: 8, color: '#fff', fontSize: '1.1rem', fontFamily: 'monospace', textAlign: 'center', letterSpacing: 3 }}
+                autoFocus
+                disabled={resetting}
+              />
+              {pinError && <p style={{ color: '#f44336', fontSize: '0.85rem', marginTop: 8 }}>{pinError}</p>}
+            </div>
+            <div className="cc-modal-footer" style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button className="cc-btn-sm" onClick={() => setPinModal(null)} disabled={resetting}>Cancel</button>
+              <button className="cc-btn-sm approve" onClick={confirmReset} disabled={resetting}>
+                {resetting ? 'Processing…' : 'Confirm Restore'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -20,6 +20,7 @@ export default function CCTeams({
   canEdit,
   canAttendance,
   onConfirmAttendance,
+  onResetAttendance,
   onAddTeam,
   onDelete,
   isAdmin,
@@ -80,6 +81,10 @@ export default function CCTeams({
           canAttendance={canAttendance}
           onConfirmAttendance={async (docId, memberAtt, status) => {
             if (onConfirmAttendance) await onConfirmAttendance(docId, memberAtt, status);
+            setSelectedTeam(null);
+          }}
+          onResetAttendance={async (teamDocId) => {
+            if (onResetAttendance) await onResetAttendance({ id: teamDocId });
             setSelectedTeam(null);
           }}
           isAdmin={isAdmin}

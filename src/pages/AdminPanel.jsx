@@ -16,6 +16,8 @@ import {
   updateTeamDetails,
   markAttendance,
   confirmMemberAttendance,
+  resetTeamAttendance,
+  resetAllAttendance,
   deleteAllTeams,
   deleteTeam,
   getSettings,
@@ -120,6 +122,14 @@ export default function AdminPanel() {
   }
   async function handleConfirmAttendance(docId, memberAtt, status) {
     await confirmMemberAttendance(docId, memberAtt, status, user?.email || 'admin');
+    loadAll();
+  }
+  async function handleResetSingleAttendance(team) {
+    await resetTeamAttendance(team.id, user?.email || 'admin');
+    loadAll();
+  }
+  async function handleResetAllAttendance() {
+    await resetAllAttendance(user?.email || 'admin');
     loadAll();
   }
   async function handleToggleSetting(key) {
@@ -239,6 +249,7 @@ export default function AdminPanel() {
           canEdit={true}
           canAttendance={true}
           onConfirmAttendance={handleConfirmAttendance}
+          onResetAttendance={handleResetSingleAttendance}
           onAddTeam={handleAddTeam}
           onDelete={handleDeleteTeam}
           isAdmin={true}
@@ -264,6 +275,9 @@ export default function AdminPanel() {
         <CCAttendance
           teams={teams}
           onConfirmAttendance={handleConfirmAttendance}
+          onResetTeamAttendance={handleResetSingleAttendance}
+          onResetAllAttendance={handleResetAllAttendance}
+          isAdmin={true}
           attendanceClosed={false}
           canEdit={true}
         />

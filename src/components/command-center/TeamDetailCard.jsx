@@ -13,6 +13,7 @@ const ADMIN_CODE = '8870881397';
  *   canEdit       – boolean: whether current user can enter edit mode
  *   canAttendance – boolean: whether attendance section is accessible
  *   onConfirmAttendance – (docId, memberAttendance, status) save attendance
+ *   onResetAttendance – (docId) reset a team's attendance (admin only)
  *   isAdmin       – boolean: whether current user is admin (for event swap)
  */
 export default function TeamDetailCard({
@@ -22,6 +23,7 @@ export default function TeamDetailCard({
   canEdit,
   canAttendance,
   onConfirmAttendance,
+  onResetAttendance,
   isAdmin,
 }) {
   const [editing, setEditing] = useState(false);
@@ -34,6 +36,10 @@ export default function TeamDetailCard({
   const [swapPin, setSwapPin] = useState('');
   const [swapError, setSwapError] = useState('');
   const [swapping, setSwapping] = useState(false);
+  const [resetModal, setResetModal] = useState(false);
+  const [resetPin, setResetPin] = useState('');
+  const [resetError, setResetError] = useState('');
+  const [resettingAttendance, setResettingAttendance] = useState(false);
 
   // Build member list from team data
   function getMembers(t) {
@@ -163,6 +169,25 @@ export default function TeamDetailCard({
     setSwapping(false);
     setSwapModal(false);
     setSwapPin('');
+  }
+
+  async function handleResetAttendance() {
+    const cleaned = resetPin.replace(/\s/g, '');
+    if (cleaned !== ADMIN_CODE) {
+      setResetError('Invalid code. Operation cancelled.');
+      return;
+    }
+    if (!onResetAttendance) return;
+
+    setResettingAttendance(true);
+    try {
+      await onResetAttendance(team.id);
+      setResetModal(false);
+      setResetPin('');
+      setResetError('');
+    } finally {
+      setResettingAttendance(false);
+    }
   }
 
   function renderField(label, key, type = 'text') {
@@ -452,6 +477,19 @@ export default function TeamDetailCard({
                   <button className="cc-btn-sm reject" onClick={markAllAbsent}>
                     <i className="fas fa-times-circle"></i> Mark All Absent
                   </button>
+                  {isAdmin && onResetAttendance && team.attendanceStatus && team.attendanceStatus !== 'not_marked' && (
+                    <button
+                      className="cc-btn-sm"
+                      style={{ background: 'rgba(245,179,1,0.16)', color: '#F5B301', border: '1px solid rgba(245,179,1,0.45)' }}
+                      onClick={() => {
+                        setResetModal(true);
+                        setResetPin('');
+                        setResetError('');
+                      }}
+                    >
+                      <i className="fas fa-undo-alt"></i> Unmark Attendance
+                    </button>
+                  )}
                 </div>
 
                 <div className="cc-att-members">
@@ -522,6 +560,40 @@ export default function TeamDetailCard({
               <button className="cc-btn-secondary" onClick={() => setSwapModal(false)} disabled={swapping}>Cancel</button>
               <button className="cc-btn-sm approve" onClick={handleEventSwap} disabled={swapping || !swapPin.trim()}>
                 {swapping ? 'Swapping…' : 'Confirm Swap'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attendance Reset PIN Modal */}
+      {resetModal && (
+        <div className="cc-modal-overlay" style={{ zIndex: 1100 }} onClick={() => !resettingAttendance && setResetModal(false)}>
+          <div className="cc-modal-card cc-danger-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <div className="cc-modal-header">
+              <h3 style={{ color: '#F5B301' }}><i className="fas fa-undo-alt" style={{ marginRight: 8 }}></i>Unmark Attendance</h3>
+            </div>
+            <div className="cc-modal-body">
+              <p style={{ marginBottom: 12, color: 'rgba(255,255,255,0.6)' }}>
+                This will clear attendance for <strong>{team.teamName}</strong> so you can mark it again.
+              </p>
+              <p style={{ marginBottom: 16, fontWeight: 600, color: '#F5B301' }}>Enter the 10-digit admin verification code to proceed.</p>
+              <input
+                type="text"
+                placeholder="Enter 10-digit code"
+                value={resetPin}
+                onChange={e => { setResetPin(e.target.value); setResetError(''); }}
+                maxLength={12}
+                style={{ width: '100%', padding: '12px 14px', background: 'var(--dark-base, #0d0d0d)', border: '1px solid #F5B30188', borderRadius: 8, color: '#fff', fontSize: '1.1rem', fontFamily: 'monospace', textAlign: 'center', letterSpacing: 3 }}
+                autoFocus
+                disabled={resettingAttendance}
+              />
+              {resetError && <p style={{ color: '#f44336', fontSize: '0.85rem', marginTop: 8 }}>{resetError}</p>}
+            </div>
+            <div className="cc-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button className="cc-btn-sm" onClick={() => setResetModal(false)} disabled={resettingAttendance}>Cancel</button>
+              <button className="cc-btn-sm approve" onClick={handleResetAttendance} disabled={resettingAttendance}>
+                {resettingAttendance ? 'Processing…' : 'Confirm Unmark'}
               </button>
             </div>
           </div>

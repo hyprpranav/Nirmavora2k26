@@ -137,7 +137,18 @@ export async function updateTeamStatus(docId, status, teamId = null) {
 }
 
 export async function updateTeamDetails(docId, partial) {
-  await updateDoc(doc(db, TEAMS, docId), partial);
+  const ref = doc(db, TEAMS, docId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) throw new Error('Team not found');
+
+  const current = snap.data();
+  const merged = { ...current, ...partial };
+  const nextMemberCount = countMembers(merged);
+
+  await updateDoc(ref, {
+    ...partial,
+    memberCount: nextMemberCount,
+  });
 }
 
 /* ─── Attendance ─── */
@@ -159,6 +170,42 @@ export async function confirmMemberAttendance(docId, memberAttendance, attendanc
     attendanceMarkedBy: markedBy || 'unknown',
     attendanceMarkedAt: new Date().toISOString(),
   });
+}
+
+export async function resetTeamAttendance(docId, resetBy) {
+  await updateDoc(doc(db, TEAMS, docId), {
+    memberAttendance: {},
+    attendanceStatus: 'not_marked',
+    attendanceConfirmed: false,
+    attendance: false,
+    attendanceAt: null,
+    attendanceMarkedBy: '',
+    attendanceMarkedAt: null,
+    attendanceResetBy: resetBy || 'admin',
+    attendanceResetAt: new Date().toISOString(),
+  });
+}
+
+export async function resetAllAttendance(resetBy) {
+  const q = query(collection(db, TEAMS), where('status', '==', TEAM_STATUS.APPROVED));
+  const snap = await getDocs(q);
+  const now = new Date().toISOString();
+
+  await Promise.all(
+    snap.docs.map((teamDoc) => updateDoc(doc(db, TEAMS, teamDoc.id), {
+      memberAttendance: {},
+      attendanceStatus: 'not_marked',
+      attendanceConfirmed: false,
+      attendance: false,
+      attendanceAt: null,
+      attendanceMarkedBy: '',
+      attendanceMarkedAt: null,
+      attendanceResetBy: resetBy || 'admin',
+      attendanceResetAt: now,
+    }))
+  );
+
+  return snap.size;
 }
 
 /* ─── Settings ─── */
