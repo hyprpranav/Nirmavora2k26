@@ -6,6 +6,34 @@ function getAddedByLabel(addedBy) {
   return 'Self-registered';
 }
 
+function toTitle(value) {
+  if (!value) return 'Not Marked';
+  if (value === 'not_marked') return 'Not Marked';
+  return String(value)
+    .split('_')
+    .map((v) => v.charAt(0).toUpperCase() + v.slice(1))
+    .join(' ');
+}
+
+function buildMembers(team) {
+  const members = [
+    { key: 'leader', name: team.leaderName || '', email: team.leaderEmail || '', phone: team.leaderPhone || '', role: 'Leader', department: team.leaderDepartment || team.department || '' },
+  ];
+  if (team.member1Name) members.push({ key: 'member1', name: team.member1Name, email: team.member1Email || '', phone: team.member1Phone || '', role: 'Member', department: team.member1Department || team.department || '' });
+  if (team.member2Name) members.push({ key: 'member2', name: team.member2Name, email: team.member2Email || '', phone: team.member2Phone || '', role: 'Member', department: team.member2Department || team.department || '' });
+  if (team.member3Name) members.push({ key: 'member3', name: team.member3Name, email: team.member3Email || '', phone: team.member3Phone || '', role: 'Member', department: team.member3Department || team.department || '' });
+  return members;
+}
+
+function getMemberAttendanceStatus(team, memberKey) {
+  const direct = team.memberAttendance && team.memberAttendance[memberKey];
+  if (direct) return toTitle(direct);
+  if (team.attendanceStatus === 'present') return 'Present';
+  if (team.attendanceStatus === 'absent') return 'Absent';
+  if (team.attendanceStatus === 'partial') return 'Partial';
+  return 'Not Marked';
+}
+
 function downloadCSV(filename, csvString) {
   const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -74,29 +102,23 @@ export function exportTeamSummaryCSV(teams) {
 /* ─── Certificate CSV ─── */
 export function exportCertificateCSV(teams) {
   const rows = [];
-  teams
-    .filter((t) => t.attendance)
-    .forEach((t) => {
-      const members = [
-        { name: t.leaderName, role: 'Leader' },
-        t.member1Name ? { name: t.member1Name, role: 'Member' } : null,
-        t.member2Name ? { name: t.member2Name, role: 'Member' } : null,
-        t.member3Name ? { name: t.member3Name, role: 'Member' } : null,
-      ].filter(Boolean);
+  let serial = 1;
 
-      members.forEach((m) => {
-        rows.push({
-          Name: m.name,
-          Role: m.role,
-          TeamID: t.teamId,
-          TeamName: t.teamName,
-          College: t.collegeName,
-          EventType: t.eventType,
-          ProblemTitle: t.problemTitle,
-        });
+  teams.forEach((team) => {
+    const members = buildMembers(team);
+    members.forEach((member) => {
+      rows.push({
+        'S.No': serial,
+        'Team Name & ID': `${team.teamName || ''} (${team.teamId || 'Pending'})`,
+        'Members': member.name,
+        'College Name': team.collegeName || '',
+        'Status': getMemberAttendanceStatus(team, member.key),
       });
     });
-  downloadCSV('nirmavora_certificates.csv', Papa.unparse(rows));
+    serial += 1;
+  });
+
+  downloadCSV('nirmavora_certificate_data.csv', Papa.unparse(rows));
 }
 
 /* ─── TeamID + TeamName CSV ─── */
@@ -114,29 +136,26 @@ export const exportTeamsCSV = exportMasterLogCSV;
 export function exportTeamContactSheetCSV(teams) {
   const rows = [];
   let serial = 1;
-  teams.forEach((t) => {
-    const members = [
-      { name: t.leaderName, phone: t.leaderPhone || '', email: t.leaderEmail || '', role: 'Leader', department: t.leaderDepartment || t.department || '' },
-      t.member1Name ? { name: t.member1Name, phone: t.member1Phone || '', email: t.member1Email || '', role: 'Member', department: t.member1Department || t.department || '' } : null,
-      t.member2Name ? { name: t.member2Name, phone: t.member2Phone || '', email: t.member2Email || '', role: 'Member', department: t.member2Department || t.department || '' } : null,
-      t.member3Name ? { name: t.member3Name, phone: t.member3Phone || '', email: t.member3Email || '', role: 'Member', department: t.member3Department || t.department || '' } : null,
-    ].filter(Boolean);
-
-    members.forEach((m) => {
+  teams.forEach((team) => {
+    const members = buildMembers(team);
+    members.forEach((member) => {
       rows.push({
-        'S.No': serial++,
-        'Team Name & ID': `${t.teamName} (${t.teamId || 'Pending'})`,
-        'Member Name': m.name,
-        'Role': m.role,
-        'Department': m.department,
-        'Phone': m.phone,
-        'Email': m.email,
-        'College': t.collegeName || '',
-        'Event': t.eventType || '',
-        'Problem Title': t.problemTitle || '',
-        'Status': t.status || '',
+        'S.No': serial,
+        'Team Name & ID': `${team.teamName || ''} (${team.teamId || 'Pending'})`,
+        'Member Name': member.name,
+        'Role': member.role,
+        'Department': member.department,
+        'Phone': member.phone,
+        'Email': member.email,
+        'College Name': team.collegeName || '',
+        'Event': toTitle(team.eventType),
+        'Project Title': team.problemTitle || '',
+        'Registered At': team.createdAt || '',
+        'Member Attendance Status': getMemberAttendanceStatus(team, member.key),
+        'Team Status': toTitle(team.status),
       });
     });
+    serial += 1;
   });
   downloadCSV('nirmavora_team_contact_sheet.csv', Papa.unparse(rows));
 }
