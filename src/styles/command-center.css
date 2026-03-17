@@ -177,6 +177,14 @@
   text-align: center;
   transition: transform 0.2s;
 }
+.cc-stat-card-action {
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font-primary);
+}
+.cc-stat-card-action:hover {
+  border-color: rgba(59,130,246,0.45);
+}
 .cc-stat-card:hover {
   transform: translateY(-2px);
 }
@@ -254,6 +262,38 @@
   height: 100%;
   border-radius: 999px;
   background: linear-gradient(90deg, #22d3ee 0%, #3b82f6 100%);
+}
+
+.cc-college-modal {
+  max-width: 1040px;
+}
+
+.cc-college-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.cc-college-sort-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cc-college-sort-wrap label {
+  color: rgba(255,255,255,0.65);
+  font-size: 0.82rem;
+}
+
+.cc-college-sort-wrap .cc-input {
+  min-width: 190px;
+}
+
+.cc-college-summary-grid {
+  margin-bottom: 16px;
 }
 
 /* ─── Filter Bar ─── */
