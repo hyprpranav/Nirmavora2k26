@@ -23,6 +23,22 @@ export default function CCDashboard({ teams, users, TEAM_STATUS, PAYMENT_STATUS 
   /* Count of manually added teams */
   const manualTeams = teams.filter(t => t.addedBy === 'admin' || t.addedBy === 'coordinator').length;
 
+  /* College analytics: team count per college */
+  const collegeMap = teams.reduce((acc, t) => {
+    const raw = (t.collegeName || '').trim();
+    if (!raw) return acc;
+    const key = raw.toLowerCase();
+    if (!acc[key]) {
+      acc[key] = { name: raw, count: 0 };
+    }
+    acc[key].count += 1;
+    return acc;
+  }, {});
+
+  const collegeStats = Object.values(collegeMap).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  const totalColleges = collegeStats.length;
+  const maxCollegeCount = collegeStats.length ? collegeStats[0].count : 1;
+
   return (
     <>
       <div className="cc-stats-grid">
@@ -81,6 +97,34 @@ export default function CCDashboard({ teams, users, TEAM_STATUS, PAYMENT_STATUS 
             <div className="cc-stat-value">{manualTeams}</div>
             <div className="cc-stat-label">Manual Adds</div>
           </div>
+        )}
+        <div className="cc-stat-card blue">
+          <div className="cc-stat-value">{totalColleges}</div>
+          <div className="cc-stat-label">Unique Colleges</div>
+        </div>
+      </div>
+
+      <div className="cc-section">
+        <h3>College-wise Team Distribution</h3>
+        {collegeStats.length > 0 ? (
+          <div className="cc-college-chart">
+            {collegeStats.map((item) => {
+              const pct = Math.max((item.count / maxCollegeCount) * 100, 6);
+              return (
+                <div className="cc-college-row" key={item.name}>
+                  <div className="cc-college-meta">
+                    <span className="cc-college-name">{item.name}</span>
+                    <span className="cc-college-count">{item.count}</span>
+                  </div>
+                  <div className="cc-college-track">
+                    <div className="cc-college-bar" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ color: 'rgba(255,255,255,0.45)' }}>No college data available yet.</div>
         )}
       </div>
 
