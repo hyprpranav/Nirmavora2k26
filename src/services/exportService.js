@@ -44,6 +44,13 @@ function downloadCSV(filename, csvString) {
   URL.revokeObjectURL(url);
 }
 
+function normalizeCollegeKey(name) {
+  return String(name || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase();
+}
+
 /* ─── Master Log CSV ─── */
 export function exportMasterLogCSV(teams) {
   const rows = teams.map((t) => ({
@@ -84,6 +91,58 @@ export function exportMasterLogCSV(teams) {
     RegisteredAt: t.createdAt,
   }));
   downloadCSV('nirmavora_master_log.csv', Papa.unparse(rows));
+}
+
+/* ─── College Attendance Summary CSV ─── */
+export function exportCollegeAttendanceSummaryCSV(teams) {
+  const map = teams.reduce((acc, t) => {
+    const rawName = (t.collegeName || '').trim();
+    if (!rawName) return acc;
+
+    const key = normalizeCollegeKey(rawName);
+    if (!acc[key]) {
+      acc[key] = {
+        name: rawName,
+        count: 0,
+        events: new Set(),
+      };
+    }
+
+    acc[key].count += 1;
+    if (t.eventType) acc[key].events.add(String(t.eventType).toLowerCase());
+
+    // Prefer a more readable variant if current one is all caps/lowercase.
+    if (
+      acc[key].name === acc[key].name.toUpperCase() ||
+      acc[key].name === acc[key].name.toLowerCase()
+    ) {
+      acc[key].name = rawName;
+    }
+
+    return acc;
+  }, {});
+
+  const rows = Object.values(map)
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+    .map((item, index) => {
+      const hasHackathon = item.events.has('hackathon');
+      const hasDesignathon = item.events.has('designathon');
+
+      let eventRegistered = 'Other';
+      if (hasHackathon && hasDesignathon) eventRegistered = 'Both';
+      else if (hasHackathon) eventRegistered = 'Hackathon';
+      else if (hasDesignathon) eventRegistered = 'Designathon';
+      else if (item.events.size > 0) eventRegistered = Array.from(item.events).join(', ');
+
+      return {
+        'S.No': index + 1,
+        'DTE College Name': item.name,
+        'Number of Teams': item.count,
+        'Registered Event(s)': eventRegistered,
+      };
+    });
+
+  downloadCSV('nirmavora_college_attendance_summary.csv', Papa.unparse(rows));
 }
 
 /* ─── Event-specific Master Logs ─── */
