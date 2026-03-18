@@ -86,6 +86,58 @@ export function exportMasterLogCSV(teams) {
   downloadCSV('nirmavora_master_log.csv', Papa.unparse(rows));
 }
 
+/* ─── Event-specific Master Logs ─── */
+export function exportHackathonMasterLogCSV(teams) {
+  const rows = teams.filter((t) => t.eventType === 'hackathon');
+  exportMasterLogCSVWithFilename(rows, 'nirmavora_hackathon_master_log.csv');
+}
+
+export function exportDesignathonMasterLogCSV(teams) {
+  const rows = teams.filter((t) => t.eventType === 'designathon');
+  exportMasterLogCSVWithFilename(rows, 'nirmavora_designathon_master_log.csv');
+}
+
+function exportMasterLogCSVWithFilename(teams, filename) {
+  const rows = teams.map((t) => ({
+    TeamID: t.teamId || '',
+    TeamName: t.teamName,
+    EventType: t.eventType,
+    College: t.collegeName,
+    Department: t.department || '',
+    Year: t.year,
+    LeaderName: t.leaderName,
+    LeaderEmail: t.leaderEmail,
+    LeaderPhone: t.leaderPhone,
+    LeaderDepartment: t.leaderDepartment || t.department || '',
+    Member1: t.member1Name || '',
+    Member1Department: t.member1Department || t.department || '',
+    Member2: t.member2Name || '',
+    Member2Department: t.member2Department || t.department || '',
+    Member3: t.member3Name || '',
+    Member3Department: t.member3Department || t.department || '',
+    MemberCount: t.memberCount || '',
+    ProblemTitle: t.problemTitle,
+    SDG: Array.isArray(t.sdgGoals) ? t.sdgGoals.join(', ') : (t.sdgGoal || ''),
+    AbstractFile: t.abstractFileName || t.abstractLink || '',
+    AbstractURL: t.abstractFileUrl || t.abstractLink || '',
+    Status: t.status,
+    PaymentStatus: t.paymentStatus || 'not_paid',
+    PaymentTxn: t.paymentTxnId || '',
+    PaymentAmount: t.paymentStatus === 'verified' ? `₹${(t.memberCount || 3) * 350}` : '',
+    PaymentScreenshot: t.paymentScreenshotUrl || t.paymentScreenshotLink || '',
+    Attendance: t.attendance ? 'Yes' : 'No',
+    AttendanceStatus: t.attendanceStatus || '',
+    AddedBy: getAddedByLabel(t.addedBy),
+    AddedByEmail: t.addedByEmail || '',
+    LastEditedBy: t.lastEditedBy || '',
+    LastEditedAt: t.lastEditedAt || '',
+    AttendanceMarkedBy: t.attendanceMarkedBy || '',
+    AttendanceMarkedAt: t.attendanceMarkedAt || '',
+    RegisteredAt: t.createdAt,
+  }));
+  downloadCSV(filename, Papa.unparse(rows));
+}
+
 /* ─── Team Summary CSV ─── */
 export function exportTeamSummaryCSV(teams) {
   const rows = teams.map((t) => ({

@@ -29,6 +29,12 @@ export default function CCExport({ teams, users }) {
         <button className="cc-export-btn" onClick={() => doExport('exportMasterLogCSV')}>
           <i className="fas fa-file-csv"></i> Master Log
         </button>
+        <button className="cc-export-btn" onClick={() => doExport('exportHackathonMasterLogCSV')}>
+          <i className="fas fa-file-csv"></i> Hackathon Master Log
+        </button>
+        <button className="cc-export-btn" onClick={() => doExport('exportDesignathonMasterLogCSV')}>
+          <i className="fas fa-file-csv"></i> Designathon Master Log
+        </button>
         <button className="cc-export-btn" onClick={() => doExport('exportTeamSummaryCSV')}>
           <i className="fas fa-file-csv"></i> Team Summary
         </button>

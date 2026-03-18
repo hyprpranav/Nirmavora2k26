@@ -30,6 +30,8 @@ export default function CCTeams({
   const [paymentView, setPaymentView] = useState(false);
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [teamPaymentFilter, setTeamPaymentFilter] = useState('all');
+  const [eventFilter, setEventFilter] = useState('all');
+  const [attendanceFilter, setAttendanceFilter] = useState('all');
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [busyTeamId, setBusyTeamId] = useState(null);
@@ -56,14 +58,17 @@ export default function CCTeams({
   const filtered = teams.filter(t => {
     const matchFilter = filter === 'all' || t.status === filter;
     const currentPayment = t.paymentStatus || PAYMENT.NOT_PAID;
+    const currentAttendance = t.attendanceStatus || 'not_marked';
     const matchPayment = teamPaymentFilter === 'all' || currentPayment === teamPaymentFilter;
+    const matchEvent = eventFilter === 'all' || t.eventType === eventFilter;
+    const matchAttendance = attendanceFilter === 'all' || currentAttendance === attendanceFilter;
     const matchSearch =
       !search ||
       (t.teamName || '').toLowerCase().includes(search.toLowerCase()) ||
       (t.teamId || '').toLowerCase().includes(search.toLowerCase()) ||
       (t.collegeName || '').toLowerCase().includes(search.toLowerCase()) ||
       (t.leaderName || '').toLowerCase().includes(search.toLowerCase());
-    return matchFilter && matchPayment && matchSearch;
+    return matchFilter && matchPayment && matchEvent && matchAttendance && matchSearch;
   });
 
   return (
@@ -176,6 +181,34 @@ export default function CCTeams({
           </div>
 
           <div className="cc-filter-bar" style={{ marginBottom: 10 }}>
+            {['all', 'hackathon', 'designathon'].map((f) => (
+              <button
+                key={f}
+                className={`cc-filter-btn${eventFilter === f ? ' active' : ''}`}
+                onClick={() => setEventFilter(f)}
+              >
+                {f === 'all' ? 'All Events' : (f === 'hackathon' ? 'Hackathon' : 'Designathon')} (
+                {f === 'all' ? teams.length : teams.filter((t) => t.eventType === f).length})
+              </button>
+            ))}
+          </div>
+
+          <div className="cc-filter-bar" style={{ marginBottom: 10 }}>
+            {['all', 'present', 'partial', 'absent', 'not_marked'].map((f) => (
+              <button
+                key={f}
+                className={`cc-filter-btn${attendanceFilter === f ? ' active' : ''}`}
+                onClick={() => setAttendanceFilter(f)}
+              >
+                {f === 'all' ? 'All Attendance' : f.replace('_', ' ')} (
+                {f === 'all'
+                  ? teams.length
+                  : teams.filter((t) => (t.attendanceStatus || 'not_marked') === f).length})
+              </button>
+            ))}
+          </div>
+
+          <div className="cc-filter-bar" style={{ marginBottom: 10 }}>
             {['all', PAYMENT.NOT_PAID, PAYMENT.UPLOADED, PAYMENT.VERIFIED, PAYMENT.REJECTED].map(f => (
               <button
                 key={f}
@@ -237,7 +270,7 @@ export default function CCTeams({
                         {team.attendanceStatus === 'present' ? '✓ Present' :
                          team.attendanceStatus === 'partial' ? '◐ Partial' :
                          team.attendanceStatus === 'absent' ? '✗ Absent' :
-                         '—'}
+                         'Not Marked'}
                       </span>
                     </td>
                     <td onClick={(e) => e.stopPropagation()}>
